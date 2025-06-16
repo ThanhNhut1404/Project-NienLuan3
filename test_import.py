@@ -5,6 +5,8 @@ import imutils
 import dlib
 import face_recognition
 
+
+
 print("✅ OpenCV:", cv2.__version__)
 print("✅ NumPy:", np.__version__)
 print("✅ Pillow:", Image.__version__)
