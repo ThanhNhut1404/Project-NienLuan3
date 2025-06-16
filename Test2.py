@@ -1,0 +1,1 @@
+print("tôi yêu thanh Nhựt nhiều lắm nhé")
