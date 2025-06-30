@@ -1,0 +1,102 @@
+import sqlite3
+
+conn = sqlite3.connect("Diem_danh.db")
+cursor = conn.cursor()
+
+# Tạo bảng ADMIN
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS ADMIN (
+    ID_ADMIN INTEGER PRIMARY KEY,
+    NAME_ADMIN TEXT,
+    PASS_ADMIN TEXT
+);
+''')
+
+# Tạo bảng SINH_VIEN
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS SINH_VIEN (
+    ID_SV INTEGER PRIMARY KEY,
+    NAME_SV TEXT,
+    ADDRESS_SV TEXT,
+    DATE_SV TEXT,
+    SEX_SV INTEGER,
+    CLASS_SV TEXT,
+    PASSWORD_SV TEXT,
+    MSSV TEXT
+);
+''')
+
+# Tạo bảng HINH_ANH_KHUON_MAT
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS HINH_ANH_KHUON_MAT (
+    ID_FACE INTEGER PRIMARY KEY,
+    FILE_IMG TEXT,
+    STATUS TEXT,
+    DATE_CREATED TEXT
+);
+''')
+
+# Tạo bảng HK_NK
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS HK_NK (
+    ID_HK INTEGER PRIMARY KEY,
+    SCHOOL_YEAR TEXT
+);
+''')
+
+# Tạo bảng HOAT_DONG
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS HOAT_DONG (
+    ID_HD INTEGER PRIMARY KEY,
+    TIME_OUT TEXT,
+    START_TIME TEXT,
+    CATEGORY_HD TEXT
+);
+''')
+
+# Tạo bảng KHOA
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS KHOA (
+    ID_KHOA INTEGER PRIMARY KEY,
+    NAME_KHOA TEXT
+);
+''')
+
+# Tạo bảng TAO
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS TAO (
+    ID_HD INTEGER,
+    ID_KHOA INTEGER,
+    PRIMARY KEY (ID_HD, ID_KHOA),
+    FOREIGN KEY (ID_HD) REFERENCES HOAT_DONG(ID_HD),
+    FOREIGN KEY (ID_KHOA) REFERENCES KHOA(ID_KHOA)
+);
+''')
+
+# Tạo bảng THAM_GIA
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS THAM_GIA (
+    ID_SV INTEGER,
+    ID_HD INTEGER,
+    PRIMARY KEY (ID_SV, ID_HD),
+    FOREIGN KEY (ID_SV) REFERENCES SINH_VIEN(ID_SV),
+    FOREIGN KEY (ID_HD) REFERENCES HOAT_DONG(ID_HD)
+);
+''')
+
+# Tạo bảng DIEM_DANH
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS DIEM_DANH (
+    ID_HD INTEGER,
+    ID_FACE INTEGER,
+    ID_HK INTEGER,
+    PRIMARY KEY (ID_HD, ID_FACE, ID_HK),
+    FOREIGN KEY (ID_HD) REFERENCES HOAT_DONG(ID_HD),
+    FOREIGN KEY (ID_FACE) REFERENCES HINH_ANH_KHUON_MAT(ID_FACE),
+    FOREIGN KEY (ID_HK) REFERENCES HK_NK(ID_HK)
+);
+''')
+
+conn.commit()
+conn.close()
+print("✅ Tạo cơ sở dữ liệu Diem_danh.db thành công.")
