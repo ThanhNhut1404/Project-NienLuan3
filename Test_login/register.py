@@ -1,6 +1,8 @@
 # register.py
 import tkinter as tk
 from tkinter import messagebox
+
+from Database.Create_db import sinh_vien_exists
 from database import init_db, insert_user, user_exists, get_all_users
 from face_utils import capture_multiple_encodings, compare_face
 def show_custom_popup(message):
@@ -25,8 +27,9 @@ def register_user():
         messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập đầy đủ tất cả thông tin.")
         return
 
-    if user_exists(user_id, name):
-        messagebox.showerror("Đã tồn tại", f"Người dùng với ID '{user_id}' và tên '{name}' đã tồn tại.\nVui lòng nhập ID hoặc tên khác.")
+    if user_exists( name):
+        messagebox.show_custom_popup(f"Gương mặt đã được đăng ký bởi {matched}.\nKhông thể đăng ký lại.")
+
         return
 
     known_users = get_all_users()
