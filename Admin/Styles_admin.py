@@ -34,3 +34,13 @@ SEPARATOR_STYLE = {
     "width": 1,
     "height": 30
 }
+
+# Ẩn hiện mật khẩu
+CHECKBOX_STYLE = {
+    "bg": "#003366",
+    "fg": "white",
+    "activebackground": "#003366",
+    "activeforeground": "white",
+    "selectcolor": "white",  # Màu nền của ô vuông checkbox
+    "font": ("Arial", 10)
+}
