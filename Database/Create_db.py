@@ -176,4 +176,4 @@ def reset_and_create_sinh_vien_table():
     conn.commit()
     conn.close()
 
-print("✅ Tạo cơ sở dữ liệu và các bảng thành công.")
+print("✅ Tạo cơ sở  liệu và các bảng thành công.")

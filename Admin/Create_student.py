@@ -43,6 +43,7 @@ def register_sinh_vien():
         matched = compare_face(encoding_json, known_users)
         if matched:
             show_popup(f"Gương mặt đã được đăng ký bởi {matched['name']} .\nKhông thể đăng ký lại.")
+            print(f"❌ Khuôn mặt đã được đăng ký bởi {matched['name']}.")
             return
 
     # ✅ Nếu không trùng, lưu nhiều dòng (mỗi face_encoding 1 dòng)
