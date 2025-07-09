@@ -4,7 +4,6 @@ import face_recognition
 import json
 import numpy as np
 import time
-
 def capture_multiple_encodings(num_captures=5, delay=1.5):
     cam = cv2.VideoCapture(0)
     print("Hệ thống sẽ tự động chụp 5 lần khi phát hiện khuôn mặt...")
@@ -43,13 +42,24 @@ def compare_face(new_encoding, known_users, tolerance=0.6):
     import face_recognition
     import numpy as np
 
-    new_encoding_array = np.array(eval(new_encoding))
+    try:
+        new_encoding_array = np.array(eval(new_encoding))
+    except Exception as e:
+        print(f"Lỗi khi chuyển đổi encoding mới: {e}")
+        return None
 
     for user in known_users:
-        known_encoding = np.array(eval(user['face_encoding']))
-        results = face_recognition.compare_faces([known_encoding], new_encoding_array, tolerance=tolerance)
-        if results[0]:
-            return user['name']  # ✅ chỉ trả về tên nếu trùng
+        try:
+            if 'face_encoding' not in user or user['face_encoding'] is None:
+                continue
+            known_encoding = np.array(eval(user['face_encoding']))
+            results = face_recognition.compare_faces([known_encoding], new_encoding_array, tolerance=tolerance)
+            if results[0]:
+                return user['name']  # ✅ chỉ trả về tên nếu trùng
+        except Exception as e:
+            print(f"Lỗi xử lý encoding của {user.get('name', 'Không rõ')}: {e}")
+            continue
 
     return None  # ❌ Không trùng ai hết
+
 

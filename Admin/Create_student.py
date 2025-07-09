@@ -1,10 +1,16 @@
-import sqlite3
 import tkinter as tk
 from tkinter import messagebox
+import json
+
 from Admin.Styles_admin import TITLE_FONT, LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
-from Database.Create_db import  DB_NAME, insert_sinh_vien, sinh_vien_exists, get_all_sinh_vien, create_table_sinh_vien
+from Database.Create_db import (
+    insert_sinh_vien,
+    sinh_vien_exists,
+    get_all_sinh_vien,
+    create_table_sinh_vien
+)
 from Admin.face_util import capture_multiple_encodings, compare_face
-conn = sqlite3.connect(DB_NAME)
+
 
 def render_student_create(container):
     for widget in container.winfo_children():
@@ -12,8 +18,6 @@ def render_student_create(container):
 
     create_table_sinh_vien()
     container.config(bg="white")
-
-    # === Giao diện ===
     form = tk.Frame(container, bg="white")
     form.pack(pady=20)
 
@@ -40,30 +44,40 @@ def render_student_create(container):
         if not all([name, mssv, email, birthdate, gender, phone, address, class_sv, password]):
             messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập đầy đủ tất cả các trường.")
             return
+
+        # Kiểm tra trùng tên
         if sinh_vien_exists(name):
-            messagebox.showerror("Đã tồn tại", f"Người dùng với tên '{name}' đã tồn tại.\nVui lòng nhập tên khác.")
+            messagebox.showerror("Đã tồn tại", f"Tên '{name}' đã tồn tại. Vui lòng chọn tên khác.")
             return
 
-        known_users = get_all_sinh_vien()
+        # Kiểm tra trùng email hoặc MSSV
+        existing = get_all_sinh_vien()
+        for sv in existing:
+            if sv['name'] == name or sv.get('email') == email or sv.get('mssv') == mssv:
+                messagebox.showerror("Trùng thông tin", "Email hoặc MSSV đã tồn tại.")
+                return
+
+        # Chụp ảnh
         encodings = capture_multiple_encodings()
         if not encodings:
-            messagebox.showerror("Thất bại", "Không lấy được dữ liệu khuôn mặt.")
+            messagebox.showerror("Lỗi", "Không lấy được dữ liệu khuôn mặt.")
             return
 
-        for encoding_json in encodings:
-            matched = compare_face(encoding_json, known_users)
+        # Kiểm tra trùng khuôn mặt
+        for encoding in encodings:
+            matched = compare_face(encoding, existing)
             if matched:
-                show_popup(f"Gương mặt đã được đăng ký bởi {matched['name']}.")
+                show_popup(f"Gương mặt đã tồn tại: {matched['name']}")
                 return
 
         try:
-            for encoding_json in encodings:
-                insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json)
-            messagebox.showinfo("Thành công", f"Đã lưu {len(encodings)} ảnh cho {name}")
+            encoding_json = json.dumps(encodings)
+            insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json)
+            messagebox.showinfo("Thành công", f"Đăng ký {name} thành công với {len(encodings)} ảnh.")
         except Exception as e:
             messagebox.showerror("Lỗi", f"Không thể lưu dữ liệu: {e}")
 
-    # === Tạo Label + Entry ===
+    # Tạo label + entry
     def make_label(text, row):
         tk.Label(form, text=text, font=LABEL_FONT, bg="white").grid(row=row, column=0, sticky='e', padx=10, pady=5)
 
@@ -99,7 +113,9 @@ def render_student_create(container):
     make_label("Mật khẩu:", 8)
     password_entry = make_entry(8, show="*")
 
-    # Nút đăng ký
-    tk.Button(form, text="Đăng ký khuôn mặt", command=register_sinh_vien, **BUTTON_STYLE).grid(
-        row=9, column=0, columnspan=2, pady=15
-    )
+    tk.Button(
+        form,
+        text="Đăng ký khuôn mặt",
+        command=register_sinh_vien,
+        **BUTTON_STYLE
+    ).grid(row=9, column=0, columnspan=2, pady=15)

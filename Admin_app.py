@@ -1,7 +1,6 @@
 import tkinter as tk
 from Admin.Login_admin import render_admin_login
 from Admin.Styles_admin import APP_SIZE
-
 def start_admin_app():
     root = tk.Tk()
     root.title("Hệ thống điểm danh - Admin")

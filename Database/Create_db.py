@@ -1,13 +1,17 @@
 import os
+import json
 import sqlite3
 
 # ✅ Luôn đảm bảo file .db nằm trong thư mục Database
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # thư mục Database
-DB_NAME = os.path.join(BASE_DIR, "Diem_danh.db")       # -> Database/Diem_danh.db
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_NAME = os.path.join(BASE_DIR, "Diem_danh.db")
+
+# ================== KẾT NỐI DB =====================
+if not os.path.exists(BASE_DIR):
+    os.makedirs(BASE_DIR)
 
 conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
-
 
 # ---------------- TẠO CÁC BẢNG ------------------
 
@@ -29,7 +33,7 @@ CREATE TABLE IF NOT EXISTS SINH_VIEN (
     EMAIL_SV TEXT UNIQUE,
     ADDRESS_SV TEXT,
     DATE_SV DATE,
-    SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),  -- 0: Nam, 1: Nữ
+    SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),
     CLASS_SV TEXT,
     PASSWORD_SV TEXT NOT NULL,
     FACE_ENCODING TEXT,
@@ -137,23 +141,40 @@ def create_table_sinh_vien():
 def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute('''
-        INSERT INTO SINH_VIEN (
-            NAME_SV, MSSV, EMAIL_SV, ADDRESS_SV,
-            DATE_SV, SEX_SV, CLASS_SV,
-            PASSWORD_SV, FACE_ENCODING
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json))
-    conn.commit()
-    conn.close()
+    try:
+        c.execute('''
+            INSERT INTO SINH_VIEN (
+                NAME_SV, MSSV, EMAIL_SV, ADDRESS_SV,
+                DATE_SV, SEX_SV, CLASS_SV,
+                PASSWORD_SV, FACE_ENCODING
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json))
+        conn.commit()
+    except sqlite3.IntegrityError as e:
+        raise Exception(f"Trùng MSSV hoặc Email: {e}")
+    finally:
+        conn.close()
 
 def get_all_sinh_vien():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    c.execute("SELECT ID_SV, NAME_SV, FACE_ENCODING FROM SINH_VIEN")
+    c.execute("SELECT ID_SV, NAME_SV, MSSV, EMAIL_SV, FACE_ENCODING FROM SINH_VIEN")
     rows = c.fetchall()
     conn.close()
-    return [{'id': row[0], 'name': row[1], 'face_encoding': row[2]} for row in rows]
+    result = []
+    for row in rows:
+        try:
+            encodings = json.loads(row[4]) if row[4] else []
+        except:
+            encodings = []
+        result.append({
+            'id': row[0],
+            'name': row[1],
+            'mssv': row[2],
+            'email': row[3],
+            'encodings': encodings
+        })
+    return result
 
 def sinh_vien_exists(name_sv):
     conn = sqlite3.connect(DB_NAME)
