@@ -1,12 +1,22 @@
-APP_SIZE = "900x450"
+# Styles_student.py
 
-LABEL_FONT = ("Arial", 13)
-ENTRY_FONT = ("Arial", 13)
+# Font cho các nhãn label
+LABEL_FONT = ("Arial", 12)
 
+# Font cho ô nhập
+ENTRY_FONT = ("Arial", 12)
+
+# Style cho nút
 BUTTON_STYLE = {
-    "font": ("Arial", 13, "bold"),
-    "bg": "#4CAF50",
+    "font": ("Arial", 12, "bold"),
+    "bg": "#89CFF0",            # Baby Blue
     "fg": "white",
-    "activebackground": "#388E3C",
-    "width": 22
+    "activebackground": "#87CEEB",  # Sky Blue khi hover
+    "cursor": "hand2",
+    "bd": 0,
+    "padx": 10,
+    "pady": 6,
 }
+
+# Kích thước cửa sổ nếu cần dùng cho Student_app.py
+APP_SIZE = "960x600"
