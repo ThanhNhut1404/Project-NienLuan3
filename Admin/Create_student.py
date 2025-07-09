@@ -1,107 +1,105 @@
+import sqlite3
 import tkinter as tk
-from Admin.Styles_admin import TITLE_FONT, LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
 from tkinter import messagebox
-from Database.Create_db import insert_sinh_vien,sinh_vien_exists, get_all_sinh_vien,create_table_sinh_vien
-from face_util import capture_multiple_encodings, compare_face
-def show_popup(message):
-    popup = tk.Toplevel()
-    popup.title("Thông báo")
-    popup.geometry("300x120")
-    popup.resizable(False, False)
+from Admin.Styles_admin import TITLE_FONT, LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
+from Database.Create_db import  DB_NAME, insert_sinh_vien, sinh_vien_exists, get_all_sinh_vien, create_table_sinh_vien
+from Admin.face_util import capture_multiple_encodings, compare_face
+conn = sqlite3.connect(DB_NAME)
 
-    tk.Label(popup, text=message, wraplength=280, justify="center", fg="red").pack(pady=15)
-    tk.Button(popup, text="OK", command=popup.destroy, bg="#f44336", fg="white", width=10).pack(pady=5)
-    popup.grab_set()  # Khóa popup cho đến khi tắt
-def register_sinh_vien():
-    name = name_entry.get().strip()
-    mssv = mssv_entry.get().strip()
-    email = email_entry.get().strip()
-    address = address_entry.get().strip()
-    birthdate = birth_entry.get().strip()
-    gender = gender_entry.get().strip()   # Nhập 0 (Nam) hoặc 1 (Nữ)
-    class_sv = class_entry.get().strip()
-    password = password_entry.get().strip()
+def render_student_create(container):
+    for widget in container.winfo_children():
+        widget.destroy()
 
-    # ⚠️ Kiểm tra thông tin cần thiết
-    if not all([name,mssv,email, address, birthdate, gender, class_sv, password]):
-        messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập đầy đủ tất cả các trường.")
-        return
-    if sinh_vien_exists(name):
-        messagebox.showerror("Đã tồn tại", f"Người dùng với tên '{name}' đã tồn tại.\nVui lòng nhập tên khác.")
-        return
-    # ⚠️ Lấy danh sách sinh viên đã có
-    known_users = get_all_sinh_vien()
+    create_table_sinh_vien()
+    container.config(bg="white")
 
-    # 🧠 Chụp nhiều lần để lấy encoding
-    encodings = capture_multiple_encodings()
-    if not encodings:
-        messagebox.showerror("Thất bại", "Không lấy được dữ liệu khuôn mặt.")
-        return
+    # === Giao diện ===
+    form = tk.Frame(container, bg="white")
+    form.pack(pady=20)
 
-    # ✅ Kiểm tra trùng khuôn mặt
-    for encoding_json in encodings:
-        matched = compare_face(encoding_json, known_users)
-        if matched:
-            show_popup(f"Gương mặt đã được đăng ký bởi {matched['name']} .\nKhông thể đăng ký lại.")
-            print(f"❌ Khuôn mặt đã được đăng ký bởi {matched['name']}.")
+    def show_popup(message):
+        popup = tk.Toplevel()
+        popup.title("Thông báo")
+        popup.geometry("300x120")
+        popup.resizable(False, False)
+        tk.Label(popup, text=message, wraplength=280, justify="center", fg="red").pack(pady=15)
+        tk.Button(popup, text="OK", command=popup.destroy, bg="#f44336", fg="white", width=10).pack(pady=5)
+        popup.grab_set()
+
+    def register_sinh_vien():
+        name = name_entry.get().strip()
+        mssv = mssv_entry.get().strip()
+        email = email_entry.get().strip()
+        birthdate = birth_entry.get().strip()
+        gender = gender_entry.get().strip()
+        phone = phone_entry.get().strip()
+        address = address_entry.get().strip()
+        class_sv = class_entry.get().strip()
+        password = password_entry.get().strip()
+
+        if not all([name, mssv, email, birthdate, gender, phone, address, class_sv, password]):
+            messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập đầy đủ tất cả các trường.")
+            return
+        if sinh_vien_exists(name):
+            messagebox.showerror("Đã tồn tại", f"Người dùng với tên '{name}' đã tồn tại.\nVui lòng nhập tên khác.")
             return
 
-    # ✅ Nếu không trùng, lưu nhiều dòng (mỗi face_encoding 1 dòng)
-    try:
+        known_users = get_all_sinh_vien()
+        encodings = capture_multiple_encodings()
+        if not encodings:
+            messagebox.showerror("Thất bại", "Không lấy được dữ liệu khuôn mặt.")
+            return
+
         for encoding_json in encodings:
-            insert_sinh_vien(name,mssv, email, address, birthdate, gender, class_sv, password, encoding_json)
-        messagebox.showinfo("Thành công", f"Đã lưu {len(encodings)} ảnh cho {name}")
-        print(f"✅ Sinh viên '{name}' đã được đăng ký thành công cùng {len(encodings)} ảnh.")
-    except Exception as e:
-        messagebox.showerror("Lỗi", f"Không thể lưu dữ liệu: {e}")
+            matched = compare_face(encoding_json, known_users)
+            if matched:
+                show_popup(f"Gương mặt đã được đăng ký bởi {matched['name']}.")
+                return
 
+        try:
+            for encoding_json in encodings:
+                insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json)
+            messagebox.showinfo("Thành công", f"Đã lưu {len(encodings)} ảnh cho {name}")
+        except Exception as e:
+            messagebox.showerror("Lỗi", f"Không thể lưu dữ liệu: {e}")
 
-# Khởi tạo CSDL
-create_table_sinh_vien()
-# Giao diện Tkinter
-# Giao diện Tkinter
-root = tk.Tk()
-root.title("Đăng ký người dùng bằng khuôn mặt")
-root.geometry("400x500")
-root.resizable(False, False)
+    # === Tạo Label + Entry ===
+    def make_label(text, row):
+        tk.Label(form, text=text, font=LABEL_FONT, bg="white").grid(row=row, column=0, sticky='e', padx=10, pady=5)
 
-tk.Label(root, text="Họ tên:").grid(row=0, column=0, padx=10, pady=5, sticky='e')
-name_entry = tk.Entry(root, width=30)
-name_entry.grid(row=0, column=1, padx=10, pady=5)
+    def make_entry(row, show=None):
+        e = tk.Entry(form, font=ENTRY_FONT, width=30, show=show)
+        e.grid(row=row, column=1, padx=10, pady=5)
+        return e
 
-tk.Label(root, text="MSSV:").grid(row=1, column=0, padx=10, pady=5, sticky='e')
-mssv_entry = tk.Entry(root, width=30)
-mssv_entry.grid(row=1, column=1, padx=10, pady=5)
+    make_label("Họ tên:", 0)
+    name_entry = make_entry(0)
 
-tk.Label(root, text="Email:").grid(row=2, column=0, padx=10, pady=5, sticky='e')
-email_entry = tk.Entry(root, width=30)
-email_entry.grid(row=2, column=1, padx=10, pady=5)
+    make_label("MSSV:", 1)
+    mssv_entry = make_entry(1)
 
-tk.Label(root, text="Ngày sinh (YYYY-MM-DD):").grid(row=3, column=0, padx=10, pady=5, sticky='e')
-birth_entry = tk.Entry(root, width=30)
-birth_entry.grid(row=3, column=1, padx=10, pady=5)
+    make_label("Email:", 2)
+    email_entry = make_entry(2)
 
-tk.Label(root, text="Giới tính (0 = Nam / 1 = Nữ):").grid(row=4, column=0, padx=10, pady=5, sticky='e')
-gender_entry = tk.Entry(root, width=30)
-gender_entry.grid(row=4, column=1, padx=10, pady=5)
+    make_label("Ngày sinh (YYYY-MM-DD):", 3)
+    birth_entry = make_entry(3)
 
-tk.Label(root, text="Số điện thoại:").grid(row=5, column=0, padx=10, pady=5, sticky='e')
-phone_entry = tk.Entry(root, width=30)
-phone_entry.grid(row=5, column=1, padx=10, pady=5)
+    make_label("Giới tính (0 = Nam / 1 = Nữ):", 4)
+    gender_entry = make_entry(4)
 
-tk.Label(root, text="Địa chỉ:").grid(row=6, column=0, padx=10, pady=5, sticky='e')
-address_entry = tk.Entry(root, width=30)
-address_entry.grid(row=6, column=1, padx=10, pady=5)
+    make_label("Số điện thoại:", 5)
+    phone_entry = make_entry(5)
 
-tk.Label(root, text="Lớp:").grid(row=7, column=0, padx=10, pady=5, sticky='e')
-class_entry = tk.Entry(root, width=30)
-class_entry.grid(row=7, column=1, padx=10, pady=5)
+    make_label("Địa chỉ:", 6)
+    address_entry = make_entry(6)
 
-tk.Label(root, text="Mật khẩu:").grid(row=8, column=0, padx=10, pady=5, sticky='e')
-password_entry = tk.Entry(root, width=30, show="*")
-password_entry.grid(row=8, column=1, padx=10, pady=5)
+    make_label("Lớp:", 7)
+    class_entry = make_entry(7)
 
-btn = tk.Button(root, text="Đăng ký khuôn mặt", command=register_sinh_vien, font=("Arial", 12), bg="#4CAF50", fg="white")
-btn.grid(row=9, column=0, columnspan=2, pady=15)
+    make_label("Mật khẩu:", 8)
+    password_entry = make_entry(8, show="*")
 
-root.mainloop()
+    # Nút đăng ký
+    tk.Button(form, text="Đăng ký khuôn mặt", command=register_sinh_vien, **BUTTON_STYLE).grid(
+        row=9, column=0, columnspan=2, pady=15
+    )

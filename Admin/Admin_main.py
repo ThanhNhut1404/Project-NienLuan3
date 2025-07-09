@@ -15,8 +15,8 @@ def render_admin_main(container):
             widget.destroy()
 
         if view_name == "create_student":
-            from Admin.Create_student import render_create_student
-            render_create_student(main_content)
+            from Admin.Create_student import render_student_create
+            render_student_create(main_content)
         elif view_name == "view_students":
             tk.Label(main_content, text="📋 Danh sách sinh viên", font=TITLE_FONT, bg="white").pack(pady=40)
         elif view_name == "delete_student":

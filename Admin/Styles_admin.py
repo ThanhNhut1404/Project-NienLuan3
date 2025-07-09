@@ -41,6 +41,6 @@ CHECKBOX_STYLE = {
     "fg": "white",
     "activebackground": "#003366",
     "activeforeground": "white",
-    "selectcolor": "white",  # Màu nền của ô vuông checkbox
+    "selectcolor": "#003366",  # Màu nền của ô vuông checkbox
     "font": ("Arial", 10)
 }

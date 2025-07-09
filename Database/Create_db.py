@@ -1,8 +1,13 @@
+import os
 import sqlite3
 
-DB_NAME = "Diem_danh.db"
+# ✅ Luôn đảm bảo file .db nằm trong thư mục Database
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # thư mục Database
+DB_NAME = os.path.join(BASE_DIR, "Diem_danh.db")       # -> Database/Diem_danh.db
+
 conn = sqlite3.connect(DB_NAME)
 cursor = conn.cursor()
+
 
 # ---------------- TẠO CÁC BẢNG ------------------
 
@@ -16,26 +21,21 @@ CREATE TABLE IF NOT EXISTS ADMIN (
 ''')
 
 # SINH_VIEN
-def create_table_sinh_vien():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS SINH_VIEN (
-            ID_SV INTEGER PRIMARY KEY AUTOINCREMENT,
-            NAME_SV TEXT NOT NULL,
-            MSSV TEXT UNIQUE,
-            EMAIL_SV TEXT UNIQUE,
-            ADDRESS_SV TEXT,
-            DATE_SV DATE,
-            SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),  -- 0: Nam, 1: Nữ
-            CLASS_SV TEXT,
-            PASSWORD_SV TEXT NOT NULL,
-            FACE_ENCODING TEXT,
-            CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-    ''')
-    conn.commit()
-    conn.close()
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS SINH_VIEN (
+    ID_SV INTEGER PRIMARY KEY AUTOINCREMENT,
+    NAME_SV TEXT NOT NULL,
+    MSSV TEXT UNIQUE,
+    EMAIL_SV TEXT UNIQUE,
+    ADDRESS_SV TEXT,
+    DATE_SV DATE,
+    SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),  -- 0: Nam, 1: Nữ
+    CLASS_SV TEXT,
+    PASSWORD_SV TEXT NOT NULL,
+    FACE_ENCODING TEXT,
+    CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+''')
 
 # HINH_ANH_KHUON_MAT
 cursor.execute('''
@@ -113,21 +113,40 @@ conn.close()
 
 # ----------------- CÁC HÀM XỬ LÝ DỮ LIỆU ------------------
 
-# Thêm sinh viên
-def insert_sinh_vien(name,mssv, email, address, birthdate, gender, class_sv, password, encoding_json):
+def create_table_sinh_vien():
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS SINH_VIEN (
+            ID_SV INTEGER PRIMARY KEY AUTOINCREMENT,
+            NAME_SV TEXT NOT NULL,
+            MSSV TEXT UNIQUE,
+            EMAIL_SV TEXT UNIQUE,
+            ADDRESS_SV TEXT,
+            DATE_SV DATE,
+            SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),
+            CLASS_SV TEXT,
+            PASSWORD_SV TEXT NOT NULL,
+            FACE_ENCODING TEXT,
+            CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+    ''')
+    conn.commit()
+    conn.close()
+
+def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute('''
         INSERT INTO SINH_VIEN (
-            NAME_SV,MSSV, EMAIL_SV, ADDRESS_SV,
+            NAME_SV, MSSV, EMAIL_SV, ADDRESS_SV,
             DATE_SV, SEX_SV, CLASS_SV,
             PASSWORD_SV, FACE_ENCODING
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (name,mssv, email, address, birthdate, gender, class_sv, password, encoding_json))
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json))
     conn.commit()
     conn.close()
-# Lấy danh sách sinh viên và encoding
+
 def get_all_sinh_vien():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -136,7 +155,6 @@ def get_all_sinh_vien():
     conn.close()
     return [{'id': row[0], 'name': row[1], 'face_encoding': row[2]} for row in rows]
 
-# Kiểm tra sinh viên đã tồn tại
 def sinh_vien_exists(name_sv):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -145,7 +163,6 @@ def sinh_vien_exists(name_sv):
     conn.close()
     return result is not None
 
-# Reset bảng SINH_VIEN
 def reset_sinh_vien_table():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -153,7 +170,6 @@ def reset_sinh_vien_table():
     conn.commit()
     conn.close()
 
-# Reset và tạo lại bảng SINH_VIEN
 def reset_and_create_sinh_vien_table():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
@@ -171,9 +187,9 @@ def reset_and_create_sinh_vien_table():
             PASSWORD_SV TEXT NOT NULL,
             FACE_ENCODING TEXT,
             CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
+        );
     ''')
     conn.commit()
     conn.close()
 
-print("✅ Tạo cơ sở  liệu và các bảng thành công.")
+print("✅ Tạo cơ sở dữ liệu và các bảng thành công.")
