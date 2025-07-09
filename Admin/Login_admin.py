@@ -1,28 +1,31 @@
 import tkinter as tk
 from tkinter import messagebox
+from Admin.Styles_admin import TITLE_FONT, LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
 
-def open_admin_login(parent_root):
-    login_window = tk.Toplevel(parent_root)
-    login_window.title("Đăng nhập quản trị viên")
-    login_window.geometry("400x300")
+def render_admin_login(container):
+    for widget in container.winfo_children():
+        widget.destroy()
 
-    tk.Label(login_window, text="Đăng nhập Quản trị viên", font=("Arial", 14)).pack(pady=10)
+    content = tk.Frame(container, bg="#003366")
+    content.pack(fill=tk.BOTH, expand=True)
 
-    tk.Label(login_window, text="Tài khoản:").pack(anchor='w', padx=20)
-    entry_username = tk.Entry(login_window)
-    entry_username.pack(padx=20)
+    tk.Label(content, text="Đăng nhập Quản trị viên", font=TITLE_FONT, bg="white").pack(pady=20)
 
-    tk.Label(login_window, text="Mật khẩu:").pack(anchor='w', padx=20)
-    entry_password = tk.Entry(login_window, show="*")
-    entry_password.pack(padx=20)
+    tk.Label(content, text="Họ và tên:", font=LABEL_FONT, bg="white").pack(anchor='w', padx=150)
+    entry_name = tk.Entry(content, font=ENTRY_FONT, width=30)
+    entry_name.pack(pady=(0, 15))
 
-    def admin_login():
+    tk.Label(content, text="Mật khẩu:", font=LABEL_FONT, bg="white").pack(anchor='w', padx=150)
+    entry_password = tk.Entry(content, show="*", font=ENTRY_FONT, width=30)
+    entry_password.pack(pady=(0, 20))
+
+    def handle_login():
         name = entry_name.get()
-        username = entry_username.get()
         password = entry_password.get()
-        if username == "admin" and password == "123":
-            messagebox.showinfo("Đăng nhập thành công", f"Chào quản trị viên {name}")
+        if name.lower() == "admin" and password == "123":
+            from Admin.Admin_main import render_admin_main  # ✅ Import CỤC BỘ tại đây
+            render_admin_main(container)
         else:
-            messagebox.showerror("Thất bại", "Sai tài khoản hoặc mật khẩu")
+            messagebox.showerror("Lỗi", "Sai thông tin đăng nhập.")
 
-    tk.Button(login_window, text="Đăng nhập", command=admin_login).pack(pady=15)
+    tk.Button(content, text="Đăng nhập", command=handle_login, **BUTTON_STYLE).pack()
