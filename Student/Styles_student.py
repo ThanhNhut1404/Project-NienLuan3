@@ -1,12 +1,15 @@
-APP_SIZE = "900x450"
-
-LABEL_FONT = ("Arial", 13)
-ENTRY_FONT = ("Arial", 13)
-
+LABEL_FONT = ("Arial", 12)
+ENTRY_FONT = ("Arial", 12)
 BUTTON_STYLE = {
-    "font": ("Arial", 13, "bold"),
+    "font": ("Arial", 12, "bold"),
     "bg": "#4CAF50",
     "fg": "white",
-    "activebackground": "#388E3C",
-    "width": 22
+    "activebackground": "#45a049",
+    "cursor": "hand2",
+    "bd": 0,
+    "padx": 10,
+    "pady": 6,
 }
+
+# Kích thước cửa sổ sinh viên
+APP_SIZE = "960x600"

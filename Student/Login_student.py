@@ -45,7 +45,7 @@ def open_student_login(container):
     # ==== Form bên phải ====
     right_frame = tk.LabelFrame(
         container,
-        text="Thông tin đăng nhập",
+        text="ĐĂNG NHẬP SINH VIÊN",
         padx=30, pady=30,
         font=("Arial", 14, "bold"),
         bg="white"

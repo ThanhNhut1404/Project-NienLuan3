@@ -2,11 +2,11 @@ import tkinter as tk
 from Admin.Styles_admin import MENU_BUTTON_STYLE, SEPARATOR_STYLE
 
 def render_header(container, on_logout, switch_to_view):
-    header = tk.Frame(container, bg="#34495E", height=50)
+    header = tk.Frame(container, bg="#003366", height=50)
 
     # === MENU: Quản lý sinh viên ===
     student_menu_btn = tk.Menubutton(header, text="Quản lý sinh viên", **MENU_BUTTON_STYLE, direction="below")
-    student_menu = tk.Menu(student_menu_btn, tearoff=0, font=("Arial", 10))
+    student_menu = tk.Menu(student_menu_btn, tearoff=0, font=("Arial", 10), )
     student_menu.add_command(label="Tạo tài khoản", command=lambda: switch_to_view("create_student"))
     student_menu.add_separator()
     student_menu.add_command(label="Xem danh sách", command=lambda: switch_to_view("view_students"))

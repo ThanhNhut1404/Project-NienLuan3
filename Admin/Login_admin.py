@@ -9,14 +9,14 @@ def render_admin_login(container):
     content = tk.Frame(container, bg="#003366")
     content.pack(fill=tk.BOTH, expand=True)
 
-    tk.Label(content, text="Đăng nhập Quản trị viên", font=TITLE_FONT, bg="white").pack(pady=20)
+    tk.Label(content, text="ĐĂNG NHẬP QUẢN TRỊ VIÊN", font=TITLE_FONT, bg="#003366", fg="white").pack(pady=20)
 
-    tk.Label(content, text="Họ và tên:", font=LABEL_FONT, bg="white").pack(anchor='w', padx=150)
-    entry_name = tk.Entry(content, font=ENTRY_FONT, width=30)
+    tk.Label(content, text="Họ và tên:", font=LABEL_FONT, bg="#003366", fg="white").pack(anchor='w', padx=215)
+    entry_name = tk.Entry(content, font=ENTRY_FONT, width=28)
     entry_name.pack(pady=(0, 15))
 
-    tk.Label(content, text="Mật khẩu:", font=LABEL_FONT, bg="white").pack(anchor='w', padx=150)
-    entry_password = tk.Entry(content, show="*", font=ENTRY_FONT, width=30)
+    tk.Label(content, text="Mật khẩu:", font=LABEL_FONT, bg="#003366", fg="white",).pack(anchor='w', padx=215)
+    entry_password = tk.Entry(content, show="*", font=ENTRY_FONT, width=28)
     entry_password.pack(pady=(0, 20))
 
     def handle_login():
