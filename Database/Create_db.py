@@ -23,6 +23,7 @@ def create_table_sinh_vien():
         CREATE TABLE IF NOT EXISTS SINH_VIEN (
             ID_SV INTEGER PRIMARY KEY AUTOINCREMENT,
             NAME_SV TEXT NOT NULL,
+            MSSV TEXT UNIQUE,
             EMAIL_SV TEXT UNIQUE,
             ADDRESS_SV TEXT,
             DATE_SV DATE,
@@ -113,17 +114,17 @@ conn.close()
 # ----------------- CÁC HÀM XỬ LÝ DỮ LIỆU ------------------
 
 # Thêm sinh viên
-def insert_sinh_vien(name, email, address, birthdate, gender, class_sv, password, encoding_json):
+def insert_sinh_vien(name,mssv, email, address, birthdate, gender, class_sv, password, encoding_json):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute('''
         INSERT INTO SINH_VIEN (
-            NAME_SV, EMAIL_SV, ADDRESS_SV,
+            NAME_SV,MSSV, EMAIL_SV, ADDRESS_SV,
             DATE_SV, SEX_SV, CLASS_SV,
             PASSWORD_SV, FACE_ENCODING
         )
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (name, email, address, birthdate, gender, class_sv, password, encoding_json))
+    ''', (name,mssv, email, address, birthdate, gender, class_sv, password, encoding_json))
     conn.commit()
     conn.close()
 # Lấy danh sách sinh viên và encoding
@@ -161,6 +162,7 @@ def reset_and_create_sinh_vien_table():
         CREATE TABLE SINH_VIEN (
             ID_SV INTEGER PRIMARY KEY AUTOINCREMENT,
             NAME_SV TEXT NOT NULL,
+            MSSV TEXT UNIQUE,
             EMAIL_SV TEXT UNIQUE,
             ADDRESS_SV TEXT,
             DATE_SV DATE,
