@@ -1,38 +1,47 @@
 import tkinter as tk
 from tkinter import messagebox
+import json
 import cv2
+import face_recognition
+import numpy as np
 from PIL import Image, ImageTk
+
+from Database.Create_db import get_all_sinh_vien
+from Student.Student_main import render_student_main
 from Student.Styles_student import LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
+
 
 def open_student_login(container):
     for widget in container.winfo_children():
         widget.destroy()
-
     container.config(bg="white")
+
     cap = cv2.VideoCapture(0)
+    current_frame = {'image': None}
 
-    # ==== Camera bên trái (Frame + Label để đồng bộ bên phải) ====
-    left_frame = tk.Frame(container, bg="white", bd=2, relief="groove")
-    left_frame.place(relx=0.02, rely=0.05, relwidth=0.45, relheight=0.9)
+    # ========== FRAME TRÁI: CAMERA + NÚT ĐĂNG NHẬP KHUÔN MẶT ========== #
+    left_frame = tk.Frame(container, bg="white", bd=2, relief="ridge")
+    left_frame.place(relx=0.02, rely=0.05, relwidth=0.46, relheight=0.9)
 
-    title_cam = tk.Label(
+    tk.Label(
         left_frame,
-        text="CAMERA NHẬN DIỆN KHUÔN MẶT",
-        font=("Arial", 14, "bold"),
-        bg="white"
-    )
-    title_cam.pack(pady=(15, 5))
+        text="QUÉT KHUÔN MẶT",
+        font=("Arial", 16, "bold"),
+        bg="white",
+        fg="#003366"
+    ).pack(pady=(15, 10))
 
-    cam_label = tk.Label(left_frame, bg="white")
-    cam_label.pack()
+    cam_label = tk.Label(left_frame, bg="white", relief="sunken", bd=1)
+    cam_label.pack(padx=10, pady=10, fill="both", expand=True)
 
     def update_camera():
         ret, frame = cap.read()
         if ret:
-            frame = cv2.resize(frame, (360, 270))
+            frame = cv2.resize(frame, (400, 300))
             frame = cv2.flip(frame, 1)
-            img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            img = Image.fromarray(img)
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            current_frame['image'] = rgb_frame
+            img = Image.fromarray(rgb_frame)
             imgtk = ImageTk.PhotoImage(image=img)
             cam_label.imgtk = imgtk
             cam_label.configure(image=imgtk)
@@ -40,44 +49,107 @@ def open_student_login(container):
 
     update_camera()
 
-    # ==== Form bên phải (đồng bộ khung) ====
-    right_frame = tk.Frame(container, bg="white", bd=2, relief="groove")
-    right_frame.place(relx=0.52, rely=0.05, relwidth=0.45, relheight=0.9)
+    # --- NÚT ĐĂNG NHẬP BẰNG KHUÔN MẶT --- #
+    tk.Button(
+        left_frame,
+        text="🧑‍💻 Đăng nhập bằng khuôn mặt",
+        command=lambda: face_login(current_frame, cap, container),
+        **BUTTON_STYLE
+    ).pack(pady=(20, 10))
 
-    title_label = tk.Label(
+    # ========== FRAME PHẢI: ĐĂNG NHẬP TÀI KHOẢN ========== #
+    right_frame = tk.Frame(container, bg="white", bd=2, relief="ridge")
+    right_frame.place(relx=0.51, rely=0.05, relwidth=0.47, relheight=0.9)
+
+    tk.Label(
         right_frame,
-        text="ĐĂNG NHẬP SINH VIÊN",
-        font=("Arial", 14, "bold"),
-        bg="white"
+        text="ĐĂNG NHẬP BẰNG TÀI KHOẢN",
+        font=("Arial", 16, "bold"),
+        bg="white",
+        fg="#003366"
+    ).pack(pady=(30, 20))
+
+    # --- Biểu mẫu đăng nhập --- #
+    form_frame = tk.Frame(right_frame, bg="white")
+    form_frame.pack(pady=(10, 0))
+
+    tk.Label(form_frame, text="MSSV:", bg="white", font=LABEL_FONT).grid(row=0, column=0, sticky="w", padx=5, pady=5)
+    mssv_entry = tk.Entry(form_frame, font=ENTRY_FONT, width=30)
+    mssv_entry.grid(row=0, column=1, pady=5)
+
+    tk.Label(form_frame, text="Mật khẩu:", bg="white", font=LABEL_FONT).grid(row=1, column=0, sticky="w", padx=5, pady=5)
+    password_entry = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=30)
+    password_entry.grid(row=1, column=1, pady=5)
+
+    def login_by_account():
+        mssv = mssv_entry.get().strip()
+        password = password_entry.get().strip()
+
+        if not mssv or not password:
+            messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ MSSV và mật khẩu.")
+            return
+
+        all_users = get_all_sinh_vien()
+        for user in all_users:
+            if user["mssv"] == mssv and user.get("password") == password:
+                cap.release()
+                render_student_main(container, user)
+                return
+
+        messagebox.showerror("Lỗi", "Sai MSSV hoặc mật khẩu.")
+
+    # --- Nút đăng nhập tài khoản --- #
+    tk.Button(
+        right_frame,
+        text="🔓 Đăng nhập",
+        command=login_by_account,
+        **BUTTON_STYLE
+    ).pack(pady=(30, 10))
+
+    # ========== ĐÓNG ỨNG DỤNG ========== #
+    container.winfo_toplevel().protocol(
+        "WM_DELETE_WINDOW",
+        lambda: (cap.release(), container.winfo_toplevel().destroy())
     )
-    title_label.pack(pady=(15, 5))
 
-    form_container = tk.Frame(right_frame, bg="white")
-    form_container.pack(anchor='n', pady=(5, 0))  # Dịch lên gần đầu
 
-    tk.Label(form_container, text="Họ và tên:", font=LABEL_FONT, bg="white").pack(anchor='w', pady=(0, 6))
-    entry_name = tk.Entry(form_container, width=36, font=ENTRY_FONT)
-    entry_name.pack(pady=(0, 18))
 
-    tk.Label(form_container, text="Mã số sinh viên:", font=LABEL_FONT, bg="white").pack(anchor='w', pady=(0, 6))
-    entry_mssv = tk.Entry(form_container, width=36, font=ENTRY_FONT)
-    entry_mssv.pack(pady=(0, 18))
+# ===================== ĐĂNG NHẬP BẰNG KHUÔN MẶT ===================== #
+def face_login(frame_dict, cap, container):
+    img = frame_dict.get('image')
+    if img is None:
+        messagebox.showerror("Lỗi", "Chưa có khung hình từ camera.")
+        return
 
-    tk.Label(form_container, text="Mật khẩu:", font=LABEL_FONT, bg="white").pack(anchor='w', pady=(0, 6))
-    entry_password = tk.Entry(form_container, show="*", width=36, font=ENTRY_FONT)
-    entry_password.pack(pady=(0, 22))
+    boxes = face_recognition.face_locations(img)
+    if len(boxes) != 1:
+        messagebox.showerror("Lỗi", "Vui lòng đảm bảo chỉ có 1 khuôn mặt trước camera.")
+        return
 
-    def student_login():
-        name = entry_name.get()
-        mssv = entry_mssv.get()
-        password = entry_password.get()
-        messagebox.showinfo("Đăng nhập", f"Đang kiểm tra thông tin cho {name} - {mssv}")
-        # TODO: xác thực CSDL
-        # cap.release()
-        # from Student.Student_main import render_student_main
-        # render_student_main(container)
+    unknown_encoding = face_recognition.face_encodings(img, boxes)[0]
 
-    tk.Button(form_container, text="Đăng nhập", command=student_login, **BUTTON_STYLE).pack(pady=12)
+    all_users = get_all_sinh_vien()
+    if not all_users:
+        messagebox.showwarning("Không có dữ liệu", "Không tìm thấy người dùng trong hệ thống.")
+        return
 
-    # Đóng app → release camera
-    container.winfo_toplevel().protocol("WM_DELETE_WINDOW", lambda: (cap.release(), container.winfo_toplevel().destroy()))
+    for user in all_users:
+        enc_list = user.get("encodings", [])
+        if not enc_list:
+            continue
+
+        for known_encoding in enc_list:
+            try:
+                if isinstance(known_encoding, str):
+                    known_encoding = json.loads(known_encoding)
+                known_np = np.array(known_encoding, dtype=np.float64)
+                match = face_recognition.compare_faces([known_np], unknown_encoding, tolerance=0.5)[0]
+                if match:
+                    cap.release()
+                    render_student_main(container, user)
+                    return
+            except Exception as e:
+                print("[Lỗi] So sánh encoding:", e)
+                continue
+
+    messagebox.showerror("Không thành công", "Không tìm thấy khuôn mặt trong hệ thống.")
