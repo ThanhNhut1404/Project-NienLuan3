@@ -157,24 +157,25 @@ def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, pa
 
 def get_all_sinh_vien():
     conn = sqlite3.connect(DB_NAME)
-    c = conn.cursor()
-    c.execute("SELECT ID_SV, NAME_SV, MSSV, EMAIL_SV, FACE_ENCODING FROM SINH_VIEN")
-    rows = c.fetchall()
+    cursor = conn.cursor()
+    cursor.execute("SELECT NAME_SV, MSSV, FACE_ENCODING FROM SINH_VIEN")
+    rows = cursor.fetchall()
     conn.close()
+
     result = []
     for row in rows:
         try:
-            encodings = json.loads(row[4]) if row[4] else []
-        except:
+            encodings = json.loads(row[2]) if row[2] else []
+        except Exception as e:
+            print(f"[Lỗi] Không thể parse encoding từ DB: {e}")
             encodings = []
         result.append({
-            'id': row[0],
-            'name': row[1],
-            'mssv': row[2],
-            'email': row[3],
-            'encodings': encodings
+            "name": row[0],
+            "mssv": row[1],
+            "encodings": encodings
         })
     return result
+
 
 def sinh_vien_exists(name_sv):
     conn = sqlite3.connect(DB_NAME)

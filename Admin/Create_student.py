@@ -5,18 +5,10 @@ import threading
 import cv2
 from PIL import Image, ImageTk
 import time
+import numpy as np
 
-from Student.Styles_student import (
-    TITLE_FONT, LABEL_FONT, ENTRY_FONT, BUTTON_STYLE,
-    FORM_BG_COLOR, FORM_BORDER_WIDTH, FORM_BORDER_STYLE,
-    FORM_PADDING_X, FORM_PADDING_Y, PAGE_BG_COLOR
-)
-from Database.Create_db import (
-    insert_sinh_vien,
-    sinh_vien_exists,
-    get_all_sinh_vien,
-    create_table_sinh_vien
-)
+from Student.Styles_student import *
+from Database.Create_db import insert_sinh_vien, create_table_sinh_vien, get_all_sinh_vien
 from Admin.face_util import compare_face, extract_face_encodings_from_frame
 
 
@@ -31,31 +23,24 @@ def render_student_create(container):
     main_frame = tk.Frame(container, bg="white")
     main_frame.pack(padx=20, pady=10, fill="both", expand=True)
 
-    # ========== CAMERA ==========
+    # ===== Camera UI =====
     camera_wrapper = tk.Frame(main_frame, bg=PAGE_BG_COLOR)
     camera_wrapper.pack(side="left", padx=(10, 5), pady=10)
-
     tk.Label(
         camera_wrapper,
-        text="Camera sẽ bắt đầu chụp sau khi nhấn \"Tạo tài khoản\".\nHệ thống sẽ chụp 5 ảnh khuôn mặt. Hãy nhìn thẳng vào camera.",
+        text="Camera sẽ bắt đầu chụp sau khi nhấn 'Tạo tài khoản'.\nHệ thống sẽ chụp 5 ảnh khuôn mặt. Hãy nhìn thẳng vào camera.",
         font=("Arial", 11, "italic"),
         bg="white", fg="red", wraplength=440, justify="center"
     ).pack(pady=(0, 5))
 
     left_frame = tk.Frame(camera_wrapper, bg="black", width=460, height=360, bd=2, relief="ridge")
-    left_frame.pack()
-    left_frame.pack_propagate(False)
+    left_frame.pack(); left_frame.pack_propagate(False)
+    video_label = tk.Label(left_frame, bg="black"); video_label.pack(expand=True)
 
-    video_label = tk.Label(left_frame, bg="black")
-    video_label.pack(expand=True)
-
-    counter_label = tk.Label(
-        camera_wrapper, text="Đã chụp: 0/5 ảnh",
-        bg="white", fg="#003366", font=("Arial", 14, "bold")
-    )
+    counter_label = tk.Label(camera_wrapper, text="Đã chụp: 0/5 ảnh", bg="white", fg="#003366", font=("Arial", 14, "bold"))
     counter_label.pack(pady=(5, 0))
 
-    # ========== FORM ==========
+    # ===== Form UI =====
     form_wrapper = tk.Frame(main_frame, bg=FORM_BG_COLOR, bd=FORM_BORDER_WIDTH, relief=FORM_BORDER_STYLE)
     form_wrapper.pack(side="right", padx=10, pady=10)
     form_frame = tk.Frame(form_wrapper, bg=FORM_BG_COLOR)
@@ -79,8 +64,8 @@ def render_student_create(container):
     phone_entry = make_entry(7); make_label("Số điện thoại:", 7)
     password_entry = make_entry(8, show="*"); make_label("Mật khẩu:", 8)
 
-    cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-    running = True
+    cap = None
+    running = False
     capture_count = 0
 
     def clear_form():
@@ -90,15 +75,16 @@ def render_student_create(container):
     def stop_camera():
         nonlocal cap, running
         running = False
-        if cap:
+        if cap and cap.isOpened():
             cap.release()
             cap = None
         video_label.config(image='')
 
     def reset_camera():
-        nonlocal capture_count, cap, running
+        nonlocal cap, running, capture_count
         capture_count = 0
         counter_label.config(text="Đã chụp: 0/5 ảnh")
+        stop_camera()
         cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         running = True
         update_camera()
@@ -117,7 +103,7 @@ def render_student_create(container):
         if running:
             video_label.after(10, update_camera)
 
-    update_camera()
+    reset_camera()
 
     def show_popup(msg):
         popup = tk.Toplevel()
@@ -144,58 +130,57 @@ def render_student_create(container):
             messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập đầy đủ tất cả các trường.")
             return
 
-        if sinh_vien_exists(name):
-            messagebox.showerror("Đã tồn tại", f"Tên '{name}' đã tồn tại.")
-            return
-
         encodings = []
         capture_count = 0
         last_capture = time.time()
 
         def capture_loop():
             nonlocal capture_count, last_capture
-            existing = get_all_sinh_vien()
             while capture_count < 5 and cap and cap.isOpened():
                 ret, frame = cap.read()
                 if not ret:
                     continue
                 if time.time() - last_capture >= 1.5:
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    encoding = extract_face_encodings_from_frame(frame_rgb)
-                    if not encoding:
+                    enc = extract_face_encodings_from_frame(frame_rgb)
+
+                    if not enc or not isinstance(enc, list) or len(enc) != 128:
+                        print("[Lỗi] Encoding mới không hợp lệ, bỏ qua ảnh này.")
                         continue
 
-                    # ✅ Kiểm tra trùng khuôn mặt
+                    existing = get_all_sinh_vien()
+                    print(f"[DEBUG] Có {len(existing)} sinh viên trong DB để so sánh.")
                     for sv in existing:
+                        print(f"[DEBUG] So sánh với {sv['name']} - số encoding: {len(sv['encodings'])}")
                         for known in sv.get("encodings", []):
                             try:
-                                # ⚠️ Nếu known là chuỗi JSON, chuyển sang list
-                                if isinstance(known, str):
-                                    known = json.loads(known)
-
-                                # ⚠️ Chỉ so sánh nếu known là list[float]
-                                if isinstance(known, list) and all(isinstance(x, (float, int)) for x in known):
-                                    if compare_face(encoding, [known]):
-                                        stop_camera()
-                                        show_popup(f"Gương mặt đã tồn tại: {sv['name']}. Vui lòng dùng khuôn mặt khác.")
-                                        reset_camera()
-                                        return
+                                known = np.array(known)
+                                if known.shape != (128,):
+                                    print(f"[Bỏ qua] Encoding sai kích thước: {known.shape}")
+                                    continue
+                                if compare_face(enc, [known]):
+                                    stop_camera()
+                                    show_popup(f"Gương mặt đã tồn tại: {sv['name']}. Vui lòng dùng khuôn mặt khác.")
+                                    reset_camera()
+                                    return
                             except Exception as e:
                                 print("[Lỗi] So sánh khuôn mặt:", e)
 
-                    encodings.append(encoding)
+                    encodings.append(enc)
                     capture_count += 1
                     counter_label.config(text=f"Đã chụp: {capture_count}/5 ảnh")
                     last_capture = time.time()
 
             stop_camera()
-            if not encodings:
-                show_popup("Không thể đăng ký: chưa có ảnh khuôn mặt nào được chụp.")
+
+            if not encodings or any(len(e) != 128 for e in encodings):
+                show_popup("Dữ liệu khuôn mặt không hợp lệ. Vui lòng thử lại.")
                 return
+
             try:
                 insert_sinh_vien(
                     name, mssv, email, address, birthdate, gender, class_sv, password,
-                    json.dumps(encodings)  # ✅ Lưu lại dưới dạng list[list[float]]
+                    json.dumps(encodings)
                 )
                 messagebox.showinfo("Thành công", f"Tài khoản '{name}' đã được tạo thành công!")
                 clear_form()
@@ -205,7 +190,4 @@ def render_student_create(container):
 
         threading.Thread(target=capture_loop).start()
 
-    tk.Button(
-        form_frame, text="Tạo tài khoản",
-        command=register_sinh_vien, **BUTTON_STYLE
-    ).grid(row=10, column=0, columnspan=2, pady=20)
+    tk.Button(form_frame, text="Tạo tài khoản", command=register_sinh_vien, **BUTTON_STYLE).grid(row=10, column=0, columnspan=2, pady=20)
