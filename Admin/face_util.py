@@ -11,7 +11,7 @@ def extract_face_encodings_from_frame(frame):
         return None
     return encodings[0].tolist()
 
-def compare_face(new_encoding, known_encodings_list, tolerance=0.6):
+def compare_face(new_encoding, known_encodings_list, tolerance=0.45):  # ⚠ giảm threshold cho chính xác
     try:
         new_encoding_array = np.array(new_encoding, dtype=np.float64)
         if new_encoding_array.shape != (128,):
@@ -32,11 +32,12 @@ def compare_face(new_encoding, known_encodings_list, tolerance=0.6):
 
             known_array = np.array(known, dtype=np.float64)
             if known_array.shape != (128,):
-                print("[Bỏ qua] Encoding sai kích thước:", known)
+                print("[Bỏ qua] Encoding sai kích thước:", known_array.shape)
                 continue
 
-            match_result = face_recognition.compare_faces([known_array], new_encoding_array, tolerance)
-            if isinstance(match_result, list) and any(match_result):
+            distance = face_recognition.face_distance([known_array], new_encoding_array)[0]
+            print(f"[DEBUG] Face distance: {distance:.4f}")
+            if distance < tolerance:
                 return True
     except Exception as e:
         print(f"[Lỗi] So sánh khuôn mặt: {e}")

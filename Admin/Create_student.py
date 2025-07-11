@@ -154,11 +154,11 @@ def render_student_create(container):
                         print(f"[DEBUG] So sánh với {sv['name']} - số encoding: {len(sv['encodings'])}")
                         for known in sv.get("encodings", []):
                             try:
-                                known = np.array(known)
-                                if known.shape != (128,):
-                                    print(f"[Bỏ qua] Encoding sai kích thước: {known.shape}")
+                                known_array = np.array(known)
+                                if known_array.shape != (128,):
+                                    print(f"[Bỏ qua] Encoding sai kích thước: {known_array.shape}")
                                     continue
-                                if compare_face(enc, [known]):
+                                if compare_face(enc, [known_array]):
                                     stop_camera()
                                     show_popup(f"Gương mặt đã tồn tại: {sv['name']}. Vui lòng dùng khuôn mặt khác.")
                                     reset_camera()
