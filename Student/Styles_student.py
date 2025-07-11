@@ -1,22 +1,29 @@
-# Styles_student.py
-
-# Font cho các nhãn label
-LABEL_FONT = ("Arial", 12)
-
-# Font cho ô nhập
+# ========== Font ==========
+TITLE_FONT = ("Arial", 18, "bold")
+LABEL_FONT = ("Arial", 14, "bold")
 ENTRY_FONT = ("Arial", 12)
 
-# Style cho nút
+# ========== Style cho Button ==========
 BUTTON_STYLE = {
-    "font": ("Arial", 12, "bold"),
-    "bg": "#89CFF0",            # Baby Blue
+    "font": ("Arial", 15, "bold"),
+    "bg": "#388E3C",
     "fg": "white",
     "activebackground": "#87CEEB",  # Sky Blue khi hover
     "cursor": "hand2",
     "bd": 0,
     "padx": 10,
-    "pady": 6,
+    "pady": 4,
 }
 
-# Kích thước cửa sổ nếu cần dùng cho Student_app.py
+# ========== Layout Colors ==========
+PAGE_BG_COLOR = "white"        # Nền cho toàn giao diện chính
+FORM_BG_COLOR = "#336699"      # Nền khung form
+
+# ========== Form Style ==========
+FORM_BORDER_WIDTH = 2
+FORM_BORDER_STYLE = "groove"
+FORM_PADDING_X = 20
+FORM_PADDING_Y = 15
+
+# ========== Kích thước cửa sổ ==========
 APP_SIZE = "960x600"

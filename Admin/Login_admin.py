@@ -1,6 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
-from Admin.Styles_admin import TITLE_FONT, LABEL_FONT, ENTRY_FONT, BUTTON_STYLE, CHECKBOX_STYLE
+from Admin.Styles_admin import (
+    TITLE_FONT, LABEL_FONT, ENTRY_FONT, BUTTON_STYLE, CHECKBOX_STYLE,
+    FORM_BG_COLOR, FORM_BORDER_WIDTH, FORM_BORDER_STYLE,
+    FORM_PADDING_Y, FORM_LABEL_PADX, FORM_ENTRY_PADX,
+    FORM_CHECKBOX_PADX, FORM_BUTTON_PADY
+)
 
 def render_admin_login(container):
     for widget in container.winfo_children():
@@ -9,34 +14,39 @@ def render_admin_login(container):
     content = tk.Frame(container, bg="#003366")
     content.pack(fill=tk.BOTH, expand=True)
 
-    tk.Label(content, text="ĐĂNG NHẬP QUẢN TRỊ VIÊN", font=TITLE_FONT, bg="#003366", fg="white").pack(pady=20)
+    # === Tiêu đề ===
+    tk.Label(content, text="ĐĂNG NHẬP QUẢN TRỊ VIÊN", font=TITLE_FONT, bg="#003366", fg="white").pack(pady=43)
+
+    # === Form login (ô vuông) ===
+    form_frame = tk.Frame(content, bg=FORM_BG_COLOR, bd=FORM_BORDER_WIDTH, relief=FORM_BORDER_STYLE)
+    form_frame.config(width=500, height=350)
+    form_frame.place(relx=0.5, rely=0.4, anchor="center")  # Canh giữa màn hình
 
     # === Họ và tên ===
-    tk.Label(content, text="Họ và tên:", font=LABEL_FONT, bg="#003366", fg="white").pack(anchor='w', padx=215)
-    entry_name = tk.Entry(content, font=ENTRY_FONT, width=28)
-    entry_name.pack(pady=(0, 15))
+    tk.Label(form_frame, text="Họ và tên:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="black")\
+        .pack(anchor='w', padx=FORM_LABEL_PADX, pady=(FORM_PADDING_Y, 5))
+    entry_name = tk.Entry(form_frame, font=ENTRY_FONT, width=30)
+    entry_name.pack(padx=FORM_ENTRY_PADX)
 
     # === Mật khẩu ===
-    tk.Label(content, text="Mật khẩu:", font=LABEL_FONT, bg="#003366", fg="white").pack(anchor='w', padx=215)
-    entry_password = tk.Entry(content, show="*", font=ENTRY_FONT, width=28)
-    entry_password.pack(pady=(0, 10))
+    tk.Label(form_frame, text="Mật khẩu:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="black")\
+        .pack(anchor='w', padx=FORM_LABEL_PADX, pady=(15, 5))
+    entry_password = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=30)
+    entry_password.pack(padx=FORM_ENTRY_PADX)
 
-    # === Hiện mật khẩu (Checkbutton) ===
+    # === Checkbutton hiện mật khẩu ===
     show_password = tk.BooleanVar(value=False)
 
     def toggle_password():
-        if show_password.get():
-            entry_password.config(show="")  # Hiện
-        else:
-            entry_password.config(show="*")  # Ẩn
+        entry_password.config(show="" if show_password.get() else "*")
 
     tk.Checkbutton(
-        content,
+        form_frame,
         text="Hiện mật khẩu",
         variable=show_password,
         command=toggle_password,
         **CHECKBOX_STYLE
-    ).pack(anchor='w', padx=215, pady=(0, 15))
+    ).pack(anchor='w', padx=FORM_CHECKBOX_PADX, pady=(10, 10))
 
     # === Nút đăng nhập ===
     def handle_login():
@@ -48,4 +58,5 @@ def render_admin_login(container):
         else:
             messagebox.showerror("Lỗi", "Sai thông tin đăng nhập.")
 
-    tk.Button(content, text="Đăng nhập", command=handle_login, **BUTTON_STYLE).pack()
+    tk.Button(form_frame, text="Đăng Nhập", command=handle_login, **BUTTON_STYLE)\
+        .pack(pady=(0, FORM_BUTTON_PADY))
