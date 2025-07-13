@@ -11,7 +11,7 @@ def extract_face_encodings_from_frame(frame):
         return None
     return encodings[0].tolist()
 
-def compare_face(new_encoding, known_encodings_list, tolerance=0.45):  # ⚠ giảm threshold cho chính xác
+def compare_face(new_encoding, known_encodings_list, tolerance=0.40):  #giảm threshold cho chính xác
     try:
         new_encoding_array = np.array(new_encoding, dtype=np.float64)
         if new_encoding_array.shape != (128,):

@@ -11,27 +11,27 @@ def render_admin_login(container):
     for widget in container.winfo_children():
         widget.destroy()
 
-    content = tk.Frame(container, bg="#003366")
+    content = tk.Frame(container, bg="white")
     content.pack(fill=tk.BOTH, expand=True)
 
     # === Tiêu đề ===
-    tk.Label(content, text="ĐĂNG NHẬP QUẢN TRỊ VIÊN", font=TITLE_FONT, bg="#003366", fg="white").pack(pady=43)
+    tk.Label(content, text="ĐĂNG NHẬP QUẢN TRỊ VIÊN", font=TITLE_FONT, bg="white", fg="#003366").pack(pady=43)
 
     # === Form login (ô vuông) ===
     form_frame = tk.Frame(content, bg=FORM_BG_COLOR, bd=FORM_BORDER_WIDTH, relief=FORM_BORDER_STYLE)
-    form_frame.config(width=500, height=350)
-    form_frame.place(relx=0.5, rely=0.4, anchor="center")  # Canh giữa màn hình
+    form_frame.config(width=600, height=500)
+    form_frame.place(relx=0.5, rely=0.3, anchor="center")  # Canh giữa màn hình
 
     # === Họ và tên ===
-    tk.Label(form_frame, text="Họ và tên:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="black")\
+    tk.Label(form_frame, text="Họ và tên:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="white")\
         .pack(anchor='w', padx=FORM_LABEL_PADX, pady=(FORM_PADDING_Y, 5))
-    entry_name = tk.Entry(form_frame, font=ENTRY_FONT, width=30)
+    entry_name = tk.Entry(form_frame, font=ENTRY_FONT, width=35)
     entry_name.pack(padx=FORM_ENTRY_PADX)
 
     # === Mật khẩu ===
-    tk.Label(form_frame, text="Mật khẩu:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="black")\
+    tk.Label(form_frame, text="Mật khẩu:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="white")\
         .pack(anchor='w', padx=FORM_LABEL_PADX, pady=(15, 5))
-    entry_password = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=30)
+    entry_password = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=35)
     entry_password.pack(padx=FORM_ENTRY_PADX)
 
     # === Checkbutton hiện mật khẩu ===

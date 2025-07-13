@@ -11,7 +11,6 @@ def render_header(container, on_logout, switch_to_view):
     student_menu.add_separator()
     student_menu.add_command(label="Xem danh sách", command=lambda: switch_to_view("view_students"))
     student_menu.add_separator()
-    student_menu.add_command(label="Xóa tài khoản", command=lambda: switch_to_view("delete_student"))
     student_menu_btn.config(menu=student_menu)
     student_menu_btn.pack(side=tk.LEFT, padx=2)
 
@@ -26,7 +25,6 @@ def render_header(container, on_logout, switch_to_view):
     activity_menu.add_separator()
     activity_menu.add_command(label="Xem danh sách hoạt động", command=lambda: switch_to_view("view_activities"))
     activity_menu.add_separator()
-    activity_menu.add_command(label="Xóa hoạt động", command=lambda: switch_to_view("delete_activity"))
     activity_menu_btn.config(menu=activity_menu)
     activity_menu_btn.pack(side=tk.LEFT, padx=2)
 

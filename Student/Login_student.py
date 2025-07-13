@@ -143,7 +143,7 @@ def face_login(frame_dict, cap, container):
                 if isinstance(known_encoding, str):
                     known_encoding = json.loads(known_encoding)
                 known_np = np.array(known_encoding, dtype=np.float64)
-                match = face_recognition.compare_faces([known_np], unknown_encoding, tolerance=0.5)[0]
+                match = face_recognition.compare_faces([known_np], unknown_encoding, tolerance=0.40)[0]
                 if match:
                     cap.release()
                     render_student_main(container, user)

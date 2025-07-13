@@ -2,6 +2,8 @@ import os
 import json
 import sqlite3
 
+
+
 # ✅ Luôn đảm bảo file .db nằm trong thư mục Database
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_NAME = os.path.join(BASE_DIR, "Diem_danh.db")
@@ -226,5 +228,13 @@ def reset_and_create_sinh_vien_table():
     ''')
     conn.commit()
     conn.close()
+
+def delete_sinh_vien_by_mssv(mssv):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute("DELETE FROM SINH_VIEN WHERE MSSV = ?", (mssv,))
+    conn.commit()
+    conn.close()
+
 
 print("✅ Tạo cơ sở dữ liệu và các bảng thành công.")
