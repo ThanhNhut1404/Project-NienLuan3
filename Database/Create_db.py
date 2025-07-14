@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS SINH_VIEN (
     SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),
     CLASS_SV TEXT,
     PASSWORD_SV TEXT NOT NULL,
+    TONG_DIEM_HD INTEGER DEFAULT 0,
     FACE_ENCODING TEXT,
     CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -64,10 +65,15 @@ CREATE TABLE IF NOT EXISTS HK_NK (
 # HOAT_DONG
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS HOAT_DONG (
-    ID_HD INTEGER PRIMARY KEY,
-    TIME_OUT TEXT,
-    START_TIME TEXT,
-    CATEGORY_HD TEXT
+    ID_HD INTEGER PRIMARY KEY AUTOINCREMENT,
+    TEN_HD TEXT NOT NULL,           -- Tên hoạt động
+    CATEGORY_HD TEXT,               -- Loại hoạt động: Tình nguyện, Hội nhập...
+    CAP_HD TEXT,                    -- Cấp: Chi hội, Liên chi, Trường
+    START_TIME TEXT,                -- Thời gian bắt đầu
+    TIME_OUT TEXT,                  -- Thời gian kết thúc
+    DIEM_CONG INTEGER DEFAULT 0,     -- Số điểm cộng khi tham gia
+    CO_XAC_NHAN TEXT,
+    NGAY_TO_CHUC TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')) -- Ngày tổ chức
 );
 ''')
 
@@ -133,6 +139,7 @@ def create_table_sinh_vien():
             SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),
             CLASS_SV TEXT,
             PASSWORD_SV TEXT NOT NULL,
+            TONG_DIEM_HD INTEGER DEFAULT 0,
             FACE_ENCODING TEXT,
             CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
         );
@@ -163,7 +170,7 @@ def get_all_sinh_vien():
     c.execute('''
         SELECT 
             ID_SV, NAME_SV, MSSV, EMAIL_SV, ADDRESS_SV, DATE_SV, SEX_SV,
-            CLASS_SV, PASSWORD_SV, FACE_ENCODING, CREATED_AT
+            CLASS_SV, PASSWORD_SV, TONG_DIEM_HD, FACE_ENCODING, CREATED_AT
         FROM SINH_VIEN
     ''')
     rows = c.fetchall()
@@ -172,7 +179,7 @@ def get_all_sinh_vien():
     result = []
     for row in rows:
         try:
-            encodings = json.loads(row[9]) if row[9] else []
+            encodings = json.loads(row[10]) if row[10] else []  # ✅ Đã sửa index đúng
         except:
             encodings = []
 
@@ -186,11 +193,13 @@ def get_all_sinh_vien():
             'sex': row[6],
             'class': row[7],
             'password': row[8],
+            'TONG_DIEM_HD': row[9],
             'encodings': encodings,
-            'created_at': row[10]
+            'created_at': row[11],
         })
 
     return result
+
 
 def sinh_vien_exists(name_sv):
     conn = sqlite3.connect(DB_NAME)
@@ -222,8 +231,10 @@ def reset_and_create_sinh_vien_table():
             SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),
             CLASS_SV TEXT,
             PASSWORD_SV TEXT NOT NULL,
+            TONG_DIEM_HD INTEGER DEFAULT 0,
             FACE_ENCODING TEXT,
             CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
+
         );
     ''')
     conn.commit()
