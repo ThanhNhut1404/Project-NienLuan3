@@ -23,22 +23,23 @@ def render_student_edit(container, student_data):
         entry.grid(row=row, column=1, padx=10, pady=8)
         return entry
 
-    name_entry = create_row("Họ tên:", student_data['name'], 0)
-    mssv_entry = create_row("MSSV:", student_data['mssv'], 1)
-    email_entry = create_row("Email:", student_data['email'], 2)
-    address_entry = create_row("Địa chỉ:", student_data['address'], 3)
-    birth_entry = create_row("Ngày sinh (YYYY-MM-DD):", student_data['date'], 4)
+    name_entry = create_row("Họ và tên:", student_data['name'], 0)
+    class_entry = create_row("Lớp:", student_data['class'], 1)
+    mssv_entry = create_row("MSSV:", student_data['mssv'], 2)
 
     # Giới tính
-    tk.Label(form_frame, text="Giới tính:", font=LABEL_FONT, bg="white").grid(row=5, column=0, sticky="e", padx=10, pady=8)
+    tk.Label(form_frame, text="Giới tính:", font=LABEL_FONT, bg="white").grid(row=3, column=0, sticky="e", padx=10, pady=8)
     gender_var = tk.IntVar(value=1 if str(student_data['sex']) == "1" else 0)
     gender_frame = tk.Frame(form_frame, bg="white")
-    gender_frame.grid(row=5, column=1, sticky="w")
+    gender_frame.grid(row=3, column=1, sticky="w")
     tk.Radiobutton(gender_frame, text="Nam", variable=gender_var, value=1, bg="white", font=ENTRY_FONT).pack(side="left")
     tk.Radiobutton(gender_frame, text="Nữ", variable=gender_var, value=0, bg="white", font=ENTRY_FONT).pack(side="left")
 
-    class_entry = create_row("Lớp:", student_data['class'], 6)
-    password_entry = create_row("Mật khẩu:", student_data['password'], 7)
+    birth_entry = create_row("Ngày sinh:", student_data['date'], 4)
+    address_entry = create_row("Địa chỉ:", student_data['address'], 5)
+    email_entry = create_row("Email:", student_data['email'], 6)
+    phone_entry = create_row("Số điện thoại:", student_data.get('phone', ""), 7)
+    password_entry = create_row("Mật khẩu:", student_data['password'], 8)
 
     def save_changes():
         name = name_entry.get().strip()
@@ -49,19 +50,20 @@ def render_student_edit(container, student_data):
         sex = gender_var.get()
         class_sv = class_entry.get().strip()
         password = password_entry.get().strip()
+        phone = phone_entry.get().strip()
 
-        if not all([name, mssv, email, class_sv, password, birth]):
-            messagebox.showwarning("Thiếu thông tin", "Vui lòng điền đầy đủ thông tin bắt buộc.")
+        if not all([name, mssv, email, class_sv, password, birth, phone]):
+            messagebox.showwarning("Thiếu thông tin", "Vui lòng điền đầy đủ thông tin.")
             return
 
         try:
-            datetime.datetime.strptime(birth, "%Y-%m-%d")
+            datetime.datetime.strptime(birth, "%d-%m-%Y")
         except:
-            messagebox.showerror("Lỗi", "Ngày sinh không hợp lệ. Định dạng: YYYY-MM-DD")
+            messagebox.showerror("Lỗi", "Ngày sinh không hợp lệ. Định dạng đúng: dd-mm-yyyy")
             return
 
         try:
-            update_sinh_vien(student_data['id'], name, mssv, email, address, birth, sex, class_sv, password)
+            update_sinh_vien(student_data['id'], name, mssv, email, address, birth, sex, class_sv, password, phone)
             messagebox.showinfo("Thành công", "Đã cập nhật thông tin sinh viên.")
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
@@ -71,4 +73,4 @@ def render_student_edit(container, student_data):
         render_student_list(container)
 
     tk.Button(container, text="💾 Lưu thay đổi", command=save_changes, **BUTTON_STYLE).pack(pady=20)
-    tk.Button(container, text="⬅️ Quay lại danh sách", command=back_to_list, **BUTTON_STYLE).pack(pady=(0, 20))
+    tk.Button(container, text="⬅️ Quay lại", command=back_to_list, **BUTTON_STYLE).pack(pady=(0, 20))

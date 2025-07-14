@@ -4,6 +4,8 @@ import json
 import cv2
 import face_recognition
 import numpy as np
+import hashlib
+
 from PIL import Image, ImageTk
 
 from Database.Create_db import get_all_sinh_vien
@@ -83,11 +85,13 @@ def open_student_login(container):
 
     def login_by_account():
         mssv = mssv_entry.get().strip()
-        password = password_entry.get().strip()
+        raw_password = password_entry.get().strip()
 
-        if not mssv or not password:
+        if not mssv or not raw_password:
             messagebox.showerror("Lỗi", "Vui lòng nhập đầy đủ MSSV và mật khẩu.")
             return
+
+        password = hashlib.sha256(raw_password.encode()).hexdigest()
 
         all_users = get_all_sinh_vien()
         for user in all_users:

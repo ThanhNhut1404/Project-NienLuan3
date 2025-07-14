@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS SINH_VIEN (
     DATE_SV DATE,
     SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),
     CLASS_SV TEXT,
+    PHONE_SV TEXT, 
     PASSWORD_SV TEXT NOT NULL,
     TONG_DIEM_HD INTEGER DEFAULT 0,
     FACE_ENCODING TEXT,
@@ -151,7 +152,7 @@ def create_table_sinh_vien():
     conn.commit()
     conn.close()
 
-def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json):
+def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json, phone):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     try:
@@ -159,14 +160,15 @@ def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, pa
             INSERT INTO SINH_VIEN (
                 NAME_SV, MSSV, EMAIL_SV, ADDRESS_SV,
                 DATE_SV, SEX_SV, CLASS_SV,
-                PASSWORD_SV, FACE_ENCODING
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json))
+                PASSWORD_SV, FACE_ENCODING, PHONE_SV
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json, phone))
         conn.commit()
     except sqlite3.IntegrityError as e:
         raise Exception(f"Trùng MSSV hoặc Email: {e}")
     finally:
         conn.close()
+
 
 def get_all_sinh_vien():
     conn = sqlite3.connect(DB_NAME)
@@ -174,7 +176,7 @@ def get_all_sinh_vien():
     c.execute('''
         SELECT 
             ID_SV, NAME_SV, MSSV, EMAIL_SV, ADDRESS_SV, DATE_SV, SEX_SV,
-            CLASS_SV, PASSWORD_SV, TONG_DIEM_HD, FACE_ENCODING, CREATED_AT
+            CLASS_SV, PASSWORD_SV, TONG_DIEM_HD, FACE_ENCODING, CREATED_AT, PHONE_SV
         FROM SINH_VIEN
     ''')
     rows = c.fetchall()
@@ -200,6 +202,7 @@ def get_all_sinh_vien():
             'TONG_DIEM_HD': row[9],
             'encodings': encodings,
             'created_at': row[11],
+            'phone': row[12]
         })
 
     return result
@@ -251,16 +254,18 @@ def delete_sinh_vien_by_mssv(mssv):
     conn.commit()
     conn.close()
 
-def update_sinh_vien(mssv, name, email, address, birthdate, gender, class_sv):
+def update_sinh_vien(id_sv, name, mssv, email, address, birthdate, gender, class_sv, password, phone):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     c.execute('''
         UPDATE SINH_VIEN
-        SET NAME_SV = ?, EMAIL_SV = ?, ADDRESS_SV = ?, DATE_SV = ?, SEX_SV = ?, CLASS_SV = ?
-        WHERE MSSV = ?
-    ''', (name, email, address, birthdate, gender, class_sv, mssv))
+        SET NAME_SV = ?, MSSV = ?, EMAIL_SV = ?, ADDRESS_SV = ?, DATE_SV = ?, SEX_SV = ?, CLASS_SV = ?, PASSWORD_SV = ?, PHONE_SV = ?
+        WHERE ID_SV = ?
+    ''', (name, mssv, email, address, birthdate, gender, class_sv, password, phone, id_sv))
     conn.commit()
     conn.close()
+
+
 
 
 

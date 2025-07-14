@@ -87,11 +87,11 @@ def render_student_create(container, switch_to_view):
 
     # Giới tính
     make_label("Giới tính:", 3)
-    gender_var = tk.IntVar(value=0)
+    gender_var = tk.IntVar(value=1)
     gender_frame = tk.Frame(form_frame, bg=FORM_BG_COLOR)
     gender_frame.grid(row=3, column=1, padx=FORM_ENTRY_PADX, pady=5, sticky="w")
 
-    for text, val in [("Nam", 0), ("Nữ", 1)]:
+    for text, val in [("Nam", 1), ("Nữ", 0)]:
         tk.Radiobutton(
             gender_frame, text=text, variable=gender_var, value=val,
             bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT, selectcolor=FORM_BG_COLOR,
@@ -309,7 +309,7 @@ def render_student_create(container, switch_to_view):
             try:
                 insert_sinh_vien(
                     name, mssv, email, address, birthdate, gender, class_sv, password,
-                    json.dumps(encodings)
+                    json.dumps(encodings), phone
                 )
                 stop_camera()
                 messagebox.showinfo("Thành công", f"Tài khoản '{name}' đã được tạo thành công!")
@@ -337,6 +337,7 @@ def render_student_create(container, switch_to_view):
 
     #Khởi động camera sau khi layout xong
     container.after(500, reset_camera)
+    return stop_camera  # Trả về hàm stop_camera để gọi từ bên ngoài nếu cần
 
 
 

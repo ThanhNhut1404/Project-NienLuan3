@@ -9,14 +9,25 @@ def render_admin_main(container):
     for widget in container.winfo_children():
         widget.destroy()
 
+    # === Biến lưu hàm dọn dẹp của view hiện tại (nếu có) ===
+    current_cleanup = {"func": None}
+
     # === Hàm chuyển view ===
     def switch_to_view(view_name):
+        # Gọi hàm dọn dẹp hiện tại nếu có (ví dụ: tắt camera)
+        if current_cleanup["func"]:
+            try:
+                current_cleanup["func"]()
+            except Exception as e:
+                print("[Lỗi dọn dẹp view]:", e)
+            current_cleanup["func"] = None
+
         for widget in main_content.winfo_children():
             widget.destroy()
 
         if view_name == "create_student":
             from Admin.Create_student import render_student_create
-            render_student_create(main_content, switch_to_view)
+            current_cleanup["func"] = render_student_create(main_content, switch_to_view)
         elif view_name == "view_students":
             from Admin.List_student import render_student_list
             render_student_list(main_content)
