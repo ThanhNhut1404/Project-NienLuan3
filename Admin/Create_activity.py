@@ -35,25 +35,23 @@ def render_Create_activity(container):
         diem_xn = 4 if xn == "Có" else 0
 
         tong = diem_cap + diem_loai + diem_xn
-        diem_label.config(text=f"➡ Tổng điểm cộng: {tong}")
+        diem_label.config(text=f"➞ Tổng điểm cộng: {tong}")
         return tong
 
     def clear_form():
         entry_ten.delete(0, tk.END)
         combo_loai.set("")
         combo_cap.set("")
-        entry_start.delete(0, tk.END)
-        entry_end.delete(0, tk.END)
         xn_var.set("Không")
-        diem_label.config(text="➡ Tổng điểm cộng: 0")
+        diem_label.config(text="➞ Tổng điểm cộng: 0")
 
     def tao_hoat_dong():
         ten_hd = entry_ten.get().strip()
         loai_hd = combo_loai.get().strip()
         cap_hd = combo_cap.get().strip()
         ngay_to_chuc = calendar_ngay.get_date().strftime("%d/%m/%Y")
-        gio_bat_dau = entry_start.get().strip()
-        gio_ket_thuc = entry_end.get().strip()
+        gio_bd = f"{spin_start_hour.get()}:{spin_start_min.get()}:00"
+        gio_kt = f"{spin_end_hour.get()}:{spin_end_min.get()}:00"
         co_xn = xn_var.get()
         diem_cong = tinh_diem()
 
@@ -67,7 +65,7 @@ def render_Create_activity(container):
             cursor.execute('''
                 INSERT INTO HOAT_DONG (TEN_HD, CATEGORY_HD, CAP_HD, START_TIME, TIME_OUT, NGAY_TO_CHUC, DIEM_CONG, CO_XAC_NHAN)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (ten_hd, loai_hd, cap_hd, gio_bat_dau, gio_ket_thuc, ngay_to_chuc, diem_cong, co_xn))
+            ''', (ten_hd, loai_hd, cap_hd, gio_bd, gio_kt, ngay_to_chuc, diem_cong, co_xn))
             conn.commit()
 
             id_hd = cursor.lastrowid
@@ -75,7 +73,7 @@ def render_Create_activity(container):
 
             conn.close()
 
-            clear_form()  # Gọi trước khi chuyển giao diện
+            clear_form()
             from Admin.View_qr_imge import show_qr_image
             show_qr_image(container, qr_path)
 
@@ -119,16 +117,20 @@ def render_Create_activity(container):
 
     # Giờ bắt đầu
     tk.Label(form, text="Giờ bắt đầu (HH:mm):", font=("Arial", 10), width=18, anchor="e").grid(row=5, column=0, pady=6)
-    entry_start = tk.Entry(form, font=("Arial", 10), width=35)
-    entry_start.grid(row=5, column=1, pady=6)
+    spin_start_hour = tk.Spinbox(form, from_=0, to=23, width=5, format="%02.0f")
+    spin_start_min = tk.Spinbox(form, from_=0, to=59, width=5, format="%02.0f")
+    spin_start_hour.grid(row=5, column=1, sticky="w", padx=(0, 50))
+    spin_start_min.grid(row=5, column=1, sticky="e")
 
     # Giờ kết thúc
     tk.Label(form, text="Giờ kết thúc (HH:mm):", font=("Arial", 10), width=18, anchor="e").grid(row=6, column=0, pady=6)
-    entry_end = tk.Entry(form, font=("Arial", 10), width=35)
-    entry_end.grid(row=6, column=1, pady=6)
+    spin_end_hour = tk.Spinbox(form, from_=0, to=23, width=5, format="%02.0f")
+    spin_end_min = tk.Spinbox(form, from_=0, to=59, width=5, format="%02.0f")
+    spin_end_hour.grid(row=6, column=1, sticky="w", padx=(0, 50))
+    spin_end_min.grid(row=6, column=1, sticky="e")
 
     # Tổng điểm cộng
-    diem_label = tk.Label(container, text="➡ Tổng điểm cộng: 0", font=("Arial", 11, "bold"), fg="green", bg="white")
+    diem_label = tk.Label(container, text="➞ Tổng điểm cộng: 0", font=("Arial", 11, "bold"), fg="green", bg="white")
     diem_label.pack(pady=5)
 
     # Nút tạo hoạt động

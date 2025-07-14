@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 
 from Database.Create_db import get_all_sinh_vien
 from Student.Styles_student import LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
+from Student.Activity_roll_call import open_activity_roll_call
 
 def render_student_main(container, user):
     for widget in container.winfo_children():
@@ -34,6 +35,13 @@ def render_student_main(container, user):
     # Nút chức năng cơ bản
     btn_frame = tk.Frame(content_frame, bg="#f0f0f0")
     btn_frame.pack(pady=10)
+    btn_attendance = tk.Button(
+        btn_frame,
+        text="Điểm danh hoạt động",
+        command=lambda: open_activity_roll_call(container, user),
+        **BUTTON_STYLE
+    )
+    btn_attendance.grid(row=4, column=0, columnspan=2, pady=5)
 
     btn_view_profile = tk.Button(
         btn_frame,
