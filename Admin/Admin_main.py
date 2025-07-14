@@ -16,7 +16,7 @@ def render_admin_main(container):
 
         if view_name == "create_student":
             from Admin.Create_student import render_student_create
-            render_student_create(main_content)
+            render_student_create(main_content, switch_to_view)
         elif view_name == "view_students":
             from Admin.List_student import render_student_list
             render_student_list(main_content)
@@ -30,7 +30,7 @@ def render_admin_main(container):
     # === Tiêu đề hệ thống luôn nằm trên cùng ===
     title_label = tk.Label(
         container,
-        text="🎓 HỆ THÔNG ĐIỂM DANH SINH VIÊN - ADMIN",
+        text="🎓 HỆ THỐNG ĐIỂM DANH SINH VIÊN - ADMIN",
         font=TITLE_FONT,
         fg="#2E4053",
         bg="white",

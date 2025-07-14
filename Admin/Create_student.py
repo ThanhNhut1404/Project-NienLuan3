@@ -13,11 +13,13 @@ from Admin.Styles_admin import *
 from Database.Create_db import insert_sinh_vien, create_table_sinh_vien, get_all_sinh_vien
 from Admin.face_util import compare_face, extract_face_encodings_from_frame
 from tkcalendar import DateEntry
+from Admin.List_student import render_student_list
+
 
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def render_student_create(container):
+def render_student_create(container, switch_to_view):
     for widget in container.winfo_children():
         widget.destroy()
 
@@ -319,8 +321,22 @@ def render_student_create(container):
 
         threading.Thread(target=capture_loop).start()
 
-    tk.Button(form_frame, text="Tạo tài khoản", command=register_sinh_vien, **BUTTON_STYLE).grid(row=10, column=0, columnspan=2, pady=20)
-    container.after(500, reset_camera) #Gọi reset_camera sau 0.5s khi giao diện đã xong
+    # Nút "Tạo tài khoản"
+    tk.Button(form_frame, text="Tạo tài khoản", command=register_sinh_vien, **BUTTON_STYLE).grid(
+        row=10, column=0, columnspan=2, pady=20
+    )
+
+    #Nút quay lại — đặt NGAY SAU counter_label, bên dưới camera
+    back_button = tk.Button(
+        camera_wrapper,
+        text="← Quay lại",
+        command=lambda: switch_to_view("dashboard"),
+        **BUTTON_STYLE
+    )
+    back_button.pack(anchor="w", padx=5, pady=(15, 0))
+
+    #Khởi động camera sau khi layout xong
+    container.after(500, reset_camera)
 
 
 

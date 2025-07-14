@@ -236,5 +236,17 @@ def delete_sinh_vien_by_mssv(mssv):
     conn.commit()
     conn.close()
 
+def update_sinh_vien(mssv, name, email, address, birthdate, gender, class_sv):
+    conn = sqlite3.connect(DB_NAME)
+    c = conn.cursor()
+    c.execute('''
+        UPDATE SINH_VIEN
+        SET NAME_SV = ?, EMAIL_SV = ?, ADDRESS_SV = ?, DATE_SV = ?, SEX_SV = ?, CLASS_SV = ?
+        WHERE MSSV = ?
+    ''', (name, email, address, birthdate, gender, class_sv, mssv))
+    conn.commit()
+    conn.close()
+
+
 
 print("✅ Tạo cơ sở dữ liệu và các bảng thành công.")

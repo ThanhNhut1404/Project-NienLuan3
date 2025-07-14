@@ -2,9 +2,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from Admin.Styles_admin import LIST_TITLE_FONT, TREEVIEW_STYLE
+from Admin.Edit_student import render_student_edit
 from Database.Create_db import get_all_sinh_vien, delete_sinh_vien_by_mssv  # Đảm bảo hàm này trả về list[dict]
 
-def on_tree_click(event, tree):
+def on_tree_click(event, tree, container):
     region = tree.identify("region", event.x, event.y)
     if region != "cell":
         return
@@ -12,24 +13,62 @@ def on_tree_click(event, tree):
     row_id = tree.identify_row(event.y)
     column = tree.identify_column(event.x)
 
-    if column == "#5":  # Cột thứ 5 = "actions"
-        item = tree.item(row_id)
-        values = item["values"]
-        if not values:
-            return
-        mssv = values[3]  # MSSV ở cột thứ 4
-        name = values[1]
+    if not row_id or column != "#5":
+        return
 
+    item = tree.item(row_id)
+    values = item["values"]
+    if not values:
+        return
+
+    mssv = str(values[3]) .strip()  # MSSV ở cột thứ 4
+    name = values[1]
+
+    bbox = tree.bbox(row_id, column)
+    if not bbox:
+        return
+
+    click_offset = event.x - bbox[0]
+
+    # Dự đoán chiều rộng từng phần bằng pixel tương đối
+    sửa_text = "🛠 Sửa"
+    xóa_text = "❌ Xóa"
+
+    font = ("Arial", 11)  # hoặc dùng font bạn set trong TREEVIEW_STYLE["font"]
+    temp = tk.Label(tree, text=sửa_text, font=font)
+    temp.update_idletasks()
+    sửa_width = temp.winfo_reqwidth()
+
+    temp.config(text=" | ")
+    temp.update_idletasks()
+    separator_width = temp.winfo_reqwidth()
+
+    temp.config(text=xóa_text)
+    temp.update_idletasks()
+    xóa_width = temp.winfo_reqwidth()
+
+    del temp  # cleanup
+
+    # Phân vùng click
+    if click_offset <= sửa_width:
+        # ====== BẤM SỬA ======
+        students = get_all_sinh_vien()
+        selected_sv = next((sv for sv in students if sv["mssv"] == mssv), None)
+        if selected_sv:
+            render_student_edit(container, selected_sv)
+        else:
+            messagebox.showerror("Lỗi", "Không tìm thấy dữ liệu sinh viên.")
+    elif click_offset >= sửa_width + separator_width:
+        # ====== BẤM XÓA ======
         confirm = messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa sinh viên: {name} ({mssv})?")
         if confirm:
             delete_sinh_vien_by_mssv(mssv)
             tree.delete(row_id)
-            # Cập nhật lại STT cho các dòng còn lại
+            # Cập nhật lại STT
             for idx, item_id in enumerate(tree.get_children(), start=1):
                 item_vals = list(tree.item(item_id)["values"])
                 item_vals[0] = idx
                 tree.item(item_id, values=item_vals)
-
             messagebox.showinfo("Thành công", f"Đã xóa sinh viên '{name}' khỏi hệ thống.")
 
 def render_student_list(container):
@@ -87,13 +126,14 @@ def render_student_list(container):
     tree.pack(fill=tk.BOTH, expand=True)
 
     # Kết hợp cả: ngăn kéo cột + xử lý click nút "Xóa"
-    def handle_click(event):
+    def handle_click(event, container):
         region = tree.identify_region(event.x, event.y)
         if region == "separator":
-            return "break"  # Ngăn chỉnh độ rộng cột
-        on_tree_click(event, tree)  # Nếu không phải separator thì xử lý click bình thường
+            return "break"
+        on_tree_click(event, tree, container)
 
-    tree.bind("<Button-1>", handle_click)
+    tree.bind("<Button-1>", lambda e: handle_click(e, container))
+
 
     tree.heading("stt", text="STT")
     tree.heading("name", text="Họ và Tên")
