@@ -75,7 +75,9 @@ CREATE TABLE IF NOT EXISTS HOAT_DONG (
     TIME_OUT TEXT,                  -- Thời gian kết thúc
     DIEM_CONG INTEGER DEFAULT 0,     -- Số điểm cộng khi tham gia
     CO_XAC_NHAN TEXT,
-    NGAY_TO_CHUC TEXT  -- Ngày tổ chức
+    NGAY_TO_CHUC TEXT,  -- Ngày tổ chức
+    ID_HK INTEGER,
+    FOREIGN KEY (ID_HK) REFERENCES HK_NK(ID_HK)
 );
 ''')
 

@@ -34,6 +34,9 @@ def render_admin_main(container):
         elif view_name == "create_activity":
             from Admin.Create_activity import render_Create_activity
             render_Create_activity(main_content)
+        elif view_name == "create_hk":
+            from Admin.Create_HK import render_create_hoc_ky
+            render_create_hoc_ky(main_content)
         elif view_name == "view_activities":
             tk.Label(main_content, text="📅 Danh sách hoạt động", font=TITLE_FONT, bg="white").pack(pady=40)
         else:

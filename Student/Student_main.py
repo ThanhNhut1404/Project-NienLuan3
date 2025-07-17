@@ -9,6 +9,8 @@ from PIL import Image, ImageTk
 from Database.Create_db import get_all_sinh_vien
 from Student.Styles_student import LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
 from Student.Activity_roll_call import open_activity_roll_call
+from Student.View_activity import open_view_activity
+
 
 def render_student_main(container, user):
     for widget in container.winfo_children():
@@ -38,11 +40,17 @@ def render_student_main(container, user):
     btn_attendance = tk.Button(
         btn_frame,
         text="Điểm danh hoạt động",
-        command=lambda: open_activity_roll_call(container, user),
+        command=lambda: open_activity_roll_call(user),
+        **BUTTON_STYLE
+    )
+    btn_attendance.grid(row=3, column=0, columnspan=2, pady=5)
+    btn_attendance = tk.Button(
+        btn_frame,
+        text="📅 Xem hoạt động đã tham gia",
+        command=lambda: open_view_activity(container, user),
         **BUTTON_STYLE
     )
     btn_attendance.grid(row=4, column=0, columnspan=2, pady=5)
-
     btn_view_profile = tk.Button(
         btn_frame,
         text="Xem thông tin",
@@ -62,13 +70,11 @@ def render_student_main(container, user):
     btn_logout = tk.Button(
         btn_frame,
         text="Đăng xuất",
-        command=lambda: import_and_back_to_login(container),
+        command=lambda: (messagebox.showinfo("Đăng xuất", "Bạn đã đăng xuất."), container.master.destroy()),
         **BUTTON_STYLE
     )
     btn_logout.grid(row=1, column=0, columnspan=2, pady=15)
 
-
-def import_and_back_to_login(container):
-    from Student.Login_student import open_student_login
-    open_student_login(container)
-
+    # Footer
+    footer = tk.Label(container, text="© 2025 Hệ thống quản lý sinh viên", font=("Arial", 10), bg="#e0e0e0")
+    footer.pack(side="bottom", fill="x")

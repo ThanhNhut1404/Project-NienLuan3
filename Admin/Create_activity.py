@@ -25,6 +25,13 @@ def render_Create_activity(container):
     for widget in container.winfo_children():
         widget.destroy()
 
+    # ================== KẾT NỐI DB VÀ LẤY HỌC KỲ ===================
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute("SELECT ID_HK, NAME_HK, SCHOOL_YEAR FROM HK_NK")
+    hk_data = cursor.fetchall()
+    hk_list = [f"{row[0]} - {row[1]} ({row[2]})" for row in hk_data]
+
     def tinh_diem():
         cap = combo_cap.get()
         loai = combo_loai.get()
@@ -42,6 +49,7 @@ def render_Create_activity(container):
         entry_ten.delete(0, tk.END)
         combo_loai.set("")
         combo_cap.set("")
+        combo_hk.set("")
         xn_var.set("Không")
         diem_label.config(text="➞ Tổng điểm cộng: 0")
 
@@ -53,25 +61,27 @@ def render_Create_activity(container):
         gio_bd = f"{spin_start_hour.get()}:{spin_start_min.get()}:00"
         gio_kt = f"{spin_end_hour.get()}:{spin_end_min.get()}:00"
         co_xn = xn_var.get()
-        diem_cong = tinh_diem()
+        hk_str = combo_hk.get().strip()
 
         if not ten_hd:
             messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập tên hoạt động.")
             return
+        if not hk_str:
+            messagebox.showwarning("Thiếu học kỳ", "Vui lòng chọn học kỳ – năm học.")
+            return
+
+        diem_cong = tinh_diem()
+        id_hk = int(hk_str.split(" - ")[0])
 
         try:
-            conn = sqlite3.connect(DB_NAME)
-            cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO HOAT_DONG (TEN_HD, CATEGORY_HD, CAP_HD, START_TIME, TIME_OUT, NGAY_TO_CHUC, DIEM_CONG, CO_XAC_NHAN)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (ten_hd, loai_hd, cap_hd, gio_bd, gio_kt, ngay_to_chuc, diem_cong, co_xn))
+                INSERT INTO HOAT_DONG (TEN_HD, CATEGORY_HD, CAP_HD, START_TIME, TIME_OUT, NGAY_TO_CHUC, DIEM_CONG, CO_XAC_NHAN, ID_HK)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (ten_hd, loai_hd, cap_hd, gio_bd, gio_kt, ngay_to_chuc, diem_cong, co_xn, id_hk))
             conn.commit()
 
             id_hd = cursor.lastrowid
             qr_path = tao_qr_hoat_dong(id_hd, ten_hd)
-
-            conn.close()
 
             clear_form()
             from Admin.View_qr_imge import show_qr_image
@@ -80,7 +90,7 @@ def render_Create_activity(container):
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
 
-    # === Giao diện ===
+    # ========== GIAO DIỆN ==========
     tk.Label(container, text="📌 TẠO HOẠT ĐỘNG", font=("Arial", 16, "bold"), fg="#003366").pack(pady=10)
     form = tk.Frame(container, bg="#f9f9f9", padx=20, pady=20)
     form.pack()
@@ -128,6 +138,11 @@ def render_Create_activity(container):
     spin_end_min = tk.Spinbox(form, from_=0, to=59, width=5, format="%02.0f")
     spin_end_hour.grid(row=6, column=1, sticky="w", padx=(0, 50))
     spin_end_min.grid(row=6, column=1, sticky="e")
+
+    # Học kỳ - năm học
+    tk.Label(form, text="Học kỳ - Năm học:", font=("Arial", 10), width=18, anchor="e").grid(row=7, column=0, pady=6)
+    combo_hk = ttk.Combobox(form, font=("Arial", 10), width=33, state="readonly", values=hk_list)
+    combo_hk.grid(row=7, column=1, pady=6)
 
     # Tổng điểm cộng
     diem_label = tk.Label(container, text="➞ Tổng điểm cộng: 0", font=("Arial", 11, "bold"), fg="green", bg="white")
