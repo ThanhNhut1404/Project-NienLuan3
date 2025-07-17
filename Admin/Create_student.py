@@ -94,7 +94,7 @@ def render_student_create(container, switch_to_view):
     for text, val in [("Nam", 1), ("Nữ", 0)]:
         tk.Radiobutton(
             gender_frame, text=text, variable=gender_var, value=val,
-            bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT, selectcolor=FORM_BG_COLOR,
+            bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT, selectcolor="black",
             activebackground=FORM_BG_COLOR, activeforeground="white"
         ).pack(side="left", padx=(0, 10))
 
@@ -184,7 +184,7 @@ def render_student_create(container, switch_to_view):
         popup.geometry("300x120")
         popup.resizable(False, False)
         tk.Label(popup, text=msg, wraplength=280, justify="center", fg="red").pack(pady=15)
-        tk.Button(popup, text="OK", command=popup.destroy, bg="#f44336", fg="white", width=10).pack(pady=5)
+        tk.Button(popup, text="OK", command=popup.destroy, **POPUP_OK_BUTTON_STYLE).pack(pady=5)
         popup.grab_set()
 
     def register_sinh_vien():
@@ -206,11 +206,21 @@ def render_student_create(container, switch_to_view):
             return
 
         mssv = mssv_entry.get().strip()
-        #Email
         email = email_entry.get().strip()
+
+        # Kiểm tra định dạng email
         if not re.match(r'^[\w\.-]+@gmail\.com$', email):
             messagebox.showwarning("Lỗi định dạng Email", "Email phải có định dạng hợp lệ và kết thúc bằng @gmail.com")
             return
+
+        # Kiểm tra MSSV và Email trùng
+        for sv in get_all_sinh_vien():
+            if sv["mssv"] == mssv:
+                messagebox.showerror("Trùng MSSV", f"MSSV '{mssv}' đã tồn tại. Vui lòng dùng MSSV khác.")
+                return
+            if sv["email"] == email:
+                messagebox.showerror("Trùng Email", f"Email '{email}' đã được dùng. Vui lòng chọn email khác.")
+                return
 
         birthdate = birth_entry.get().strip()
         #Giới tính
@@ -322,22 +332,22 @@ def render_student_create(container, switch_to_view):
         threading.Thread(target=capture_loop).start()
 
     # Nút "Tạo tài khoản"
-    tk.Button(form_frame, text="Tạo tài khoản", command=register_sinh_vien, **BUTTON_STYLE).grid(
-        row=10, column=0, columnspan=2, pady=20
-    )
+    tk.Button(
+        form_frame,
+        text="Tạo tài khoản",
+        command=register_sinh_vien,
+        **CREATE_BUTTON_STYLE
+    ).grid(row=10, column=0, columnspan=2, pady=20)
 
     #Nút quay lại — đặt NGAY SAU counter_label, bên dưới camera
     back_button = tk.Button(
         camera_wrapper,
         text="← Quay lại",
         command=lambda: switch_to_view("dashboard"),
-        **BUTTON_STYLE
+        **BACK_BUTTON_STYLE
     )
     back_button.pack(anchor="w", padx=5, pady=(15, 0))
 
     #Khởi động camera sau khi layout xong
     container.after(500, reset_camera)
     return stop_camera  # Trả về hàm stop_camera để gọi từ bên ngoài nếu cần
-
-
-

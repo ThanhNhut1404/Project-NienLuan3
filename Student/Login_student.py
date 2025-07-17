@@ -5,7 +5,6 @@ import cv2
 import face_recognition
 import numpy as np
 import hashlib
-
 from PIL import Image, ImageTk
 
 from Database.Create_db import get_all_sinh_vien
@@ -21,20 +20,39 @@ def open_student_login(container):
     cap = cv2.VideoCapture(0)
     current_frame = {'image': None}
 
-    # ========== FRAME TRÁI: CAMERA + NÚT ĐĂNG NHẬP KHUÔN MẶT ========== #
-    left_frame = tk.Frame(container, bg="white", bd=2, relief="ridge")
-    left_frame.place(relx=0.02, rely=0.05, relwidth=0.46, relheight=0.9)
+    # ====== TIÊU ĐỀ CHÍNH TRÊN CÙNG ====== #
+    title_label = tk.Label(
+        container,
+        text="CỔNG ĐĂNG NHẬP SINH VIÊN",
+        font=("Helvetica", 22, "bold"),
+        bg="white",
+        fg="#002244"
+    )
+    title_label.place(relx=0.5, rely=0.01, anchor="n")  # Canh giữa theo chiều ngang
+
+    # ====== FRAME CAMERA (có viền) ====== #
+    camera_frame = tk.Frame(container, bg="white", bd=2, relief="groove")
+    camera_frame.place(relx=0.05, rely=0.1, relwidth=0.42, relheight=0.80)
 
     tk.Label(
-        left_frame,
-        text="QUÉT KHUÔN MẶT",
+        camera_frame,
+        text="ĐĂNG NHẬP BẰNG KHUÔN MẶT",
         font=("Arial", 16, "bold"),
+        bg="white", fg="#003366"
+    ).pack(pady=(10, 5))
+    note_label = tk.Label(
+        camera_frame,
+        text="Nếu không muốn đăng nhập bằng tài khoản,\n bạn có thể dùng khuôn mặt để đăng nhập.",
+        font=("Arial", 10, "italic"),
+        fg="red",
         bg="white",
-        fg="#003366"
-    ).pack(pady=(15, 10))
+        justify="center"
+    )
+    note_label.pack(pady=(0, 10))
 
-    cam_label = tk.Label(left_frame, bg="white", relief="sunken", bd=1)
-    cam_label.pack(padx=10, pady=10, fill="both", expand=True)
+    cam_label = tk.Label(camera_frame, bg="white")
+    cam_label.pack(pady=10, padx=10, expand=True)
+
 
     def update_camera():
         ret, frame = cap.read()
@@ -51,35 +69,32 @@ def open_student_login(container):
 
     update_camera()
 
-    # --- NÚT ĐĂNG NHẬP BẰNG KHUÔN MẶT --- #
     tk.Button(
-        left_frame,
-        text="🧑‍💻 Đăng nhập bằng khuôn mặt",
+        camera_frame,
+        text="🔓 Đăng nhập",
         command=lambda: face_login(current_frame, cap, container),
         **BUTTON_STYLE
-    ).pack(pady=(20, 10))
+    ).pack(pady=(10, 20))
 
-    # ========== FRAME PHẢI: ĐĂNG NHẬP TÀI KHOẢN ========== #
-    right_frame = tk.Frame(container, bg="white", bd=2, relief="ridge")
-    right_frame.place(relx=0.51, rely=0.05, relwidth=0.47, relheight=0.9)
+    # ====== FORM ĐĂNG NHẬP BẰNG MSSV (có viền) ====== #
+    right_frame = tk.Frame(container, bg="#E0F2F1", bd=2, relief="groove")
+    right_frame.place(relx=0.52, rely=0.1, relwidth=0.43, relheight=0.80)
 
     tk.Label(
         right_frame,
         text="ĐĂNG NHẬP BẰNG TÀI KHOẢN",
         font=("Arial", 16, "bold"),
-        bg="white",
-        fg="#003366"
+        bg="#E0F2F1", fg="#003366"
     ).pack(pady=(30, 20))
 
-    # --- Biểu mẫu đăng nhập --- #
-    form_frame = tk.Frame(right_frame, bg="white")
-    form_frame.pack(pady=(10, 0))
+    form_frame = tk.Frame(right_frame, bg="#E0F2F1")
+    form_frame.pack()
 
-    tk.Label(form_frame, text="MSSV:", bg="white", font=LABEL_FONT).grid(row=0, column=0, sticky="w", padx=5, pady=5)
+    tk.Label(form_frame, text="MSSV:", font=LABEL_FONT, bg="#E0F2F1", fg="white").grid(row=0, column=0, sticky="w", padx=5, pady=5)
     mssv_entry = tk.Entry(form_frame, font=ENTRY_FONT, width=30)
     mssv_entry.grid(row=0, column=1, pady=5)
 
-    tk.Label(form_frame, text="Mật khẩu:", bg="white", font=LABEL_FONT).grid(row=1, column=0, sticky="w", padx=5, pady=5)
+    tk.Label(form_frame, text="Mật khẩu:", font=LABEL_FONT, bg="#E0F2F1").grid(row=1, column=0, sticky="w", padx=5, pady=5)
     password_entry = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=30)
     password_entry.grid(row=1, column=1, pady=5)
 
@@ -102,7 +117,6 @@ def open_student_login(container):
 
         messagebox.showerror("Lỗi", "Sai MSSV hoặc mật khẩu.")
 
-    # --- Nút đăng nhập tài khoản --- #
     tk.Button(
         right_frame,
         text="🔓 Đăng nhập",
@@ -110,7 +124,7 @@ def open_student_login(container):
         **BUTTON_STYLE
     ).pack(pady=(30, 10))
 
-    # ========== ĐÓNG ỨNG DỤNG ========== #
+    # ======= ĐÓNG ỨNG DỤNG ======= #
     container.winfo_toplevel().protocol(
         "WM_DELETE_WINDOW",
         lambda: (cap.release(), container.winfo_toplevel().destroy())
@@ -118,7 +132,6 @@ def open_student_login(container):
 
 
 
-# ===================== ĐĂNG NHẬP BẰNG KHUÔN MẶT ===================== #
 def face_login(frame_dict, cap, container):
     img = frame_dict.get('image')
     if img is None:
@@ -131,7 +144,6 @@ def face_login(frame_dict, cap, container):
         return
 
     unknown_encoding = face_recognition.face_encodings(img, boxes)[0]
-
     all_users = get_all_sinh_vien()
     if not all_users:
         messagebox.showwarning("Không có dữ liệu", "Không tìm thấy người dùng trong hệ thống.")

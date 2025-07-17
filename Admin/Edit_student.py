@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from Admin.Styles_admin import LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
+from Admin.Styles_admin import *
 from Database.Create_db import update_sinh_vien
 import datetime
 
@@ -8,16 +8,23 @@ def render_student_edit(container, student_data):
     for widget in container.winfo_children():
         widget.destroy()
 
-    container.config(bg="white")
+    container.config(bg=PAGE_BG_COLOR)
+    tk.Label(container, text="👤📝 Chỉnh sửa thông tin sinh viên", font=TITLE_FONT, bg="white", fg="#003366").pack(anchor="w", padx=28, pady=(20, 5))
 
-    tk.Label(container, text="📝 Chỉnh sửa thông tin sinh viên", font=("Arial", 18, "bold"), fg="#003366", bg="white") \
-        .pack(pady=20)
+    outer_frame = tk.Frame(
+        container,
+        bg=FORM_BG_COLOR,
+        bd=FORM_BORDER_WIDTH,
+        relief=FORM_BORDER_STYLE,
+        width=480,
+    )
+    outer_frame.pack(pady=10)
 
-    form_frame = tk.Frame(container, bg="white")
-    form_frame.pack(pady=10)
+    form_frame = tk.Frame(outer_frame, bg=FORM_BG_COLOR)
+    form_frame.pack(padx=FORM_PADDING_X, pady=FORM_PADDING_Y)
 
     def create_row(label, value, row):
-        tk.Label(form_frame, text=label, font=LABEL_FONT, bg="white").grid(row=row, column=0, sticky="e", padx=10, pady=8)
+        tk.Label(form_frame, text=label, font=LABEL_FONT, bg="#003366", fg="white").grid(row=row, column=0, sticky="e", padx=10, pady=8)
         entry = tk.Entry(form_frame, font=ENTRY_FONT, width=35)
         entry.insert(0, value)
         entry.grid(row=row, column=1, padx=10, pady=8)
@@ -28,12 +35,17 @@ def render_student_edit(container, student_data):
     mssv_entry = create_row("MSSV:", student_data['mssv'], 2)
 
     # Giới tính
-    tk.Label(form_frame, text="Giới tính:", font=LABEL_FONT, bg="white").grid(row=3, column=0, sticky="e", padx=10, pady=8)
+    tk.Label(form_frame, text="Giới tính:", font=LABEL_FONT, bg="#003366", fg="white") \
+        .grid(row=3, column=0, sticky="e", padx=10, pady=8)
     gender_var = tk.IntVar(value=1 if str(student_data['sex']) == "1" else 0)
-    gender_frame = tk.Frame(form_frame, bg="white")
+    gender_frame = tk.Frame(form_frame, bg="#003366")
     gender_frame.grid(row=3, column=1, sticky="w")
-    tk.Radiobutton(gender_frame, text="Nam", variable=gender_var, value=1, bg="white", font=ENTRY_FONT).pack(side="left")
-    tk.Radiobutton(gender_frame, text="Nữ", variable=gender_var, value=0, bg="white", font=ENTRY_FONT).pack(side="left")
+    for text, val in [("Nam", 1), ("Nữ", 0)]:
+        tk.Radiobutton(
+            gender_frame, text=text, variable=gender_var, value=val,
+            bg="#003366", fg="white", font=ENTRY_FONT,
+            selectcolor="black", activebackground="#003366", activeforeground="white"
+        ).pack(side="left", padx=(0, 10))
 
     birth_entry = create_row("Ngày sinh:", student_data['date'], 4)
     address_entry = create_row("Địa chỉ:", student_data['address'], 5)
@@ -41,6 +53,7 @@ def render_student_edit(container, student_data):
     phone_entry = create_row("Số điện thoại:", student_data.get('phone', ""), 7)
     password_entry = create_row("Mật khẩu:", student_data['password'], 8)
 
+    # ✅ Đặt sau khi các biến đã có
     def save_changes():
         name = name_entry.get().strip()
         mssv = mssv_entry.get().strip()
@@ -68,9 +81,24 @@ def render_student_edit(container, student_data):
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
 
+    # Nút "Quay lại" và "Lưu thay đổi" nằm cùng 1 hàng
     def back_to_list():
         from Admin.List_student import render_student_list
         render_student_list(container)
 
-    tk.Button(container, text="💾 Lưu thay đổi", command=save_changes, **BUTTON_STYLE).pack(pady=20)
-    tk.Button(container, text="⬅️ Quay lại", command=back_to_list, **BUTTON_STYLE).pack(pady=(0, 20))
+    # Nút "Quay lại" ở cột 0, canh trái
+    tk.Button(
+        form_frame,
+        text="← Quay lại",
+        command=back_to_list,
+        **BACK_BUTTON_STYLE
+    ).grid(row=9, column=0, sticky="w", padx=(10, 0), pady=(20, 10))
+
+    # Nút "Lưu thay đổi" canh giữa bằng cách dùng columnspan=2
+    tk.Button(
+        form_frame,
+        text="💾 Lưu thay đổi",
+        command=save_changes,
+        **BUTTON_STYLE
+    ).grid(row=9, column=0, columnspan=2, pady=(20, 10))
+

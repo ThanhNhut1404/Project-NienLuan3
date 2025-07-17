@@ -44,7 +44,7 @@ BUTTON_STYLE = {
     "activebackground": "#388E3C",
     "bd": 0,
     "relief": "flat",
-    "width": 15,
+    "width": 10,
     "height": 1
 }
 
@@ -54,11 +54,11 @@ CHECKBOX_STYLE = {
     "fg": "white",
     "activebackground": FORM_BG_COLOR,
     "activeforeground": "white",
-    "selectcolor": FORM_BG_COLOR,
+    "selectcolor": "white",
     "font": ("Arial", 10, "bold")
 }
 
-# ==== Style cho nút menu (Header_admin) ====
+#Style cho nút menu (Header_admin)
 MENU_BUTTON_STYLE = {
     "font": ("Arial", 11, "bold"),
     "bg": "#003366",
@@ -70,18 +70,67 @@ MENU_BUTTON_STYLE = {
     "pady": 7
 }
 
-# ==== Style cho separator dọc giữa các menu ====
+#Style cho separator dọc giữa các menu
 SEPARATOR_STYLE = {
     "bg": "#BDC3C7",
     "width": 1,
     "height": 30
 }
 
-# ==== Ghi chú camera (Create_student) ====
+# ==== Ghi chú camera (Create_student)
 CAMERA_NOTE = (
     'Camera sẽ bắt đầu chụp sau khi nhấn "Tạo tài khoản".\n'
     'Hệ thống sẽ chụp 5 ảnh khuôn mặt. Hãy nhìn thẳng vào camera.'
 )
+
+# Nút "Tạo tài khoản"
+CREATE_BUTTON_STYLE = {
+    "font": ("Arial", 14, "bold"),
+    "bg": "#4CAF50",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 0,
+    "relief": "flat",
+    "width": 12,
+    "height": 1
+}
+
+# Nút "← Quay lại"
+BACK_BUTTON_STYLE = {
+    "font": ("Arial", 13, "bold"),
+    "bg": "#f44336",
+    "fg": "white",
+    "activebackground": "#d32f2f",
+    "bd": 0,
+    "relief": "flat",
+    "width": 10,
+    "height": 1
+}
+
+# Checkbox "Hiện mật khẩu"
+CHECKBOX_STYLE = {
+    "bg": FORM_BG_COLOR,          # Nền tổng thể
+    "fg": "white",                # Màu chữ "Hiện mật khẩu"
+    "activebackground": FORM_BG_COLOR,
+    "activeforeground": "white",
+    "selectcolor": "black",       # 👈 Nền ô vuông: màu đen
+    "font": ("Arial", 10, "bold")
+}
+
+
+
+# Nút "OK" trong popup thông báo
+POPUP_OK_BUTTON_STYLE = {
+    "font": ("Arial", 12, "bold"),
+    "bg": "#f44336",
+    "fg": "white",
+    "activebackground": "#c62828",
+    "bd": 0,
+    "relief": "flat",
+    "width": 10,
+    "height": 1
+}
+
 
 #Bảng danh sách
 TREEVIEW_STYLE = {

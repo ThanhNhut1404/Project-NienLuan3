@@ -6,7 +6,7 @@ ENTRY_FONT = ("Arial", 12)
 # ========== Style cho Button ==========
 BUTTON_STYLE = {
     "font": ("Arial", 15, "bold"),
-    "bg": "#388E3C",
+    "bg": "#FFA726",
     "fg": "white",
     "activebackground": "#87CEEB",  # Sky Blue khi hover
     "cursor": "hand2",

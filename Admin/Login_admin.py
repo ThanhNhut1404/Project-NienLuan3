@@ -25,13 +25,13 @@ def render_admin_login(container):
     # === Họ và tên ===
     tk.Label(form_frame, text="Họ và tên:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="white")\
         .pack(anchor='w', padx=FORM_LABEL_PADX, pady=(FORM_PADDING_Y, 5))
-    entry_name = tk.Entry(form_frame, font=ENTRY_FONT, width=35)
+    entry_name = tk.Entry(form_frame, font=ENTRY_FONT, width=25)
     entry_name.pack(padx=FORM_ENTRY_PADX)
 
     # === Mật khẩu ===
     tk.Label(form_frame, text="Mật khẩu:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="white")\
         .pack(anchor='w', padx=FORM_LABEL_PADX, pady=(15, 5))
-    entry_password = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=35)
+    entry_password = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=25)
     entry_password.pack(padx=FORM_ENTRY_PADX)
 
     # === Checkbutton hiện mật khẩu ===

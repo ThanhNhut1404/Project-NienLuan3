@@ -62,11 +62,13 @@ def render_student_main(container, user):
     btn_logout = tk.Button(
         btn_frame,
         text="Đăng xuất",
-        command=lambda: (messagebox.showinfo("Đăng xuất", "Bạn đã đăng xuất."), container.master.destroy()),
+        command=lambda: import_and_back_to_login(container),
         **BUTTON_STYLE
     )
     btn_logout.grid(row=1, column=0, columnspan=2, pady=15)
 
-    # Footer
-    footer = tk.Label(container, text="© 2025 Hệ thống quản lý sinh viên", font=("Arial", 10), bg="#e0e0e0")
-    footer.pack(side="bottom", fill="x")
+
+def import_and_back_to_login(container):
+    from Student.Login_student import open_student_login
+    open_student_login(container)
+
