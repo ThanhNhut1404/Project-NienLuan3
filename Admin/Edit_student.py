@@ -97,7 +97,7 @@ def render_student_edit(container, student_data):
     # Nút "Lưu thay đổi" canh giữa bằng cách dùng columnspan=2
     tk.Button(
         form_frame,
-        text="💾 Lưu thay đổi",
+        text="💾 Cập nhật",
         command=save_changes,
         **BUTTON_STYLE
     ).grid(row=9, column=0, columnspan=2, pady=(20, 10))

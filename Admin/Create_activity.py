@@ -4,6 +4,7 @@ from tkcalendar import DateEntry
 import sqlite3
 import os
 import qrcode
+from Admin.Styles_admin import *
 from datetime import datetime
 from Database.Create_db import DB_NAME
 
@@ -91,63 +92,92 @@ def render_Create_activity(container):
             messagebox.showerror("Lỗi", str(e))
 
     # ========== GIAO DIỆN ==========
-    tk.Label(container, text="📌 TẠO HOẠT ĐỘNG", font=("Arial", 16, "bold"), fg="#003366").pack(pady=10)
-    form = tk.Frame(container, bg="#f9f9f9", padx=20, pady=20)
-    form.pack()
+    container.config(bg=PAGE_BG_COLOR)
+    tk.Label(
+        container,
+        text="📝 Tạo hoạt động",
+        font=TITLE_FONT,
+        bg="white",
+        fg="#003366"
+    ).pack(anchor="w", padx=28, pady=(20, 5))
+
+    outer_frame = tk.Frame(
+        container,
+        bg=FORM_BG_COLOR,
+        bd=FORM_BORDER_WIDTH,
+        relief=FORM_BORDER_STYLE,
+        width=480
+    )
+    outer_frame.pack(pady=10)
+
+    form_frame = tk.Frame(outer_frame, bg=FORM_BG_COLOR)
+    form_frame.pack(padx=FORM_PADDING_X, pady=FORM_PADDING_Y)
 
     # Tên hoạt động
-    tk.Label(form, text="Tên hoạt động:", font=("Arial", 10), width=18, anchor="e").grid(row=0, column=0, pady=6)
-    entry_ten = tk.Entry(form, font=("Arial", 10), width=35)
+    tk.Label(form_frame, text="Tên hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=0, column=0, pady=6)
+    entry_ten = tk.Entry(form_frame, **ENTRY_STYLE_ACTIVITY)
     entry_ten.grid(row=0, column=1, pady=6)
 
     # Loại hoạt động
-    tk.Label(form, text="Loại hoạt động:", font=("Arial", 10), width=18, anchor="e").grid(row=1, column=0, pady=6)
-    combo_loai = ttk.Combobox(form, font=("Arial", 10), width=33, state="readonly")
+    tk.Label(form_frame, text="Loại hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=1, column=0, pady=6)
+    combo_loai = ttk.Combobox(form_frame, font=("Arial", 10), width=33, state="readonly")
     combo_loai['values'] = ["Tình nguyện", "Hội nhập", "Khác"]
     combo_loai.grid(row=1, column=1, pady=6)
     combo_loai.bind("<<ComboboxSelected>>", lambda e: tinh_diem())
 
     # Cấp hoạt động
-    tk.Label(form, text="Cấp hoạt động:", font=("Arial", 10), width=18, anchor="e").grid(row=2, column=0, pady=6)
-    combo_cap = ttk.Combobox(form, font=("Arial", 10), width=33, state="readonly")
+    tk.Label(form_frame, text="Cấp hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=2, column=0, pady=6)
+    combo_cap = ttk.Combobox(form_frame, font=("Arial", 10), width=33, state="readonly")
     combo_cap['values'] = ["Chi hội", "Liên chi", "Trường"]
     combo_cap.grid(row=2, column=1, pady=6)
     combo_cap.bind("<<ComboboxSelected>>", lambda e: tinh_diem())
 
     # Giấy xác nhận
-    tk.Label(form, text="Có giấy xác nhận:", font=("Arial", 10), width=18, anchor="e").grid(row=3, column=0, pady=6)
+    tk.Label(form_frame, text="Có giấy xác nhận:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=3, column=0, pady=6)
     xn_var = tk.StringVar(value="Không")
-    tk.Radiobutton(form, text="Có", variable=xn_var, value="Có", command=tinh_diem, bg="#f9f9f9").grid(row=3, column=1, sticky="w")
-    tk.Radiobutton(form, text="Không", variable=xn_var, value="Không", command=tinh_diem, bg="#f9f9f9").grid(row=3, column=1, sticky="e")
+    tk.Radiobutton(form_frame, text="Có", variable=xn_var, value="Có", command=tinh_diem, bg=FORM_BG_COLOR).grid(row=3, column=1, sticky="w")
+    tk.Radiobutton(form_frame, text="Không", variable=xn_var, value="Không", command=tinh_diem, bg=FORM_BG_COLOR).grid(row=3, column=1, sticky="e")
 
     # Ngày tổ chức
-    tk.Label(form, text="Ngày tổ chức:", font=("Arial", 10), width=18, anchor="e").grid(row=4, column=0, pady=6)
-    calendar_ngay = DateEntry(form, width=32, date_pattern='dd/mm/yyyy', background='darkblue', foreground='white')
+    tk.Label(form_frame, text="Ngày tổ chức:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=4, column=0, pady=6)
+    calendar_ngay = DateEntry(form_frame, width=32, date_pattern='dd/mm/yyyy', background='darkblue', foreground='white')
     calendar_ngay.grid(row=4, column=1, pady=6)
 
     # Giờ bắt đầu
-    tk.Label(form, text="Giờ bắt đầu (HH:mm):", font=("Arial", 10), width=18, anchor="e").grid(row=5, column=0, pady=6)
-    spin_start_hour = tk.Spinbox(form, from_=0, to=23, width=5, format="%02.0f")
-    spin_start_min = tk.Spinbox(form, from_=0, to=59, width=5, format="%02.0f")
+    tk.Label(form_frame, text="Giờ bắt đầu (HH:mm):", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=5, column=0, pady=6)
+    spin_start_hour = tk.Spinbox(form_frame, from_=0, to=23, width=5, format="%02.0f")
+    spin_start_min = tk.Spinbox(form_frame, from_=0, to=59, width=5, format="%02.0f")
     spin_start_hour.grid(row=5, column=1, sticky="w", padx=(0, 50))
     spin_start_min.grid(row=5, column=1, sticky="e")
 
     # Giờ kết thúc
-    tk.Label(form, text="Giờ kết thúc (HH:mm):", font=("Arial", 10), width=18, anchor="e").grid(row=6, column=0, pady=6)
-    spin_end_hour = tk.Spinbox(form, from_=0, to=23, width=5, format="%02.0f")
-    spin_end_min = tk.Spinbox(form, from_=0, to=59, width=5, format="%02.0f")
+    tk.Label(form_frame, text="Giờ kết thúc (HH:mm):", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=6, column=0, pady=6)
+    spin_end_hour = tk.Spinbox(form_frame, from_=0, to=23, width=5, format="%02.0f")
+    spin_end_min = tk.Spinbox(form_frame, from_=0, to=59, width=5, format="%02.0f")
     spin_end_hour.grid(row=6, column=1, sticky="w", padx=(0, 50))
     spin_end_min.grid(row=6, column=1, sticky="e")
 
     # Học kỳ - năm học
-    tk.Label(form, text="Học kỳ - Năm học:", font=("Arial", 10), width=18, anchor="e").grid(row=7, column=0, pady=6)
-    combo_hk = ttk.Combobox(form, font=("Arial", 10), width=33, state="readonly", values=hk_list)
+    tk.Label(form_frame, text="Học kỳ - Năm học:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=7, column=0, pady=6)
+    combo_hk = ttk.Combobox(form_frame, font=("Arial", 10), width=33, state="readonly", values=hk_list)
     combo_hk.grid(row=7, column=1, pady=6)
 
-    # Tổng điểm cộng
-    diem_label = tk.Label(container, text="➞ Tổng điểm cộng: 0", font=("Arial", 11, "bold"), fg="green", bg="white")
-    diem_label.pack(pady=5)
+    # Tổng điểm cộng - NHÉT VÀO FORM_FRAME
+    diem_label = tk.Label(
+        form_frame,
+        text="➞ Tổng điểm cộng: 0",
+        font=("Arial", 11, "bold"),
+        fg="green",
+        bg=FORM_BG_COLOR,
+        anchor="w"
+    )
+    diem_label.grid(row=8, column=0, columnspan=2, sticky="w", pady=(10, 5))
 
-    # Nút tạo hoạt động
-    tk.Button(container, text="Tạo hoạt động", bg="#006699", fg="white",
-              font=("Arial", 11, "bold"), command=tao_hoat_dong).pack(pady=15)
+    # Nút tạo hoạt động - CŨNG NHÉT VÀO FORM_FRAME
+    btn_create = tk.Button(
+        form_frame,
+        text="Tạo hoạt động",
+        command=tao_hoat_dong,
+        **CREATE_BUTTON_STYLE
+    )
+    btn_create.grid(row=9, column=0, columnspan=2, pady=(20, 10))

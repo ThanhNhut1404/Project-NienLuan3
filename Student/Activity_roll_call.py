@@ -8,6 +8,24 @@ import datetime
 from Database.Create_db import DB_NAME
 
 
+def render_activity_roll_call(container, user):
+    for widget in container.winfo_children():
+        widget.destroy()
+    container.config(bg="white")
+
+    tk.Label(container, text="📝 ĐIỂM DANH HOẠT ĐỘNG", font=("Arial", 16, "bold"), bg="white", fg="#003366").pack(pady=10)
+
+    tk.Label(container, text="Nhấn nút bên dưới để bắt đầu điểm danh bằng khuôn mặt và mã QR", font=("Arial", 11), bg="white").pack(pady=10)
+
+    tk.Button(
+        container,
+        text="▶️ Bắt đầu điểm danh",
+        font=("Arial", 12, "bold"),
+        command=lambda: start_roll_call(user),
+        bg="#FFA726", fg="white", padx=10, pady=5
+    ).pack(pady=10)
+
+
 def start_roll_call(user):
     mssv = user["mssv"]
     known_encodings = [np.array(enc) for enc in user.get("encodings", [])]
@@ -65,7 +83,6 @@ def start_roll_call(user):
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
 
-        # Lấy thông tin hoạt động kèm ID học kỳ
         cursor.execute('''
             SELECT TEN_HD, START_TIME, TIME_OUT, NGAY_TO_CHUC, DIEM_CONG, id_hk
             FROM HOAT_DONG
@@ -85,7 +102,6 @@ def start_roll_call(user):
             messagebox.showwarning("Quá thời gian", f"Hoạt động '{ten_hd}' chưa bắt đầu hoặc đã kết thúc.")
             return
 
-        # Kiểm tra đã điểm danh chưa
         cursor.execute('''
             SELECT 1 FROM DIEM_DANH_HOAT_DONG
             WHERE id_hoat_dong = ? AND MSSV = ?
@@ -94,13 +110,11 @@ def start_roll_call(user):
             messagebox.showinfo("Thông báo", f"Bạn đã điểm danh hoạt động '{ten_hd}' trước đó.")
             return
 
-        # Ghi điểm danh
         cursor.execute('''
             INSERT INTO DIEM_DANH_HOAT_DONG (id_hoat_dong, MSSV, thoi_gian, diem_cong, id_hk)
             VALUES (?, ?, ?, ?, ?)
         ''', (qr_data, mssv, now.strftime("%Y-%m-%d %H:%M:%S"), diem_cong, id_hk))
 
-        # Cộng điểm cho sinh viên
         cursor.execute('''
             UPDATE SINH_VIEN SET TONG_DIEM_HD = IFNULL(TONG_DIEM_HD, 0) + ?
             WHERE MSSV = ?
@@ -113,18 +127,3 @@ def start_roll_call(user):
         messagebox.showerror("Lỗi hệ thống", str(e))
     finally:
         conn.close()
-
-
-def open_activity_roll_call(user):
-    window = tk.Toplevel()
-    window.title("Điểm danh hoạt động")
-    window.geometry("400x200")
-    window.resizable(False, False)
-
-    label = tk.Label(window, text="Nhấn để bắt đầu điểm danh bằng khuôn mặt và mã QR", font=("Arial", 11))
-    label.pack(pady=20)
-
-    btn = tk.Button(window, text="Bắt đầu điểm danh", font=("Arial", 12, "bold"), command=lambda: start_roll_call(user))
-    btn.pack(pady=10)
-
-    window.mainloop()

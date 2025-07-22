@@ -95,6 +95,18 @@ CREATE_BUTTON_STYLE = {
     "height": 1
 }
 
+# Nút tạo hoạt động
+CREATE_BUTTON_STYLE = {
+    "font": ("Arial", 14, "bold"),
+    "bg": "#4CAF50",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 0,
+    "relief": "flat",
+    "width": 12,
+    "height": 1
+}
+
 # Nút "← Quay lại"
 BACK_BUTTON_STYLE = {
     "font": ("Arial", 13, "bold"),
@@ -142,4 +154,41 @@ TREEVIEW_STYLE = {
     "even_row_bg": "#f2f2f2",
     "odd_row_bg": "white",
     "border_color": "#d9d9d9"
+}
+
+# Create_ativity
+# ========== Entry Styles (Tạo hoạt động) ==========
+ENTRY_STYLE_ACTIVITY = {
+    "font": ("Arial", 11),
+    "bg": "white",
+    "fg": "black",
+    "relief": "solid",
+    "bd": 1,
+    "width": 35
+}
+
+COMBOBOX_STYLE = {
+    "font": ("Arial", 11),
+    "width": 33,
+    "state": "readonly"
+}
+
+DATE_ENTRY_STYLE = {
+    "width": 32,
+    "date_pattern": "dd/mm/yyyy",
+    "background": "darkblue",
+    "foreground": "white"
+}
+
+SPINBOX_STYLE = {
+    "from_": 0,
+    "to": 59,
+    "width": 5,
+    "format": "%02.0f",
+    "font": ("Arial", 10)
+}
+
+RADIO_STYLE = {
+    "bg": FORM_BG_COLOR,
+    "font": ("Arial", 10)
 }

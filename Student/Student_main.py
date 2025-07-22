@@ -1,80 +1,77 @@
 import tkinter as tk
 from tkinter import messagebox
 import json
-import cv2
-import face_recognition
-import numpy as np
-from PIL import Image, ImageTk
-
-from Database.Create_db import get_all_sinh_vien
-from Student.Styles_student import LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
-from Student.Activity_roll_call import open_activity_roll_call
-from Student.View_activity import open_view_activity
-
+from Student.Styles_student import BUTTON_STYLE, MENU_BUTTON_STYLE
+from Student.Header_student import render_header
+from Student.Activity_roll_call import render_activity_roll_call
+from Student.View_activity import render_view_activity
+from Student.View_infor import render_view_infor
 
 def render_student_main(container, user):
     for widget in container.winfo_children():
         widget.destroy()
     container.config(bg="#f0f0f0")
 
-    # Tiêu đề hiển thị tên sinh viên
-    header_text = f"TRANG CHÍNH SINH VIÊN - {user.get('name', '')}"
-    header = tk.Label(container, text=header_text, font=("Arial", 18, "bold"), bg="#4CAF50", fg="white")
-    header.pack(fill="x")
+    # ===== HEADER =====
+    header_frame = tk.Frame(container, bg="#2C387E", height=55)
+    header_frame.pack(fill="x")
+    render_header(header_frame, user)
 
-    # Nội dung chính
-    content_frame = tk.Frame(container, bg="#f0f0f0")
-    content_frame.pack(expand=True, fill="both", pady=20)
+    # ===== MAIN CONTENT =====
+    main_content = tk.Frame(container, bg="#f0f0f0")
+    main_content.pack(fill="both", expand=True)
 
-    welcome_label = tk.Label(
-        content_frame,
-        text=f"Chào mừng {user.get('name', 'bạn')} đến với hệ thống!",
-        font=("Arial", 14),
-        bg="#f0f0f0"
-    )
-    welcome_label.pack(pady=10)
+    # ===== NÚT MENU 3 GẠCH & KHUNG MENU =====
+    menu_section = tk.Frame(main_content, bg="#f0f0f0")
+    menu_section.pack(anchor="w", padx=20, pady=(10, 0))  # Sát bên trái
 
-    # Nút chức năng cơ bản
-    btn_frame = tk.Frame(content_frame, bg="#f0f0f0")
-    btn_frame.pack(pady=10)
-    btn_attendance = tk.Button(
-        btn_frame,
-        text="Điểm danh hoạt động",
-        command=lambda: open_activity_roll_call(user),
-        **BUTTON_STYLE
-    )
-    btn_attendance.grid(row=3, column=0, columnspan=2, pady=5)
-    btn_attendance = tk.Button(
-        btn_frame,
-        text="📅 Xem hoạt động đã tham gia",
-        command=lambda: open_view_activity(container, user),
-        **BUTTON_STYLE
-    )
-    btn_attendance.grid(row=4, column=0, columnspan=2, pady=5)
-    btn_view_profile = tk.Button(
-        btn_frame,
-        text="Xem thông tin",
-        command=lambda: messagebox.showinfo("Thông tin", json.dumps(user, indent=2, ensure_ascii=False)),
-        **BUTTON_STYLE
-    )
-    btn_view_profile.grid(row=0, column=0, padx=10, pady=5)
+    menu_container = tk.Frame(container, bg="white", bd=2, relief="ridge")
 
-    btn_view_grades = tk.Button(
-        btn_frame,
-        text="Xem điểm",
-        command=lambda: messagebox.showinfo("Điểm", "Hiển thị điểm..."),
-        **BUTTON_STYLE
-    )
-    btn_view_grades.grid(row=0, column=1, padx=10, pady=5)
+    def show_info():
+        render_view_infor(content_frame, user)
+        menu_container.pack_forget()
 
-    btn_logout = tk.Button(
-        btn_frame,
-        text="Đăng xuất",
-        command=lambda: (messagebox.showinfo("Đăng xuất", "Bạn đã đăng xuất."), container.master.destroy()),
-        **BUTTON_STYLE
-    )
-    btn_logout.grid(row=1, column=0, columnspan=2, pady=15)
+    def show_view_activity():
+        render_view_activity(content_frame, user)
+        menu_container.pack_forget()
 
-    # Footer
-    footer = tk.Label(container, text="© 2025 Hệ thống quản lý sinh viên", font=("Arial", 10), bg="#e0e0e0")
-    footer.pack(side="bottom", fill="x")
+    def show_attendance():
+        render_activity_roll_call(content_frame, user)
+        menu_container.pack_forget()
+
+    def logout():
+        if messagebox.askyesno("Xác nhận", "Bạn có chắc muốn đăng xuất?"):
+            container.master.destroy()
+
+    def toggle_menu():
+        if menu_container.winfo_ismapped():
+            menu_container.place_forget()
+        else:
+            x = menu_btn.winfo_rootx() - container.winfo_rootx()
+            y = menu_btn.winfo_rooty() - container.winfo_rooty() + menu_btn.winfo_height()
+            menu_container.place(x=x, y=y)
+
+    menu_btn = tk.Button(
+        menu_section,
+        text="☰",
+        font=("Arial", 18, "bold"),
+        bg="#2C387E",
+        fg="white",
+        bd=0,
+        padx=10,
+        pady=5,
+        command=toggle_menu
+    )
+    menu_btn.pack(anchor="w")  # Canh trái
+
+    # ==== Thêm các nút chức năng vào menu_container ====
+    tk.Button(menu_container, text="📅 Xem hoạt động đã tham gia", command=show_view_activity, **MENU_BUTTON_STYLE).pack(fill="x", pady=1)
+    tk.Button(menu_container, text="📝 Điểm danh hoạt động", command=show_attendance, **MENU_BUTTON_STYLE).pack(fill="x", pady=1)
+    tk.Button(menu_container, text="🚪 Đăng xuất", command=logout, **MENU_BUTTON_STYLE).pack(fill="x", pady=1)
+
+    # ===== NỘI DUNG CHÍNH =====
+    content_frame = tk.Frame(main_content, bg="white")  # Đã bỏ khung
+    content_frame.pack(fill="both", expand=True, padx=20, pady=10)
+
+    # Hiển thị mặc định: Thông tin sinh viên
+    render_view_infor(content_frame, user)

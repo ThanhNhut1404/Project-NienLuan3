@@ -25,5 +25,18 @@ FORM_BORDER_STYLE = "groove"
 FORM_PADDING_X = 20
 FORM_PADDING_Y = 15
 
+# Style cho các nút menu con
+MENU_BUTTON_STYLE = {
+    "font": ("Arial", 12),
+    "bg": "white",
+    "fg": "#2C387E",
+    "activebackground": "#e0e0e0",
+    "activeforeground": "#1A237E",
+    "bd": 0,
+    "anchor": "w",
+    "padx": 10,
+    "pady": 5
+}
+
 # ========== Kích thước cửa sổ ==========
 APP_SIZE = "960x600"
