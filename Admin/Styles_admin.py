@@ -32,7 +32,7 @@ FORM_PADDING_Y = 15
 
 # ==== Padding riêng ====
 FORM_LABEL_PADX = 15         # Lề trái của Label
-FORM_ENTRY_PADX = 20         # Lề trái của Entry
+FORM_ENTRY_PADX = 5         # Lề trái của Entry
 FORM_CHECKBOX_PADX = 18      # Lề trái của Checkbutton
 FORM_BUTTON_PADY = 20        # Khoảng cách dưới nút Đăng nhập
 
@@ -42,9 +42,32 @@ BUTTON_STYLE = {
     "bg": "#4CAF50",
     "fg": "white",
     "activebackground": "#388E3C",
-    "bd": 0,
-    "relief": "flat",
+    "bd": 2,
+    "relief": "raised",
     "width": 10,
+    "height": 1
+}
+
+#Sửa hoạt động
+BUTTON_EDIT_STYLE = {
+    "font": ("Arial", 14, "bold"),
+    "bg": "#4CAF50",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 2,
+    "relief": "raised",
+    "width": 13,
+    "height": 1
+}
+
+BUTTON_DELETE_STYLE = {
+    "font": ("Arial", 14, "bold"),
+    "bg": "red",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 2,
+    "relief": "raised",
+    "width": 13,
     "height": 1
 }
 
@@ -89,8 +112,8 @@ CREATE_BUTTON_STYLE = {
     "bg": "#4CAF50",
     "fg": "white",
     "activebackground": "#388E3C",
-    "bd": 0,
-    "relief": "flat",
+    "bd": 2,
+    "relief": "raised",
     "width": 12,
     "height": 1
 }
@@ -101,8 +124,8 @@ CREATE_BUTTON_STYLE = {
     "bg": "#4CAF50",
     "fg": "white",
     "activebackground": "#388E3C",
-    "bd": 0,
-    "relief": "flat",
+    "bd": 2,
+    "relief": "raised",
     "width": 12,
     "height": 1
 }
@@ -113,10 +136,22 @@ BACK_BUTTON_STYLE = {
     "bg": "#f44336",
     "fg": "white",
     "activebackground": "#d32f2f",
-    "bd": 0,
-    "relief": "flat",
+    "bd": 2,
+    "relief": "raised",
     "width": 10,
     "height": 1
+}
+
+# Nút cập nhật trong list_view_activity
+SAVE_BUTTON_STYLE = {
+    "bg": "#2196f3",
+    "fg": "white",
+    "font": ("Arial", 10, "bold"),
+    "activebackground": "#1976d2",
+    "activeforeground": "white",
+    "bd": 2,
+    "relief": "raised",
+    "width": 15
 }
 
 # Checkbox "Hiện mật khẩu"
@@ -157,28 +192,29 @@ TREEVIEW_STYLE = {
 }
 
 # Create_ativity
-# ========== Entry Styles (Tạo hoạt động) ==========
 ENTRY_STYLE_ACTIVITY = {
-    "font": ("Arial", 11),
+    "font": ENTRY_FONT,
     "bg": "white",
     "fg": "black",
-    "relief": "solid",
-    "bd": 1,
-    "width": 35
+    "width": 25
 }
 
+
 COMBOBOX_STYLE = {
-    "font": ("Arial", 11),
-    "width": 33,
+    "font": ENTRY_FONT,
+    "width": 25,
     "state": "readonly"
 }
 
+
 DATE_ENTRY_STYLE = {
-    "width": 32,
+    "width": 29,
     "date_pattern": "dd/mm/yyyy",
     "background": "darkblue",
-    "foreground": "white"
+    "foreground": "white",
+    "font": ("Arial", 10)
 }
+
 
 SPINBOX_STYLE = {
     "from_": 0,

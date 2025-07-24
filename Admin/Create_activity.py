@@ -7,11 +7,11 @@ import qrcode
 from Admin.Styles_admin import *
 from datetime import datetime
 from Database.Create_db import DB_NAME
-
+from copy import deepcopy
+from Admin.Admin_main import render_admin_main
 
 QR_FOLDER = "QR_HOAT_DONG"
 os.makedirs(QR_FOLDER, exist_ok=True)
-
 
 def tao_qr_hoat_dong(id_hd, ten_hd):
     qr_data = f"HOATDONG:{id_hd}"
@@ -21,12 +21,10 @@ def tao_qr_hoat_dong(id_hd, ten_hd):
     qr_img.save(filepath)
     return filepath
 
-
 def render_Create_activity(container):
     for widget in container.winfo_children():
         widget.destroy()
 
-    # ================== KẾT NỐI DB VÀ LẤY HỌC KỲ ===================
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("SELECT ID_HK, NAME_HK, SCHOOL_YEAR FROM HK_NK")
@@ -91,7 +89,10 @@ def render_Create_activity(container):
         except Exception as e:
             messagebox.showerror("Lỗi", str(e))
 
-    # ========== GIAO DIỆN ==========
+    def back_to_main():
+        from Admin.Admin_main import render_admin_main
+        render_admin_main(container.master)
+
     container.config(bg=PAGE_BG_COLOR)
     tk.Label(
         container,
@@ -113,71 +114,101 @@ def render_Create_activity(container):
     form_frame = tk.Frame(outer_frame, bg=FORM_BG_COLOR)
     form_frame.pack(padx=FORM_PADDING_X, pady=FORM_PADDING_Y)
 
-    # Tên hoạt động
-    tk.Label(form_frame, text="Tên hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=0, column=0, pady=6)
-    entry_ten = tk.Entry(form_frame, **ENTRY_STYLE_ACTIVITY)
+    form_inner = tk.Frame(form_frame, bg=FORM_BG_COLOR)
+    form_inner.pack()
+
+    tk.Label(form_inner, text="Tên hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=0, column=0, pady=6)
+    entry_ten = tk.Entry(form_inner, **ENTRY_STYLE_ACTIVITY)
     entry_ten.grid(row=0, column=1, pady=6)
 
-    # Loại hoạt động
-    tk.Label(form_frame, text="Loại hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=1, column=0, pady=6)
-    combo_loai = ttk.Combobox(form_frame, font=("Arial", 10), width=33, state="readonly")
+    tk.Label(form_inner, text="Loại hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=1, column=0, pady=6)
+    combo_loai = ttk.Combobox(form_inner, font=("Arial", 10), width=29, state="readonly")
     combo_loai['values'] = ["Tình nguyện", "Hội nhập", "Khác"]
     combo_loai.grid(row=1, column=1, pady=6)
     combo_loai.bind("<<ComboboxSelected>>", lambda e: tinh_diem())
 
-    # Cấp hoạt động
-    tk.Label(form_frame, text="Cấp hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=2, column=0, pady=6)
-    combo_cap = ttk.Combobox(form_frame, font=("Arial", 10), width=33, state="readonly")
+    tk.Label(form_inner, text="Cấp hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=2, column=0, pady=6)
+    combo_cap = ttk.Combobox(form_inner, font=("Arial", 10), width=29, state="readonly")
     combo_cap['values'] = ["Chi hội", "Liên chi", "Trường"]
     combo_cap.grid(row=2, column=1, pady=6)
     combo_cap.bind("<<ComboboxSelected>>", lambda e: tinh_diem())
 
-    # Giấy xác nhận
-    tk.Label(form_frame, text="Có giấy xác nhận:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=3, column=0, pady=6)
+    tk.Label(form_inner, text="Có giấy xác nhận:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=3, column=0, pady=6)
     xn_var = tk.StringVar(value="Không")
-    tk.Radiobutton(form_frame, text="Có", variable=xn_var, value="Có", command=tinh_diem, bg=FORM_BG_COLOR).grid(row=3, column=1, sticky="w")
-    tk.Radiobutton(form_frame, text="Không", variable=xn_var, value="Không", command=tinh_diem, bg=FORM_BG_COLOR).grid(row=3, column=1, sticky="e")
+    xn_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
+    xn_frame.grid(row=3, column=1, padx=FORM_ENTRY_PADX, pady=6, sticky="w")
 
-    # Ngày tổ chức
-    tk.Label(form_frame, text="Ngày tổ chức:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=4, column=0, pady=6)
-    calendar_ngay = DateEntry(form_frame, width=32, date_pattern='dd/mm/yyyy', background='darkblue', foreground='white')
+    for text in ["Có", "Không"]:
+        tk.Radiobutton(
+            xn_frame,
+            text=text,
+            variable=xn_var,
+            value=text,
+            command=tinh_diem,
+            bg=FORM_BG_COLOR,
+            fg="white",
+            font=ENTRY_FONT,
+            selectcolor="black",
+            activebackground=FORM_BG_COLOR,
+            activeforeground="white",
+        ).pack(side="left", padx=(0, 10))
+
+    tk.Label(form_inner, text="Ngày tổ chức:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=4, column=0, pady=6)
+    calendar_ngay = DateEntry(form_inner, **DATE_ENTRY_STYLE)
     calendar_ngay.grid(row=4, column=1, pady=6)
 
-    # Giờ bắt đầu
-    tk.Label(form_frame, text="Giờ bắt đầu (HH:mm):", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=5, column=0, pady=6)
-    spin_start_hour = tk.Spinbox(form_frame, from_=0, to=23, width=5, format="%02.0f")
-    spin_start_min = tk.Spinbox(form_frame, from_=0, to=59, width=5, format="%02.0f")
-    spin_start_hour.grid(row=5, column=1, sticky="w", padx=(0, 50))
-    spin_start_min.grid(row=5, column=1, sticky="e")
+    tk.Label(form_inner, text="Bắt đầu:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=5, column=0, pady=6)
+    start_time_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
+    start_time_frame.grid(row=5, column=1, pady=6, sticky="w")
 
-    # Giờ kết thúc
-    tk.Label(form_frame, text="Giờ kết thúc (HH:mm):", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=6, column=0, pady=6)
-    spin_end_hour = tk.Spinbox(form_frame, from_=0, to=23, width=5, format="%02.0f")
-    spin_end_min = tk.Spinbox(form_frame, from_=0, to=59, width=5, format="%02.0f")
-    spin_end_hour.grid(row=6, column=1, sticky="w", padx=(0, 50))
-    spin_end_min.grid(row=6, column=1, sticky="e")
+    start_hour_style = deepcopy(SPINBOX_STYLE)
+    start_hour_style["to"] = 23
+    spin_start_hour = tk.Spinbox(start_time_frame, **start_hour_style)
+    spin_start_hour.pack(side="left")
+    tk.Label(start_time_frame, text="giờ", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left", padx=(5, 15))
+    spin_start_min = tk.Spinbox(start_time_frame, **SPINBOX_STYLE)
+    spin_start_min.pack(side="left")
+    tk.Label(start_time_frame, text="phút", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left", padx=(5, 0))
 
-    # Học kỳ - năm học
-    tk.Label(form_frame, text="Học kỳ - Năm học:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=7, column=0, pady=6)
-    combo_hk = ttk.Combobox(form_frame, font=("Arial", 10), width=33, state="readonly", values=hk_list)
+    tk.Label(form_inner, text="Kết thúc:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=6, column=0, pady=6)
+    end_time_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
+    end_time_frame.grid(row=6, column=1, pady=6, sticky="w")
+
+    end_hour_style = deepcopy(SPINBOX_STYLE)
+    end_hour_style["to"] = 23
+    spin_end_hour = tk.Spinbox(end_time_frame, **end_hour_style)
+    spin_end_hour.pack(side="left")
+    tk.Label(end_time_frame, text="giờ", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left", padx=(5, 15))
+    spin_end_min = tk.Spinbox(end_time_frame, **SPINBOX_STYLE)
+    spin_end_min.pack(side="left")
+    tk.Label(end_time_frame, text="phút", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left", padx=(5, 0))
+
+    tk.Label(form_inner, text="Học kỳ - Năm học:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=7, column=0, pady=6)
+    combo_hk = ttk.Combobox(form_inner, font=("Arial", 10), width=29, state="readonly", values=hk_list)
     combo_hk.grid(row=7, column=1, pady=6)
 
-    # Tổng điểm cộng - NHÉT VÀO FORM_FRAME
     diem_label = tk.Label(
-        form_frame,
+        form_inner,
         text="➞ Tổng điểm cộng: 0",
-        font=("Arial", 11, "bold"),
-        fg="green",
+        font=("Arial", 13, "bold"),
+        fg="red",
         bg=FORM_BG_COLOR,
-        anchor="w"
+        anchor="center"
     )
-    diem_label.grid(row=8, column=0, columnspan=2, sticky="w", pady=(10, 5))
+    diem_label.grid(row=8, column=0, columnspan=2, sticky="ew", pady=(10, 5))
 
-    # Nút tạo hoạt động - CŨNG NHÉT VÀO FORM_FRAME
     btn_create = tk.Button(
-        form_frame,
+        form_inner,
         text="Tạo hoạt động",
         command=tao_hoat_dong,
         **CREATE_BUTTON_STYLE
     )
-    btn_create.grid(row=9, column=0, columnspan=2, pady=(20, 10))
+    btn_create.grid(row=9, column=1, pady=(20, 10), sticky="e")
+
+    btn_back = tk.Button(
+        form_inner,
+        text="← Quay lại",
+        command=back_to_main,
+        **BACK_BUTTON_STYLE
+    )
+    btn_back.grid(row=9, column=0, pady=(20, 10), sticky="w")

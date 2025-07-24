@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from Admin.Styles_admin import LIST_TITLE_FONT, TREEVIEW_STYLE
 from Admin.Edit_student import render_student_edit
+from Admin.Styles_admin import *
 from Database.Create_db import get_all_sinh_vien, delete_sinh_vien_by_mssv  # Đảm bảo hàm này trả về list[dict]
 
 def on_tree_click(event, tree, container):
@@ -160,4 +161,7 @@ def render_student_list(container):
     # Cấu hình màu xen kẽ cho từng dòng
     tree.tag_configure("even", background=TREEVIEW_STYLE["even_row_bg"])
     tree.tag_configure("odd", background=TREEVIEW_STYLE["odd_row_bg"])
+
+
+
 

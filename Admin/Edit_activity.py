@@ -3,6 +3,8 @@ from tkinter import ttk, messagebox
 from tkcalendar import DateEntry
 import sqlite3
 from datetime import datetime
+from copy import deepcopy
+from Admin.Styles_admin import *
 
 from Database.Create_db import DB_NAME
 
@@ -19,8 +21,7 @@ def render_edit_activity(container, id_hd, go_back):
         diem_loai = 4 if loai == "Tình nguyện" else 3 if loai == "Hội nhập" else 0
         diem_xn = 4 if xn == "Có" else 0
 
-        tong = diem_cap + diem_loai + diem_xn
-        return tong
+        return diem_cap + diem_loai + diem_xn
 
     def on_back():
         if go_back:
@@ -30,7 +31,6 @@ def render_edit_activity(container, id_hd, go_back):
         widget.destroy()
     container.configure(bg="white")
 
-    # LẤY DỮ LIỆU HOẠT ĐỘNG
     cursor.execute("SELECT * FROM HOAT_DONG WHERE ID_HD = ?", (id_hd,))
     data = cursor.fetchone()
     if not data:
@@ -39,86 +39,14 @@ def render_edit_activity(container, id_hd, go_back):
 
     ten_hd, loai_hd, cap_hd, co_xac_nhan, ngay_tc, gio_bd, gio_kt, diem_cong, id_hk = data[1:10]
 
-    # LẤY DANH SÁCH HỌC KỲ
     cursor.execute("SELECT ID_HK, NAME_HK, SCHOOL_YEAR FROM HK_NK")
     ds_hk = cursor.fetchall()
     hk_list = [f"{row[0]} - {row[1]} {row[2]}" for row in ds_hk]
     hk_map = {f"{row[0]} - {row[1]} {row[2]}": row[0] for row in ds_hk}
 
-    # GIAO DIỆN
-    tk.Label(container, text="✏️ Sửa hoạt động", font=("Arial", 16, "bold"), fg="#003366", bg="white").pack(pady=10)
-    form = tk.Frame(container, bg="#f9f9f9", padx=20, pady=20)
-    form.pack()
-
-    tk.Label(form, text="Tên hoạt động:", font=("Arial", 10), width=18, anchor="e", bg="#f9f9f9").grid(row=0, column=0, pady=6)
-    entry_ten = tk.Entry(form, font=("Arial", 10), width=35)
-    entry_ten.grid(row=0, column=1, pady=6)
-    entry_ten.insert(0, ten_hd)
-
-    tk.Label(form, text="Loại hoạt động:", font=("Arial", 10), width=18, anchor="e", bg="#f9f9f9").grid(row=1, column=0, pady=6)
-    combo_loai = ttk.Combobox(form, font=("Arial", 10), width=33, state="readonly",
-                              values=["Tình nguyện", "Hội nhập", "Khác"])
-    combo_loai.grid(row=1, column=1, pady=6)
-    combo_loai.set(loai_hd if loai_hd in combo_loai['values'] else "Khác")
-
-    tk.Label(form, text="Cấp hoạt động:", font=("Arial", 10), width=18, anchor="e", bg="#f9f9f9").grid(row=2, column=0, pady=6)
-    combo_cap = ttk.Combobox(form, font=("Arial", 10), width=33, state="readonly",
-                             values=["Chi hội", "Liên chi", "Trường"])
-    combo_cap.grid(row=2, column=1, pady=6)
-    combo_cap.set(cap_hd if cap_hd in combo_cap['values'] else "Trường")
-
-    tk.Label(form, text="Có giấy xác nhận:", font=("Arial", 10), width=18, anchor="e", bg="#f9f9f9").grid(row=3, column=0, pady=6)
-    xn_var = tk.StringVar(value=co_xac_nhan or "Không")
-    tk.Radiobutton(form, text="Có", variable=xn_var, value="Có", bg="#f9f9f9").grid(row=3, column=1, sticky="w")
-    tk.Radiobutton(form, text="Không", variable=xn_var, value="Không", bg="#f9f9f9").grid(row=3, column=1, sticky="e")
-
-    tk.Label(form, text="Ngày tổ chức:", font=("Arial", 10), width=18, anchor="e", bg="#f9f9f9").grid(row=4, column=0, pady=6)
-    calendar_ngay = DateEntry(form, width=32, date_pattern='dd/mm/yyyy', background='darkblue', foreground='white')
-    calendar_ngay.grid(row=4, column=1, pady=6)
-    try:
-        calendar_ngay.set_date(datetime.strptime(ngay_tc, "%d/%m/%Y"))
-    except:
-        pass
-
-    tk.Label(form, text="Giờ bắt đầu (HH:mm):", font=("Arial", 10), width=18, anchor="e", bg="#f9f9f9").grid(row=5, column=0, pady=6)
-    spin_start_hour = tk.Spinbox(form, from_=0, to=23, width=5, format="%02.0f")
-    spin_start_min = tk.Spinbox(form, from_=0, to=59, width=5, format="%02.0f")
-    spin_start_hour.grid(row=5, column=1, sticky="w", padx=(0, 50))
-    spin_start_min.grid(row=5, column=1, sticky="e")
-    try:
-        h, m, *_ = map(int, gio_bd.split(":"))
-        spin_start_hour.delete(0, 'end')
-        spin_start_min.delete(0, 'end')
-        spin_start_hour.insert(0, f"{h:02}")
-        spin_start_min.insert(0, f"{m:02}")
-    except:
-        pass
-
-    tk.Label(form, text="Giờ kết thúc (HH:mm):", font=("Arial", 10), width=18, anchor="e", bg="#f9f9f9").grid(row=6, column=0, pady=6)
-    spin_end_hour = tk.Spinbox(form, from_=0, to=23, width=5, format="%02.0f")
-    spin_end_min = tk.Spinbox(form, from_=0, to=59, width=5, format="%02.0f")
-    spin_end_hour.grid(row=6, column=1, sticky="w", padx=(0, 50))
-    spin_end_min.grid(row=6, column=1, sticky="e")
-    try:
-        h, m, *_ = map(int, gio_kt.split(":"))
-        spin_end_hour.delete(0, 'end')
-        spin_end_min.delete(0, 'end')
-        spin_end_hour.insert(0, f"{h:02}")
-        spin_end_min.insert(0, f"{m:02}")
-    except:
-        pass
-
-    tk.Label(form, text="Học kỳ - Năm học:", font=("Arial", 10), width=18, anchor="e", bg="#f9f9f9").grid(row=7, column=0, pady=6)
-    combo_hk = ttk.Combobox(form, font=("Arial", 10), width=33, state="readonly", values=hk_list)
-    combo_hk.grid(row=7, column=1, pady=6)
-    for hk_str in hk_list:
-        if hk_str.startswith(f"{id_hk} -"):
-            combo_hk.set(hk_str)
-            break
-
     def update_hoat_dong():
         try:
-            ten = entry_ten.get()
+            ten = entry_ten.get().strip()
             loai = combo_loai.get()
             cap = combo_cap.get()
             xn = xn_var.get()
@@ -148,8 +76,156 @@ def render_edit_activity(container, id_hd, go_back):
         except Exception as e:
             messagebox.showerror("Lỗi", f"Cập nhật thất bại: {e}")
 
-    tk.Button(container, text="📂 Lưu thay đổi", bg="#006699", fg="white",
-              font=("Arial", 11, "bold"), command=update_hoat_dong).pack(pady=10)
+    # Đặt màu nền cho toàn bộ giao diện
+    container.config(bg=PAGE_BG_COLOR)
 
-    tk.Button(container, text="↩ Quay lại", bg="gray", fg="white",
-              font=("Arial", 10), command=on_back).pack(pady=5)
+    # Tiêu đề trên cùng
+    tk.Label(
+        container,
+        text="Sửa hoạt động",
+        font=TITLE_FONT,
+        bg="white",
+        fg="#003366"
+    ).pack(anchor="w", padx=28, pady=(20, 5))
+
+    # Khung ô vuông màu xanh chứa form
+    outer_frame = tk.Frame(
+        container,
+        bg=FORM_BG_COLOR,
+        bd=FORM_BORDER_WIDTH,
+        relief=FORM_BORDER_STYLE,
+        width=480
+    )
+    outer_frame.pack(pady=10)
+
+    # === Form trong khung viền màu xanh ===
+    form_frame = tk.Frame(outer_frame, bg=FORM_BG_COLOR)
+    form_frame.pack(padx=FORM_PADDING_X, pady=FORM_PADDING_Y)
+
+    form_inner = tk.Frame(form_frame, bg=FORM_BG_COLOR)
+    form_inner.pack()
+
+    # === Ô nhập liệu ===
+    tk.Label(form_inner, text="Tên hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=0, column=0, pady=6)
+    entry_ten = tk.Entry(form_inner, **ENTRY_STYLE_ACTIVITY)
+    entry_ten.grid(row=0, column=1, pady=6)
+    entry_ten.insert(0, ten_hd)
+
+    tk.Label(form_inner, text="Loại hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=1, column=0, pady=6)
+    combo_loai = ttk.Combobox(form_inner, font=("Arial", 10), width=29, state="readonly",
+                              values=["Tình nguyện", "Hội nhập", "Khác"])
+    combo_loai.grid(row=1, column=1, pady=6)
+    combo_loai.set(loai_hd if loai_hd in combo_loai['values'] else "Khác")
+
+    tk.Label(form_inner, text="Cấp hoạt động:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=2, column=0, pady=6)
+    combo_cap = ttk.Combobox(form_inner, font=("Arial", 10), width=29, state="readonly",
+                             values=["Chi hội", "Liên chi", "Trường"])
+    combo_cap.grid(row=2, column=1, pady=6)
+    combo_cap.set(cap_hd if cap_hd in combo_cap['values'] else "Trường")
+
+    tk.Label(form_inner, text="Có giấy xác nhận:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=3, column=0, pady=6)
+    xn_var = tk.StringVar(value=co_xac_nhan if co_xac_nhan in ["Có", "Không"] else "Không")
+    xn_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
+    xn_frame.grid(row=3, column=1, padx=FORM_ENTRY_PADX, pady=6, sticky="w")
+    for text in ["Có", "Không"]:
+        tk.Radiobutton(
+            xn_frame,
+            text=text,
+            variable=xn_var,
+            value=text,
+            bg=FORM_BG_COLOR,
+            fg="white",
+            font=ENTRY_FONT,
+            selectcolor="black",
+            activebackground=FORM_BG_COLOR,
+            activeforeground="white",
+        ).pack(side="left", padx=(0, 10))
+
+    tk.Label(form_inner, text="Ngày tổ chức:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=4, column=0, pady=6)
+    calendar_ngay = DateEntry(form_inner, **DATE_ENTRY_STYLE)
+    calendar_ngay.grid(row=4, column=1, pady=6)
+    try:
+        calendar_ngay.set_date(datetime.strptime(ngay_tc, "%d/%m/%Y"))
+    except:
+        pass
+
+    tk.Label(form_inner, text="Giờ bắt đầu:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(
+        row=5, column=0, pady=6)
+    start_time_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
+    start_time_frame.grid(row=5, column=1, pady=6, sticky="w")
+    start_hour_style = deepcopy(SPINBOX_STYLE)
+    start_hour_style["to"] = 23
+    spin_start_hour = tk.Spinbox(start_time_frame, **start_hour_style)
+    spin_start_hour.pack(side="left")
+    tk.Label(start_time_frame, text="giờ", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left",
+                                                                                               padx=(5, 15))
+    spin_start_min = tk.Spinbox(start_time_frame, **SPINBOX_STYLE)
+    spin_start_min.pack(side="left")
+    tk.Label(start_time_frame, text="phút", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left",
+                                                                                                padx=(5, 0))
+    try:
+        h, m, *_ = map(int, gio_bd.strip().split(":"))
+        spin_start_hour.delete(0, 'end')
+        spin_start_min.delete(0, 'end')
+        spin_start_hour.insert(0, f"{h:02}")
+        spin_start_min.insert(0, f"{m:02}")
+    except:
+        pass
+
+    tk.Label(form_inner, text="Giờ kết thúc:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=6, column=0, pady=6)
+    end_time_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
+    end_time_frame.grid(row=6, column=1, pady=6, sticky="w")
+    end_hour_style = deepcopy(SPINBOX_STYLE)
+    end_hour_style["to"] = 23
+    spin_end_hour = tk.Spinbox(end_time_frame, **end_hour_style)
+    spin_end_hour.pack(side="left")
+    tk.Label(end_time_frame, text="giờ", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left", padx=(5, 15))
+    spin_end_min = tk.Spinbox(end_time_frame, **SPINBOX_STYLE)
+    spin_end_min.pack(side="left")
+    tk.Label(end_time_frame, text="phút", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left", padx=(5, 0))
+    try:
+        h, m, *_ = map(int, gio_kt.strip().split(":"))
+        spin_end_hour.delete(0, 'end')
+        spin_end_min.delete(0, 'end')
+        spin_end_hour.insert(0, f"{h:02}")
+        spin_end_min.insert(0, f"{m:02}")
+    except:
+        pass
+
+    tk.Label(form_inner, text="Học kỳ - Năm học:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=7, column=0, pady=6)
+    combo_hk = ttk.Combobox(form_inner, font=("Arial", 10), width=29, state="readonly", values=hk_list)
+    combo_hk.grid(row=7, column=1, pady=6)
+    for hk_str in hk_list:
+        if hk_str.startswith(f"{id_hk} -"):
+            combo_hk.set(hk_str)
+            break
+
+    # === Nút chức năng trong ô vuông ===
+    button_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
+    button_frame.grid(row=8, column=0, columnspan=2, pady=(10, 0), sticky="ew")
+    button_frame.columnconfigure(0, weight=1)
+    button_frame.columnconfigure(1, weight=1)
+
+    btn_back = tk.Button(
+        button_frame,
+        text="← Quay lại",
+        command=on_back,
+        **BACK_BUTTON_STYLE
+    )
+    btn_back.grid(row=0, column=0, sticky="w", padx=10)
+
+    btn_save = tk.Button(
+        button_frame,
+        text="Lưu thay đổi",
+        command=update_hoat_dong,
+        **CREATE_BUTTON_STYLE
+    )
+    btn_save.grid(row=0, column=1, sticky="e", padx=10)
+

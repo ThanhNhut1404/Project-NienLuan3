@@ -23,16 +23,20 @@ def render_admin_login(container):
     form_frame.place(relx=0.5, rely=0.3, anchor="center")  # Canh giữa màn hình
 
     # === Họ và tên ===
-    tk.Label(form_frame, text="Họ và tên:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="white")\
-        .pack(anchor='w', padx=FORM_LABEL_PADX, pady=(FORM_PADDING_Y, 5))
-    entry_name = tk.Entry(form_frame, font=ENTRY_FONT, width=25)
-    entry_name.pack(padx=FORM_ENTRY_PADX)
+    name_row = tk.Frame(form_frame, bg=FORM_BG_COLOR)
+    name_row.pack(pady=(FORM_PADDING_Y, 0), padx=FORM_ENTRY_PADX, anchor="w")
+    tk.Label(name_row, text="Họ và tên:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="white", width=9, anchor="w").pack(
+        side="left")
+    entry_name = tk.Entry(name_row, font=ENTRY_FONT, width=22)
+    entry_name.pack(side="left", padx=FORM_ENTRY_PADX)
 
     # === Mật khẩu ===
-    tk.Label(form_frame, text="Mật khẩu:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="white")\
-        .pack(anchor='w', padx=FORM_LABEL_PADX, pady=(15, 5))
-    entry_password = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=25)
-    entry_password.pack(padx=FORM_ENTRY_PADX)
+    pass_row = tk.Frame(form_frame, bg=FORM_BG_COLOR)
+    pass_row.pack(pady=(8, 0), padx=FORM_ENTRY_PADX, anchor="w")
+    tk.Label(pass_row, text="Mật khẩu:", font=LABEL_FONT, bg=FORM_BG_COLOR, fg="white", width=9, anchor="w").pack(
+        side="left")
+    entry_password = tk.Entry(pass_row, show="*", font=ENTRY_FONT, width=22)
+    entry_password.pack(side="left", padx=FORM_ENTRY_PADX)
 
     # === Checkbutton hiện mật khẩu ===
     show_password = tk.BooleanVar(value=False)

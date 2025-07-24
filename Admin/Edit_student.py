@@ -9,7 +9,7 @@ def render_student_edit(container, student_data):
         widget.destroy()
 
     container.config(bg=PAGE_BG_COLOR)
-    tk.Label(container, text="👤📝 Chỉnh sửa thông tin sinh viên", font=TITLE_FONT, bg="white", fg="#003366").pack(anchor="w", padx=28, pady=(20, 5))
+    tk.Label(container, text="👤 Chỉnh sửa thông tin sinh viên", font=TITLE_FONT, bg="white", fg="#003366").pack(anchor="w", padx=28, pady=(20, 5))
 
     outer_frame = tk.Frame(
         container,
@@ -87,18 +87,20 @@ def render_student_edit(container, student_data):
         render_student_list(container)
 
     # Nút "Quay lại" ở cột 0, canh trái
-    tk.Button(
+    btn_back = tk.Button(
         form_frame,
         text="← Quay lại",
         command=back_to_list,
         **BACK_BUTTON_STYLE
-    ).grid(row=9, column=0, sticky="w", padx=(10, 0), pady=(20, 10))
+    )
+    btn_back.grid(row=9, column=0, pady=(20, 10), sticky="w", padx=(10, 5))
 
-    # Nút "Lưu thay đổi" canh giữa bằng cách dùng columnspan=2
-    tk.Button(
+    # Nút "Cập nhật" ở cột 1, canh phải
+    btn_save = tk.Button(
         form_frame,
-        text="💾 Cập nhật",
+        text="Cập nhật",
         command=save_changes,
         **BUTTON_STYLE
-    ).grid(row=9, column=0, columnspan=2, pady=(20, 10))
+    )
+    btn_save.grid(row=9, column=1, pady=(20, 10), sticky="e", padx=(5, 10))
 

@@ -25,7 +25,7 @@ def render_header(container, on_logout, switch_to_view):
     activity_menu.add_separator()
     activity_menu.add_command(label="Xem danh sách hoạt động", command=lambda: switch_to_view("view_activities"))
     activity_menu.add_separator()
-    activity_menu.add_command(label="Tạo học kỳ mới", command=lambda: switch_to_view("create_hk"))
+    activity_menu.add_command(label="Tạo học kỳ", command=lambda: switch_to_view("create_hk"))
     activity_menu.add_separator()
     activity_menu_btn.config(menu=activity_menu)
     activity_menu_btn.pack(side=tk.LEFT, padx=2)
