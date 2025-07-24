@@ -319,7 +319,7 @@ def render_student_create(container, switch_to_view):
             try:
                 insert_sinh_vien(
                     name, mssv, email, address, birthdate, gender, class_sv, password,
-                    json.dumps(encodings), phone
+                    json.dumps(encodings), phone, img =""
                 )
                 stop_camera()
                 messagebox.showinfo("Thành công", f"Tài khoản '{name}' đã được tạo thành công!")

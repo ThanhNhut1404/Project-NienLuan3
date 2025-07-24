@@ -4,6 +4,7 @@ from Student.Styles_student import MENU_BUTTON_STYLE
 from Student.Activity_roll_call import render_activity_roll_call
 from Student.View_activity import render_view_activity
 from Student.Header_student import render_header
+from Student.Update_sv import render_update_sv  # ✅ THÊM DÒNG NÀY
 
 def render_student_main(container, user):
     for widget in container.winfo_children():
@@ -36,6 +37,10 @@ def render_student_main(container, user):
         menu_frame.place_forget()
         render_activity_roll_call(content_frame, user)
 
+    def show_update_info():
+        render_update_sv(content_frame, user)
+        menu_frame.pack_forget()
+
     def logout():
         if messagebox.askyesno("Xác nhận", "Bạn có chắc muốn đăng xuất?"):
             container.master.destroy()
@@ -45,6 +50,9 @@ def render_student_main(container, user):
     tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
 
     tk.Button(menu_frame, text="📝 Điểm danh hoạt động", command=show_attendance, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)
+    tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
+
+    tk.Button(menu_frame, text="📝 Cập nhật thông tin", command=show_update_info, **MENU_BUTTON_STYLE).pack(fill="x",pady=2)
     tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
 
     tk.Button(menu_frame, text="🚪 Đăng xuất", command=logout, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)

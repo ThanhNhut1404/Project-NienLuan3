@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS SINH_VIEN (
     PASSWORD_SV TEXT NOT NULL,
     TONG_DIEM_HD INTEGER DEFAULT 0,
     FACE_ENCODING TEXT,
+    IMG TEXT,
     CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ''')
@@ -145,16 +146,18 @@ def create_table_sinh_vien():
             DATE_SV DATE,
             SEX_SV INTEGER CHECK (SEX_SV IN (0, 1)),
             CLASS_SV TEXT,
+            PHONE_SV TEXT,
             PASSWORD_SV TEXT NOT NULL,
             TONG_DIEM_HD INTEGER DEFAULT 0,
             FACE_ENCODING TEXT,
+            IMG TEXT,
             CREATED_AT DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     ''')
     conn.commit()
     conn.close()
 
-def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json, phone):
+def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json, phone, img):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
     try:
@@ -162,14 +165,15 @@ def insert_sinh_vien(name, mssv, email, address, birthdate, gender, class_sv, pa
             INSERT INTO SINH_VIEN (
                 NAME_SV, MSSV, EMAIL_SV, ADDRESS_SV,
                 DATE_SV, SEX_SV, CLASS_SV,
-                PASSWORD_SV, FACE_ENCODING, PHONE_SV
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json, phone))
+                PASSWORD_SV, FACE_ENCODING, PHONE_SV, IMG
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (name, mssv, email, address, birthdate, gender, class_sv, password, encoding_json, phone, img))
         conn.commit()
     except sqlite3.IntegrityError as e:
         raise Exception(f"Trùng MSSV hoặc Email: {e}")
     finally:
         conn.close()
+
 
 
 def get_all_sinh_vien():
@@ -178,7 +182,8 @@ def get_all_sinh_vien():
     c.execute('''
         SELECT 
             ID_SV, NAME_SV, MSSV, EMAIL_SV, ADDRESS_SV, DATE_SV, SEX_SV,
-            CLASS_SV, PASSWORD_SV, TONG_DIEM_HD, FACE_ENCODING, CREATED_AT, PHONE_SV
+            CLASS_SV, PHONE_SV, PASSWORD_SV, TONG_DIEM_HD,
+            FACE_ENCODING, IMG, CREATED_AT
         FROM SINH_VIEN
     ''')
     rows = c.fetchall()
@@ -187,7 +192,7 @@ def get_all_sinh_vien():
     result = []
     for row in rows:
         try:
-            encodings = json.loads(row[10]) if row[10] else []  # ✅ Đã sửa index đúng
+            encodings = json.loads(row[11]) if row[11] else []
         except:
             encodings = []
 
@@ -200,14 +205,18 @@ def get_all_sinh_vien():
             'date': row[5],
             'sex': row[6],
             'class': row[7],
-            'password': row[8],
-            'TONG_DIEM_HD': row[9],
+            'phone': row[8],
+            'password': row[9],
+            'TONG_DIEM_HD': row[10],
             'encodings': encodings,
-            'created_at': row[11],
-            'phone': row[12]
+            'img': row[12],
+            'created_at': row[13]
         })
 
     return result
+
+
+
 
 
 def sinh_vien_exists(name_sv):

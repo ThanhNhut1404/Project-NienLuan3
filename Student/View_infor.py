@@ -15,11 +15,12 @@ def render_view_infor(container, user):
     left_frame = tk.Frame(main_frame, bg="white")
     left_frame.grid(row=0, column=0, sticky="n")
 
-    image_path = "avatar.png"
+    # Lấy ảnh từ user["img"] nếu có, ngược lại dùng avatar mặc định
+    image_path = user.get("img", "") or "avatar.png"
     if os.path.exists(image_path):
         img = Image.open(image_path)
     else:
-        img = Image.new("RGB", (150, 200), color="#cccccc")
+        img = Image.new("RGB", (150, 200), color="#cccccc")  # fallback
 
     img = img.resize((150, 200))
     photo = ImageTk.PhotoImage(img)
@@ -39,23 +40,17 @@ def render_view_infor(container, user):
     title.grid(row=0, column=0, columnspan=4, pady=(0, 15), sticky="w")
 
     def add_pair(label1, value1, label2, value2, row):
-        # Bên trái
         left_frame = tk.Frame(right_frame, bg="white")
         left_frame.grid(row=row, column=0, columnspan=2, sticky="w", pady=2, padx=(0, 40))
 
-        tk.Label(left_frame, text=label1, font=("Arial", 11), bg="white") \
-            .pack(side="left")
-        tk.Label(left_frame, text=value1, font=("Arial", 11, "bold"), bg="white", fg="#333") \
-            .pack(side="left")
+        tk.Label(left_frame, text=label1, font=("Arial", 11), bg="white").pack(side="left")
+        tk.Label(left_frame, text=value1, font=("Arial", 11, "bold"), bg="white", fg="#333").pack(side="left")
 
-        # Bên phải
         right_inner = tk.Frame(right_frame, bg="white")
         right_inner.grid(row=row, column=2, columnspan=2, sticky="w", pady=2)
 
-        tk.Label(right_inner, text=label2, font=("Arial", 11), bg="white") \
-            .pack(side="left")
-        tk.Label(right_inner, text=value2, font=("Arial", 11, "bold"), bg="white", fg="#333") \
-            .pack(side="left")
+        tk.Label(right_inner, text=label2, font=("Arial", 11), bg="white").pack(side="left")
+        tk.Label(right_inner, text=value2, font=("Arial", 11, "bold"), bg="white", fg="#333").pack(side="left")
 
     # ===== CÁC DÒNG HIỂN THỊ =====
     add_pair("MSSV:", user.get("mssv", ""), "Địa chỉ:", user.get("address", ""), 1)
