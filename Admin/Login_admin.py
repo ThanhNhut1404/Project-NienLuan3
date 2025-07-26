@@ -14,8 +14,8 @@ def render_admin_login(container):
     content = tk.Frame(container, bg="white")
     content.pack(fill=tk.BOTH, expand=True)
 
-    # === Tiêu đề ===
-    tk.Label(content, text="ĐĂNG NHẬP QUẢN TRỊ VIÊN", font=TITLE_FONT, bg="white", fg="#003366").pack(pady=43)
+    tk.Label(content, text="ĐĂNG NHẬP QUẢN TRỊ VIÊN", font=("Arial", 20, "bold"), bg="white", fg="#003366") \
+        .pack(pady=65, anchor="w", fill="x", padx=20)
 
     # === Form login (ô vuông) ===
     form_frame = tk.Frame(content, bg=FORM_BG_COLOR, bd=FORM_BORDER_WIDTH, relief=FORM_BORDER_STYLE)

@@ -6,7 +6,7 @@ def render_header(container, on_logout, switch_to_view):
 
     # === MENU: Quản lý sinh viên ===
     student_menu_btn = tk.Menubutton(header, text="Quản lý sinh viên", **MENU_BUTTON_STYLE, direction="below")
-    student_menu = tk.Menu(student_menu_btn, tearoff=0, font=("Arial", 10), )
+    student_menu = tk.Menu(student_menu_btn, tearoff=0, font=("Arial", 10), fg="#003366" )
     student_menu.add_command(label="Tạo tài khoản", command=lambda: switch_to_view("create_student"))
     student_menu.add_separator()
     student_menu.add_command(label="Xem danh sách", command=lambda: switch_to_view("view_students"))
@@ -20,7 +20,7 @@ def render_header(container, on_logout, switch_to_view):
 
     # === MENU: Quản lý hoạt động ===
     activity_menu_btn = tk.Menubutton(header, text="Quản lý hoạt động", **MENU_BUTTON_STYLE, direction="below")
-    activity_menu = tk.Menu(activity_menu_btn, tearoff=0, font=("Arial", 10))
+    activity_menu = tk.Menu(activity_menu_btn, tearoff=0, font=("Arial", 10), fg="#003366")
     activity_menu.add_command(label="Tạo hoạt động", command=lambda: switch_to_view("create_activity"))
     activity_menu.add_separator()
     activity_menu.add_command(label="Xem danh sách hoạt động", command=lambda: switch_to_view("view_activities"))

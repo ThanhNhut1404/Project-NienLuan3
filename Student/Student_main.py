@@ -14,7 +14,7 @@ def render_student_main(container, user):
     container.config(bg="#f0f0f0")
 
     # ===== HEADER =====
-    header_frame = tk.Frame(container, bg="#00897B", height=55)
+    header_frame = tk.Frame(container, bg="#00897B", height=45)
     header_frame.pack(fill="x")
     render_header(header_frame, user)
 
