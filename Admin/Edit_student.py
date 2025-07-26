@@ -9,7 +9,7 @@ def render_student_edit(container, student_data):
         widget.destroy()
 
     container.config(bg=PAGE_BG_COLOR)
-    tk.Label(container, text="👤 Chỉnh sửa thông tin sinh viên", font=TITLE_FONT, bg="white", fg="#003366").pack(anchor="w", padx=28, pady=(20, 5))
+    tk.Label(container, text="🖉 Chỉnh sửa thông tin sinh viên", font=TITLE_FONT, bg="white", fg="#003366").pack(anchor="w", padx=28, pady=(20, 5))
 
     outer_frame = tk.Frame(
         container,

@@ -96,7 +96,7 @@ def render_Create_activity(container):
     container.config(bg=PAGE_BG_COLOR)
     tk.Label(
         container,
-        text="📝 Tạo hoạt động",
+        text="📅 Tạo hoạt động",
         font=TITLE_FONT,
         bg="white",
         fg="#003366"

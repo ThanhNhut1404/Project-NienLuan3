@@ -3,31 +3,15 @@ from tkinter import messagebox
 from Student.Styles_student import MENU_BUTTON_STYLE
 from Student.Activity_roll_call import render_activity_roll_call
 from Student.View_activity import render_view_activity
-from Student.Header_student import render_header
-from Student.Update_sv import render_update_sv  # ✅ THÊM DÒNG NÀY
+from Student.Update_sv import render_update_sv
+from Student.View_infor import render_view_infor
 
-def render_student_main(container, user):
-    for widget in container.winfo_children():
-        widget.destroy()
+def render_menu(container, content_frame, user, menu_btn, go_back_login):
+    menu_frame = tk.Frame(container, bg="white", bd=2, relief="ridge")
 
-    container.config(bg="#f0f0f0")
-
-    # ===== HEADER =====
-    header_frame = tk.Frame(container, bg="#2C387E", height=60)
-    header_frame.pack(fill="x")
-
-    render_header(header_frame, user)
-
-    # ===== NỘI DUNG CHÍNH =====
-    main_content = tk.Frame(container, bg="#f0f0f0")
-    main_content.pack(fill="both", expand=True)
-
-    # ===== KHU VỰC HIỂN THỊ CHÍNH =====
-    content_frame = tk.Frame(main_content, bg="white", bd=2, relief="groove")
-    content_frame.pack(fill="both", expand=True, padx=20, pady=20)
-
-    # ===== MENU ẨN (chỉ nằm trong main_content, không che header) =====
-    menu_frame = tk.Frame(main_content, bg="white", bd=2, relief="ridge")
+    def show_home():
+        menu_frame.place_forget()
+        render_view_infor(content_frame, user)
 
     def show_view_activity():
         menu_frame.place_forget()
@@ -38,42 +22,36 @@ def render_student_main(container, user):
         render_activity_roll_call(content_frame, user)
 
     def show_update_info():
-        render_update_sv(content_frame, user)
-        menu_frame.pack_forget()
+        menu_frame.place_forget()
+        render_update_sv(content_frame, user, show_home)
 
     def logout():
         if messagebox.askyesno("Xác nhận", "Bạn có chắc muốn đăng xuất?"):
-            container.master.destroy()
+            menu_frame.place_forget()
+            go_back_login()
 
-    # ===== Các nút chức năng (với đường kẻ phân cách) =====
-    tk.Button(menu_frame, text="📅 Hoạt động đã tham gia", command=show_view_activity, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)
-    tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
-
-    tk.Button(menu_frame, text="📝 Điểm danh hoạt động", command=show_attendance, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)
-    tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
-
-    tk.Button(menu_frame, text="📝 Cập nhật thông tin", command=show_update_info, **MENU_BUTTON_STYLE).pack(fill="x",pady=2)
-    tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
-
-    tk.Button(menu_frame, text="🚪 Đăng xuất", command=logout, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)
-
-    # ===== Nút menu ☰ đặt trong header (đè lên main_content) =====
+    # ===== NÚT MENU ☰ ĐIỀU KHIỂN MENU =====
     def toggle_menu():
         if menu_frame.winfo_ismapped():
             menu_frame.place_forget()
         else:
-            menu_frame.place(x=10, y=10)
+            x = menu_btn.winfo_rootx() - container.winfo_rootx()
+            y = menu_btn.winfo_rooty() - container.winfo_rooty() + menu_btn.winfo_height()
+            menu_frame.place(x=x, y=y)
 
-    menu_btn = tk.Button(
-        header_frame,
-        text="☰",
-        font=("Arial", 20, "bold"),
-        bg="#2C387E",
-        fg="white",
-        bd=0,
-        activebackground="#1A237E",
-        activeforeground="white",
-        command=toggle_menu
-    )
-    menu_btn.place(x=10, y=10, width=40, height=40)
+    menu_btn.config(command=toggle_menu)
 
+    # ===== CÁC NÚT TRONG MENU =====
+    tk.Button(menu_frame, text="Trang chủ", command=show_home, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)
+    tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
+
+    tk.Button(menu_frame, text="Hoạt động đã tham gia", command=show_view_activity, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)
+    tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
+
+    tk.Button(menu_frame, text="Điểm danh hoạt động", command=show_attendance, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)
+    tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
+
+    tk.Button(menu_frame, text="Cập nhật thông tin", command=show_update_info, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)
+    tk.Frame(menu_frame, height=1, bg="#ccc").pack(fill="x", padx=10, pady=1)
+
+    tk.Button(menu_frame, text="Đăng xuất", command=logout, **MENU_BUTTON_STYLE).pack(fill="x", padx=10, pady=2)

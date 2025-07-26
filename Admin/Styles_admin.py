@@ -62,9 +62,9 @@ BUTTON_EDIT_STYLE = {
 
 BUTTON_DELETE_STYLE = {
     "font": ("Arial", 14, "bold"),
-    "bg": "red",
+    "bg": "#FFA726",
     "fg": "white",
-    "activebackground": "#388E3C",
+    "activebackground": "#FF5722",
     "bd": 2,
     "relief": "raised",
     "width": 13,
@@ -156,11 +156,11 @@ SAVE_BUTTON_STYLE = {
 
 # Checkbox "Hiện mật khẩu"
 CHECKBOX_STYLE = {
-    "bg": FORM_BG_COLOR,          # Nền tổng thể
-    "fg": "white",                # Màu chữ "Hiện mật khẩu"
+    "bg": FORM_BG_COLOR,
+    "fg": "white",
     "activebackground": FORM_BG_COLOR,
     "activeforeground": "white",
-    "selectcolor": "black",       # 👈 Nền ô vuông: màu đen
+    "selectcolor": "black",
     "font": ("Arial", 10, "bold")
 }
 
@@ -182,7 +182,7 @@ POPUP_OK_BUTTON_STYLE = {
 #Bảng danh sách
 TREEVIEW_STYLE = {
     "font": ("Arial", 14),     # Cỡ chữ trong bảng
-    "rowheight": 40,            # Chiều cao mỗi dòng
+    "rowheight": 29,            # Chiều cao mỗi dòng
     "header_font": ("Arial", 16, "bold"),  # Tiêu đề bảng
     "header_bg": "#003366",
     "header_fg": "white",

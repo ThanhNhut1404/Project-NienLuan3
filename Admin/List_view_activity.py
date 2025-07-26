@@ -19,7 +19,7 @@ def render_view_activities(container, go_back):
     # ========== TITLE ==========
     title_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)
     title_frame.pack(anchor="w", padx=28, pady=(20, 5))
-    tk.Label(title_frame, text="Danh sách hoạt động", font=TITLE_FONT, bg="white", fg="#003366").pack(anchor="w")
+    tk.Label(title_frame, text="📚 Danh sách hoạt động", font=TITLE_FONT, bg="white", fg="#003366").pack(anchor="w")
 
     # ========== TREEVIEW ==========
     tree_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)

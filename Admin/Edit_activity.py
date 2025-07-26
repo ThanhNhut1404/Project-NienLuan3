@@ -82,7 +82,7 @@ def render_edit_activity(container, id_hd, go_back):
     # Tiêu đề trên cùng
     tk.Label(
         container,
-        text="Sửa hoạt động",
+        text="🛠️ Sửa hoạt động",
         font=TITLE_FONT,
         bg="white",
         fg="#003366"

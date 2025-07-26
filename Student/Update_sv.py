@@ -5,8 +5,9 @@ import sqlite3
 import os
 from PIL import Image, ImageTk
 from datetime import datetime
-from Database.Create_db import DB_NAME
 import hashlib
+from Database.Create_db import DB_NAME
+from Student.Styles_student import *
 
 def render_update_sv(container, user, go_back):
     def on_back():
@@ -31,51 +32,20 @@ def render_update_sv(container, user, go_back):
     id_sv, name, mssv, email, address, birth, sex, lop, phone, password_sv, tong_diem_hd, face_encoding, img_path, created_at = sv
     img_file_path = img_path
 
-    # ===== GIAO DIỆN CHÍNH =====
-    title_label = tk.Label(container, text="📝 Cập nhật thông tin sinh viên", font=("Segoe UI", 18, "bold"), fg="#2C387E", bg="white")
-    title_label.pack(pady=(20, 10))
+    title_label = tk.Label(container, text="🔄 Cập nhật thông tin sinh viên", font=TITLE_FONT, fg="#00897B", bg="white")
+    title_label.pack(anchor="w", padx=60, pady=(20, 10))
 
-    form_frame = tk.Frame(container, bg="#F5F5F5", bd=2, relief="groove")
-    form_frame.pack(pady=10, padx=20)
+    outer_frame = tk.Frame(container, bg="#F5F5F5", bd=0)
+    outer_frame.pack(pady=30)
+    outer_frame.pack_propagate(False)
+    outer_frame.config(height=500, width=700)
 
-    def create_label_entry(row, text, entry_var, show=None):
-        tk.Label(form_frame, text=text, bg="#F5F5F5", font=("Segoe UI", 11)).grid(row=row, column=0, sticky='e', padx=10, pady=5)
-        entry = tk.Entry(form_frame, textvariable=entry_var, width=30, show=show, font=("Segoe UI", 10))
-        entry.grid(row=row, column=1, padx=10, pady=5)
-        return entry
+    left_frame = tk.Frame(outer_frame, bg="#F5F5F5")
+    left_frame.grid(row=0, column=0, padx=(20, 40), pady=20, sticky="n")
 
-    # ===== CÁC TRƯỜNG =====
-    tk.Label(form_frame, text="Ngày sinh:", bg="#F5F5F5", font=("Segoe UI", 11)).grid(row=0, column=0, sticky='e', padx=10, pady=5)
-    entry_birth = DateEntry(form_frame, date_pattern="dd-mm-yyyy", width=27, font=("Segoe UI", 10))
-    try:
-        entry_birth.set_date(datetime.strptime(birth, "%Y-%m-%d"))
-    except:
-        pass
-    entry_birth.grid(row=0, column=1, pady=5, padx=10)
+    right_frame = tk.Frame(outer_frame, bg="#F5F5F5")
+    right_frame.grid(row=0, column=1, padx=30, pady=20, sticky="nw")
 
-    address_var = tk.StringVar(value=address or "")
-    phone_var = tk.StringVar(value=phone or "")
-    old_pw_var = tk.StringVar()
-    new_pw_var = tk.StringVar()
-
-    create_label_entry(1, "Địa chỉ:", address_var)
-    create_label_entry(2, "Số điện thoại:", phone_var)
-    old_pw_entry = create_label_entry(3, "Mật khẩu cũ:", old_pw_var, show="*")
-    new_pw_entry = create_label_entry(4, "Mật khẩu mới:", new_pw_var, show="*")
-
-    # ===== HIỆN MẬT KHẨU =====
-    def toggle_password():
-        show = '' if show_pw_var.get() else '*'
-        old_pw_entry.config(show=show)
-        new_pw_entry.config(show=show)
-
-    show_pw_var = tk.BooleanVar()
-    tk.Checkbutton(
-        form_frame, text="Hiện mật khẩu", variable=show_pw_var, command=toggle_password,
-        bg="#F5F5F5", font=("Segoe UI", 10)
-    ).grid(row=5, column=1, sticky="w", padx=10)
-
-    # ===== CHỌN ẢNH =====
     def choose_image():
         nonlocal img_file_path
         file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.png *.jpeg")])
@@ -86,20 +56,86 @@ def render_update_sv(container, user, go_back):
     def show_image(path):
         try:
             img = Image.open(path)
-            img = img.resize((100, 120))
+            img = img.resize((180, 210))
             img_tk = ImageTk.PhotoImage(img)
             img_label.config(image=img_tk)
             img_label.image = img_tk
         except:
             pass
 
-    tk.Button(form_frame, text="Chọn ảnh đại diện", command=choose_image, font=("Segoe UI", 10), relief="solid", bd=1, bg="white").grid(row=6, column=0, columnspan=2, pady=10)
-    img_label = tk.Label(form_frame, bg="#F5F5F5")
-    img_label.grid(row=7, column=0, columnspan=2)
+    img_label = tk.Label(left_frame, bg="#F5F5F5")
+    img_label.pack(pady=(0, 10))
     if img_path and os.path.exists(img_path):
         show_image(img_path)
 
-    # ===== LƯU THAY ĐỔI =====
+    choose_img_label = tk.Label(
+        left_frame,
+        text="Chọn ảnh",
+        fg="#1a73e8",
+        bg="#F5F5F5",
+        cursor="hand2",
+        font=("Arial", 11,)
+    )
+    choose_img_label.pack(pady=(0, 0))
+    choose_img_label.bind("<Button-1>", lambda e: choose_image())
+
+    form_frame = tk.Frame(right_frame, bg="#F5F5F5", pady=15)
+    form_frame.pack(anchor="w", fill="both", expand=True)  # 👈 Giúp đẩy nút xuống dưới cùng
+
+    def create_label_entry(row, text, entry_var, show=None):
+        tk.Label(form_frame, text=text, bg="#F5F5F5", fg="#00897B", font=LABEL_FONT) \
+            .grid(row=row, column=0, sticky='e', padx=10, pady=6)
+        entry = tk.Entry(form_frame, textvariable=entry_var, width=25, show=show, font=ENTRY_FONT, bg="white")
+        entry.grid(row=row, column=1, padx=10, pady=6, sticky='w')
+        return entry
+
+    tk.Label(form_frame, text="Ngày sinh:", bg="#F5F5F5", fg="#00897B", font=LABEL_FONT) \
+        .grid(row=0, column=0, sticky='e', padx=10, pady=6)
+
+    entry_birth = DateEntry(form_frame, date_pattern="dd-mm-yyyy", width=23, font=ENTRY_FONT)
+    try:
+        entry_birth.set_date(datetime.strptime(birth, "%Y-%m-%d"))
+    except:
+        pass
+    entry_birth.grid(row=0, column=1, padx=10, pady=6, sticky="w")
+
+    address_var = tk.StringVar(value=address or "")
+    phone_var = tk.StringVar(value=phone or "")
+    old_pw_var = tk.StringVar()
+    new_pw_var = tk.StringVar()
+
+    old_pw_entry = create_label_entry(1, "Địa chỉ:", address_var)
+    create_label_entry(2, "Số điện thoại:", phone_var)
+    old_pw_entry = create_label_entry(3, "Mật khẩu cũ:", old_pw_var, show="*")
+    new_pw_entry = create_label_entry(4, "Mật khẩu mới:", new_pw_var, show="*")
+
+    tk.Label(form_frame, text="*Để trống nếu không muốn đổi mật khẩu",
+             fg="red", bg="#F5F5F5", font=("Arial", 9, "italic")) \
+        .grid(row=5, column=0, columnspan=2, sticky="w", padx=10, pady=(0, 4))
+
+    def toggle_password():
+        show = '' if show_pw_var.get() else '*'
+        old_pw_entry.config(show=show)
+        new_pw_entry.config(show=show)
+
+    show_pw_var = tk.BooleanVar()
+
+    check_btn = tk.Checkbutton(
+        form_frame,
+        text="Hiện mật khẩu",
+        variable=show_pw_var,
+        command=toggle_password,
+        bg="#F5F5F5",  # Nền xung quanh
+        activebackground="#F5F5F5",
+        fg="black",  # Màu chữ
+        relief="flat",
+        activeforeground="black",
+        selectcolor="#00897B",
+        overrelief="flat",
+        font=ENTRY_FONT
+    )
+    check_btn.grid(row=6, column=1, sticky="w", padx=10)
+
     def save_changes():
         new_address = address_var.get().strip()
         new_phone = phone_var.get().strip()
@@ -133,21 +169,15 @@ def render_update_sv(container, user, go_back):
         except Exception as e:
             messagebox.showerror("Lỗi", f"Cập nhật thất bại: {str(e)}")
 
-    save_btn = tk.Button(
-        container, text="✔ Cập nhật thông tin", command=save_changes,
-        font=("Segoe UI", 11, "bold"), bg="#2E8B57", fg="white",
-        activebackground="#246b45", activeforeground="white",
-        relief="flat", bd=0, padx=15, pady=7
-    )
-    save_btn.pack(pady=15)
+    # Các nút dưới cùng
+    button_frame = tk.Frame(outer_frame, bg="#F5F5F5")
+    button_frame.grid(row=1, column=0, columnspan=2, sticky="ew", padx=40, pady=(0, 10))  # 👈 Gần sát đáy
 
-    def on_enter(e): save_btn.config(bg="#246b45")
-    def on_leave(e): save_btn.config(bg="#2E8B57")
-    save_btn.bind("<Enter>", on_enter)
-    save_btn.bind("<Leave>", on_leave)
+    button_frame.grid_columnconfigure(0, weight=1)
+    button_frame.grid_columnconfigure(1, weight=1)
 
-    # ===== QUAY LẠI =====
-    tk.Button(
-        container, text="⬅ Quay lại", command=on_back,
-        font=("Segoe UI", 10), bg="#ddd", relief="flat", padx=10, pady=5
-    ).pack()
+    back_btn = tk.Button(button_frame, text="← Quay lại", command=on_back, **BACK_BUTTON_UPDATE_STYLE)
+    back_btn.grid(row=0, column=0, sticky="w")
+
+    save_btn = tk.Button(button_frame, text="Cập nhật thông tin", command=save_changes, **BUTTON_UPDATE_STYLE)
+    save_btn.grid(row=0, column=1, sticky="e", padx=(0, 90))

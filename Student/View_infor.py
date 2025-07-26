@@ -9,7 +9,7 @@ def render_view_infor(container, user):
 
     # ===== FRAME CHÍNH =====
     main_frame = tk.Frame(container, bg="white")
-    main_frame.pack(padx=20, pady=20, fill="both", expand=True)
+    main_frame.pack(padx=(50, 0), pady=20, fill="both", expand=True)
 
     # ===== BÊN TRÁI: AVATAR =====
     left_frame = tk.Frame(main_frame, bg="white")
@@ -27,7 +27,7 @@ def render_view_infor(container, user):
 
     img_label = tk.Label(left_frame, image=photo, bg="white")
     img_label.image = photo
-    img_label.pack()
+    img_label.pack(padx=(35, 0))
 
     # ===== BÊN PHẢI: THÔNG TIN =====
     right_frame = tk.Frame(main_frame, bg="white")
@@ -35,7 +35,7 @@ def render_view_infor(container, user):
 
     title = tk.Label(
         right_frame, text="Thông tin sinh viên",
-        font=("Arial", 16, "bold"), fg="#2C387E", bg="white"
+        font=("Arial", 16, "bold"), fg="#00897B", bg="white"
     )
     title.grid(row=0, column=0, columnspan=4, pady=(0, 15), sticky="w")
 
@@ -44,13 +44,13 @@ def render_view_infor(container, user):
         left_frame.grid(row=row, column=0, columnspan=2, sticky="w", pady=2, padx=(0, 40))
 
         tk.Label(left_frame, text=label1, font=("Arial", 11), bg="white").pack(side="left")
-        tk.Label(left_frame, text=value1, font=("Arial", 11, "bold"), bg="white", fg="#333").pack(side="left")
+        tk.Label(left_frame, text=value1, font=("Arial", 11, "bold"), bg="white", fg="#00897B").pack(side="left")
 
         right_inner = tk.Frame(right_frame, bg="white")
         right_inner.grid(row=row, column=2, columnspan=2, sticky="w", pady=2)
 
         tk.Label(right_inner, text=label2, font=("Arial", 11), bg="white").pack(side="left")
-        tk.Label(right_inner, text=value2, font=("Arial", 11, "bold"), bg="white", fg="#333").pack(side="left")
+        tk.Label(right_inner, text=value2, font=("Arial", 11, "bold"), bg="white", fg="#00897B").pack(side="left")
 
     # ===== CÁC DÒNG HIỂN THỊ =====
     add_pair("MSSV:", user.get("mssv", ""), "Địa chỉ:", user.get("address", ""), 1)

@@ -8,8 +8,7 @@ import hashlib
 from PIL import Image, ImageTk
 
 from Database.Create_db import get_all_sinh_vien
-from Student.Student_main import render_student_main
-from Student.Styles_student import LABEL_FONT, ENTRY_FONT, BUTTON_STYLE
+from Student.Styles_student import LABEL_FONT, ENTRY_FONT, BUTTON_STYLE, BUTTON_FACE_STYLE
 
 
 def open_student_login(container):
@@ -28,36 +27,38 @@ def open_student_login(container):
         bg="white",
         fg="#002244"
     )
-    title_label.place(relx=0.5, rely=0.01, anchor="n")  # Canh giữa theo chiều ngang
+    title_label.place(relx=0.5, rely=0.01, anchor="n")
 
-    # ====== FRAME CAMERA (có viền) ====== #
-    camera_frame = tk.Frame(container, bg="white", bd=2, relief="groove")
-    camera_frame.place(relx=0.05, rely=0.1, relwidth=0.42, relheight=0.80)
+    # ====== FRAME CAMERA ====== #
+    camera_frame = tk.Frame(container, bg="white")
+    camera_frame.place(relx=0.05, rely=0.1, relwidth=0.48, relheight=0.90)
 
     tk.Label(
         camera_frame,
         text="ĐĂNG NHẬP BẰNG KHUÔN MẶT",
         font=("Arial", 16, "bold"),
-        bg="white", fg="#003366"
+        bg="white", fg="#00897B"
     ).pack(pady=(10, 5))
+
     note_label = tk.Label(
         camera_frame,
-        text="Nếu không muốn đăng nhập bằng tài khoản,\n bạn có thể dùng khuôn mặt để đăng nhập.",
-        font=("Arial", 10, "italic"),
+        text="Bạn có thể dùng khuôn mặt để đăng nhập thay vì tài khoản.",
+        font=("Arial", 11, "italic"),
         fg="red",
         bg="white",
         justify="center"
     )
     note_label.pack(pady=(0, 10))
 
-    cam_label = tk.Label(camera_frame, bg="white")
-    cam_label.pack(pady=10, padx=10, expand=True)
+    cam_container = tk.Frame(camera_frame, bg="white", bd=3, relief="ridge")
+    cam_container.pack(pady=(4, 0), padx=10)
 
-
+    cam_label = tk.Label(cam_container, bg="black", width=480, height=360)
+    cam_label.pack()
     def update_camera():
         ret, frame = cap.read()
         if ret:
-            frame = cv2.resize(frame, (400, 300))
+            frame = cv2.resize(frame, (480, 340))
             frame = cv2.flip(frame, 1)
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             current_frame['image'] = rgb_frame
@@ -71,32 +72,56 @@ def open_student_login(container):
 
     tk.Button(
         camera_frame,
-        text="🔓 Đăng nhập",
+        text="Đăng nhập",
         command=lambda: face_login(current_frame, cap, container),
-        **BUTTON_STYLE
+        **BUTTON_FACE_STYLE
     ).pack(pady=(10, 20))
 
-    # ====== FORM ĐĂNG NHẬP BẰNG MSSV (có viền) ====== #
-    right_frame = tk.Frame(container, bg="#E0F2F1", bd=2, relief="groove")
-    right_frame.place(relx=0.52, rely=0.1, relwidth=0.43, relheight=0.80)
+    # ====== FORM ĐĂNG NHẬP BẰNG MSSV ====== #
+    right_frame = tk.Frame(container, bg="#00897B", bd=2, relief="groove")
+    right_frame.place(relx=0.54, rely=0.3, relwidth=0.41, relheight=0.39)
+
 
     tk.Label(
         right_frame,
         text="ĐĂNG NHẬP BẰNG TÀI KHOẢN",
         font=("Arial", 16, "bold"),
-        bg="#E0F2F1", fg="#003366"
-    ).pack(pady=(30, 20))
+        bg="#00897B", fg="#FFA726"
+    ).pack(pady=(10, 10))
 
-    form_frame = tk.Frame(right_frame, bg="#E0F2F1")
+    form_frame = tk.Frame(right_frame, bg="#00897B")
     form_frame.pack()
 
-    tk.Label(form_frame, text="MSSV:", font=LABEL_FONT, bg="#E0F2F1", fg="white").grid(row=0, column=0, sticky="w", padx=5, pady=5)
-    mssv_entry = tk.Entry(form_frame, font=ENTRY_FONT, width=30)
-    mssv_entry.grid(row=0, column=1, pady=5)
+    tk.Label(form_frame, text="MSSV:", font=LABEL_FONT, bg="#00897B", fg="white", anchor="e").grid(
+        row=0, column=0, sticky="e", padx=5, pady=5
+    )
+    mssv_entry = tk.Entry(form_frame, font=ENTRY_FONT, width=20)
+    mssv_entry.grid(row=0, column=1, pady=5, sticky="w")
 
-    tk.Label(form_frame, text="Mật khẩu:", font=LABEL_FONT, bg="#E0F2F1").grid(row=1, column=0, sticky="w", padx=5, pady=5)
-    password_entry = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=30)
-    password_entry.grid(row=1, column=1, pady=5)
+    tk.Label(form_frame, text="Mật khẩu:", font=LABEL_FONT, bg="#00897B", fg="white", anchor="e").grid(
+        row=1, column=0, sticky="e", padx=5, pady=5
+    )
+    password_entry = tk.Entry(form_frame, show="*", font=ENTRY_FONT, width=20)
+    password_entry.grid(row=1, column=1, pady=5, sticky="w")
+
+    show_password_var = tk.BooleanVar(value=False)
+
+    def toggle_password_visibility():
+        password_entry.config(show="" if show_password_var.get() else "*")
+
+    show_password_cb = tk.Checkbutton(
+        form_frame,
+        text="Hiện mật khẩu",
+        variable=show_password_var,
+        command=toggle_password_visibility,
+        font=("Arial", 10),
+        bg="#00897B",
+        fg="white",
+        activebackground="#00897B",
+        activeforeground="white",
+        selectcolor="#00897B",
+    )
+    show_password_cb.grid(row=2, column=1, sticky="w", pady=(0, 5))
 
     def login_by_account():
         mssv = mssv_entry.get().strip()
@@ -107,11 +132,11 @@ def open_student_login(container):
             return
 
         password = hashlib.sha256(raw_password.encode()).hexdigest()
-
         all_users = get_all_sinh_vien()
         for user in all_users:
             if user["mssv"] == mssv and user.get("password") == password:
                 cap.release()
+                from Student.Student_main import render_student_main  # ✅ Chỉ import tại đây
                 render_student_main(container, user)
                 return
 
@@ -119,17 +144,16 @@ def open_student_login(container):
 
     tk.Button(
         right_frame,
-        text="🔓 Đăng nhập",
+        text="Đăng nhập",
         command=login_by_account,
         **BUTTON_STYLE
-    ).pack(pady=(30, 10))
+    ).pack(pady=(4, 4))
 
     # ======= ĐÓNG ỨNG DỤNG ======= #
     container.winfo_toplevel().protocol(
         "WM_DELETE_WINDOW",
         lambda: (cap.release(), container.winfo_toplevel().destroy())
     )
-
 
 
 def face_login(frame_dict, cap, container):
@@ -162,6 +186,7 @@ def face_login(frame_dict, cap, container):
                 match = face_recognition.compare_faces([known_np], unknown_encoding, tolerance=0.40)[0]
                 if match:
                     cap.release()
+                    from Student.Student_main import render_student_main  # ✅ Import tại đây
                     render_student_main(container, user)
                     return
             except Exception as e:

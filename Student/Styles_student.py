@@ -5,14 +5,61 @@ ENTRY_FONT = ("Arial", 12)
 
 # ========== Style cho Button ==========
 BUTTON_STYLE = {
-    "font": ("Arial", 15, "bold"),
+    "font": ("Arial", 14, "bold"),
     "bg": "#FFA726",
     "fg": "white",
-    "activebackground": "#87CEEB",  # Sky Blue khi hover
-    "cursor": "hand2",
-    "bd": 0,
-    "padx": 10,
-    "pady": 4,
+    "activebackground": "#FF5722",
+    "bd": 2,
+    "relief": "raised",
+    "width": 9,
+    "height": 1
+}
+
+BUTTON_UPDATE_STYLE = {
+    "font": ("Arial", 14, "bold"),
+    "bg": "#00897B",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 2,
+    "relief": "raised",
+    "width": 14,
+    "height": 1
+}
+
+# Nút "← Quay lại"
+BACK_BUTTON_STYLE = {
+    "font": ("Arial", 13, "bold"),
+    "bg": "#f44336",
+    "fg": "white",
+    "activebackground": "#D32F2F",
+    "bd": 2,
+    "relief": "raised",
+    "padx": 9,
+    "pady": 10
+}
+
+BACK_BUTTON_UPDATE_STYLE = {
+    "font": ("Arial", 13, "bold"),
+    "bg": "#f44336",
+    "fg": "white",
+    "activebackground": "#D32F2F",
+    "bd": 2,
+    "relief": "raised",
+    "padx": 5,
+    "pady": 3
+}
+
+
+
+BUTTON_FACE_STYLE = {
+    "font": ("Arial", 14, "bold"),
+    "bg": "#00897B",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 2,
+    "relief": "raised",
+    "width": 9,
+    "height": 1
 }
 
 # ========== Layout Colors ==========
@@ -27,15 +74,26 @@ FORM_PADDING_Y = 15
 
 # Style cho các nút menu con
 MENU_BUTTON_STYLE = {
-    "font": ("Arial", 12),
+    "font": ("Arial", 10),
     "bg": "white",
-    "fg": "#2C387E",
-    "activebackground": "#e0e0e0",
-    "activeforeground": "#1A237E",
+    "fg": "#00897B",
+    "activebackground": "#f5f5f5",
+    "activeforeground": "#004d40",
     "bd": 0,
     "anchor": "w",
-    "padx": 10,
-    "pady": 5
+    "padx": 3,
+    "pady": 1
+}
+# Bảng
+TREEVIEW_STYLE = {
+    "font": ("Arial", 14),
+    "rowheight": 25,
+    "header_font": ("Arial", 16, "bold"),
+    "header_bg": "#00897B",
+    "header_fg": "white",
+    "even_row_bg": "#f2f2f2",
+    "odd_row_bg": "white",
+    "border_color": "#d9d9d9"
 }
 
 # ========== Kích thước cửa sổ ==========

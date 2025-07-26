@@ -10,7 +10,7 @@ def render_create_hoc_ky(container):
         widget.destroy()
 
     container.config(bg=PAGE_BG_COLOR)
-    tk.Label(container, text="👤 Tạo học kỳ", font=TITLE_FONT, bg="white", fg="#003366").pack(
+    tk.Label(container, text="📘 Tạo học kỳ", font=TITLE_FONT, bg="white", fg="#003366").pack(
         anchor="w", padx=28, pady=(20, 5))
 
     def them_hoc_ky():
