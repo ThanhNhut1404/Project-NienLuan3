@@ -60,6 +60,18 @@ BUTTON_EDIT_STYLE = {
     "height": 1
 }
 
+#Xem danh sách tham hoạt động
+BUTTON_VIEW_STYLE = {
+    "font": ("Arial", 14, "bold"),
+    "bg": "#07A8A3",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 2,
+    "relief": "raised",
+    "width": 23,
+    "height": 1
+}
+
 BUTTON_DELETE_STYLE = {
     "font": ("Arial", 14, "bold"),
     "bg": "#FFA726",

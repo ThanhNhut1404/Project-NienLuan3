@@ -38,8 +38,9 @@ def render_admin_main(container):
             from Admin.Create_HK import render_create_hoc_ky
             render_create_hoc_ky(main_content)
         elif view_name == "view_activities":
-            from Admin.List_view_activity import render_view_activities
-            render_view_activities(main_content, switch_to_view)
+            from Admin.List_view_activity import render_list_view_activity
+            render_list_view_activity(main_content, switch_to_view)
+
         else:
             render_dashboard()
 

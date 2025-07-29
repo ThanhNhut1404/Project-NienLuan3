@@ -29,7 +29,7 @@ def render_student_main(container, user):
     menu_btn = tk.Button(
         container,
         text="☰",
-        font=("Arial", 20, "bold"),
+        font=("Arial", 18, "bold"),
         bg="#00897B",
         fg="white",
         bd = "2",

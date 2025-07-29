@@ -4,10 +4,12 @@ import sqlite3
 from datetime import datetime
 from Admin.Styles_admin import *
 from Admin.Edit_activity import render_edit_activity
+from Admin.View_student_in_activity import render_student_in_activity
+
 
 DB_NAME = "Database/Diem_danh.db"
 
-def render_view_activities(container, go_back):
+def render_list_view_activity(container, go_back):
     for widget in container.winfo_children():
         widget.destroy()
     container.config(bg=PAGE_BG_COLOR)
@@ -72,6 +74,19 @@ def render_view_activities(container, go_back):
     tree.bind("<Button-1>", block_resize_column)
     tree.bind("<B1-Motion>", block_resize_column)  # Ngăn kéo giãn
 
+    def get_selected_hoat_dong_id():
+        selected = tree.selection()
+        if not selected:
+            messagebox.showwarning("Cảnh báo", "Vui lòng chọn một hoạt động.")
+            return None
+        values = tree.item(selected[0], "values")
+        return values[0]  # giả sử cột 0 là ID hoạt động
+
+    def xem_danh_sach_sinh_vien():
+        id_hd = get_selected_hoat_dong_id()
+        if id_hd:
+            render_student_in_activity(container, id_hd, lambda: render_list_view_activity(container))
+
     # ========== TÔ MÀU XEN KẼ ==========
     def style_rows():
         for i, item in enumerate(tree.get_children()):
@@ -96,7 +111,13 @@ def render_view_activities(container, go_back):
             messagebox.showerror("Lỗi", "Không xác định được ID hoạt động.")
             return
 
-        render_edit_activity(container, id_hd, lambda: render_view_activities(container, go_back))
+        render_edit_activity(container, id_hd, lambda: render_list_view_activity(container, go_back))
+
+
+    def handle_view_students():
+        id_hd = get_selected_hoat_dong_id()
+        if id_hd:
+            render_student_in_activity(container, id_hd, lambda: render_list_view_activity(container, go_back))
 
     def handle_delete():
         selected_item = tree.focus()
@@ -169,6 +190,14 @@ def render_view_activities(container, go_back):
     #Right frame
     right_frame = tk.Frame(btn_frame, bg=PAGE_BG_COLOR)
     right_frame.pack(side="right", anchor="e")
+
+    btn_view_students = tk.Button(
+        right_frame,
+        text="Xem danh sách tham gia",
+        command=handle_view_students,
+        **BUTTON_VIEW_STYLE
+    )
+    btn_view_students.pack(side="left", padx=5)
 
     btn_edit = tk.Button(
         right_frame,
