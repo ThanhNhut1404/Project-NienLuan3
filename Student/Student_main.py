@@ -5,6 +5,7 @@ from Student.Styles_student import *
 from Student.Header_student import render_header
 from Student.View_infor import render_view_infor
 from Student.Menu_student import render_menu
+from Student.Chart_activity import render_chart_activity
 
 
 def render_student_main(container, user):
@@ -32,8 +33,8 @@ def render_student_main(container, user):
         font=("Arial", 18, "bold"),
         bg="#00897B",
         fg="white",
-        bd = "2",
-        relief= "raised",
+        bd="2",
+        relief="raised",
         activebackground="#00897B",
         activeforeground="white"
     )
@@ -44,3 +45,8 @@ def render_student_main(container, user):
 
     # ===== HIỂN THỊ MẶC ĐỊNH =====
     render_view_infor(content_frame, user)
+
+    # ===== BIỂU ĐỒ ĐIỂM HOẠT ĐỘNG =====
+    chart_frame = tk.Frame(content_frame, bg="#f0f0f0")
+    chart_frame.pack(fill="x", pady=(10, 20))
+    render_chart_activity(chart_frame, user, title="📊 Tiến độ điểm rèn luyện học kỳ hiện tại")

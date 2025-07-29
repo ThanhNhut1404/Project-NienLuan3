@@ -27,6 +27,16 @@ def render_view_activity(container, user):
 
         with sqlite3.connect(DB_NAME) as conn:
             cursor = conn.cursor()
+
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS TONG_DIEM_HK (
+                    ID_SV TEXT,
+                    ID_HK INTEGER,
+                    TONG_DIEM INTEGER,
+                    PRIMARY KEY (ID_SV, ID_HK)
+                )
+            ''')
+
             cursor.execute('''
                 SELECT hd.ID_HD, hd.TEN_HD, hd.CAP_HD, hd.CATEGORY_HD, hd.CO_XAC_NHAN
                 FROM DIEM_DANH_HOAT_DONG dd
@@ -86,6 +96,12 @@ def render_view_activity(container, user):
                     SET diem_cong = ?
                     WHERE MSSV = ? AND ID_HOAT_DONG = ? AND ID_HK = ?
                 ''', (diem, mssv, id_hd, id_hk))
+
+            cursor.execute('''
+                INSERT INTO TONG_DIEM_HK (ID_SV, ID_HK, TONG_DIEM)
+                VALUES (?, ?, ?)
+                ON CONFLICT(ID_SV, ID_HK) DO UPDATE SET TONG_DIEM = excluded.TONG_DIEM
+            ''', (mssv, id_hk, tong_diem))
 
         table.insert("", "end", values=("", "", "", "", "Tổng điểm học kỳ này:", tong_diem), tags=("summary",))
         style_rows()
