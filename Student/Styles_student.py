@@ -38,6 +38,17 @@ BACK_BUTTON_STYLE = {
     "pady": 10
 }
 
+BACK_BUTTON_ROLL_CALL_STYLE= {
+    "font": ("Arial", 13, "bold"),
+    "bg": "#f44336",
+    "fg": "white",
+    "activebackground": "#D32F2F",
+    "bd": 2,
+    "relief": "raised",
+    "padx": 9,
+    "pady": 3
+}
+
 BACK_BUTTON_UPDATE_STYLE = {
     "font": ("Arial", 13, "bold"),
     "bg": "#f44336",
@@ -98,7 +109,7 @@ MENU_BUTTON_STYLE = {
 # Bảng
 TREEVIEW_STYLE = {
     "font": ("Arial", 14),
-    "rowheight": 25,
+    "rowheight": 27,
     "header_font": ("Arial", 16, "bold"),
     "header_bg": "#00897B",
     "header_fg": "white",

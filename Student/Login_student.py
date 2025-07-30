@@ -18,6 +18,7 @@ def open_student_login(container):
 
     cap = cv2.VideoCapture(0)
     current_frame = {'image': None}
+    camera_job = {"id": None}  #Lưu ID vòng lặp camera
 
     # ====== TIÊU ĐỀ CHÍNH TRÊN CÙNG ====== #
     title_label = tk.Label(
@@ -53,8 +54,9 @@ def open_student_login(container):
     cam_container = tk.Frame(camera_frame, bg="white", bd=3, relief="ridge")
     cam_container.pack(pady=(4, 0), padx=10)
 
-    cam_label = tk.Label(cam_container, bg="black", width=480, height=360)
+    cam_label = tk.Label(cam_container, bg="black", width=490, height=334)
     cam_label.pack()
+
     def update_camera():
         ret, frame = cap.read()
         if ret:
@@ -64,9 +66,11 @@ def open_student_login(container):
             current_frame['image'] = rgb_frame
             img = Image.fromarray(rgb_frame)
             imgtk = ImageTk.PhotoImage(image=img)
-            cam_label.imgtk = imgtk
-            cam_label.configure(image=imgtk)
-        cam_label.after(10, update_camera)
+            if cam_label.winfo_exists():
+                cam_label.imgtk = imgtk
+                cam_label.configure(image=imgtk)
+        if cam_label.winfo_exists():  #Kiểm tra tồn tại trước khi gọi lại
+            camera_job["id"] = cam_label.after(10, update_camera)
 
     update_camera()
 
@@ -80,7 +84,6 @@ def open_student_login(container):
     # ====== FORM ĐĂNG NHẬP BẰNG MSSV ====== #
     right_frame = tk.Frame(container, bg="#00897B", bd=2, relief="groove")
     right_frame.place(relx=0.54, rely=0.3, relwidth=0.41, relheight=0.39)
-
 
     tk.Label(
         right_frame,
@@ -136,7 +139,9 @@ def open_student_login(container):
         for user in all_users:
             if user["mssv"] == mssv and user.get("password") == password:
                 cap.release()
-                from Student.Student_main import render_student_main  # ✅ Chỉ import tại đây
+                if camera_job["id"]:
+                    cam_label.after_cancel(camera_job["id"])
+                from Student.Student_main import render_student_main
                 render_student_main(container, user)
                 return
 
@@ -149,11 +154,14 @@ def open_student_login(container):
         **BUTTON_STYLE
     ).pack(pady=(4, 4))
 
-    # ======= ĐÓNG ỨNG DỤNG ======= #
-    container.winfo_toplevel().protocol(
-        "WM_DELETE_WINDOW",
-        lambda: (cap.release(), container.winfo_toplevel().destroy())
-    )
+    # ====== ĐÓNG ỨNG DỤNG AN TOÀN ====== #
+    def on_close():
+        if camera_job["id"]:
+            cam_label.after_cancel(camera_job["id"])
+        cap.release()
+        container.winfo_toplevel().destroy()
+
+    container.winfo_toplevel().protocol("WM_DELETE_WINDOW", on_close)
 
 
 def face_login(frame_dict, cap, container):
@@ -186,7 +194,7 @@ def face_login(frame_dict, cap, container):
                 match = face_recognition.compare_faces([known_np], unknown_encoding, tolerance=0.40)[0]
                 if match:
                     cap.release()
-                    from Student.Student_main import render_student_main  # ✅ Import tại đây
+                    from Student.Student_main import render_student_main
                     render_student_main(container, user)
                     return
             except Exception as e:

@@ -8,7 +8,7 @@ import face_recognition
 import sqlite3
 import datetime
 from Database.Create_db import DB_NAME
-from Student.Styles_student import BACK_BUTTON_STYLE
+from Student.Styles_student import BACK_BUTTON_ROLL_CALL_STYLE
 from Student.View_activity import render_view_activity
 
 def render_activity_roll_call(container, user, go_back=None):
@@ -20,49 +20,39 @@ def render_activity_roll_call(container, user, go_back=None):
         .pack(pady=10, anchor="w",  padx=70)
 
     tk.Label(container, text="Bấm nút bên dưới để hệ thống nhận diện khuôn mặt và quét mã QR.",
-             font=("Arial", 13), bg="white", fg="red").pack(pady=10)
-    # ========== CAMERA FRAME ==========
-    camera_frame = tk.Frame(
-        container,
-        bg="black",
-        width=600,
-        height=375,
-        bd=3,
-        relief="ridge"
-    )
-    camera_frame.pack(pady=10)
+             font=("Arial", 13), bg="white", fg="red").pack(pady=(0, 2))
+
+    camera_frame = tk.Frame(container, bg="black", width=600, height=375, bd=3, relief="ridge")
+    camera_frame.pack(pady=5)
     camera_frame.pack_propagate(False)
 
     video_label = tk.Label(camera_frame, bg="black")
     video_label.pack(expand=True)
 
-    # ========== KHUNG DƯỚI CHỨA 2 NÚT: QUAY LẠI & ĐIỂM DANH ========== ✅
     bottom_frame = tk.Frame(container, bg="white")
     bottom_frame.pack(fill="x", side="bottom", padx=20, pady=10)
 
-    # Nút Quay lại: nằm sát bên trái
     back_btn = tk.Button(
         bottom_frame,
         text="← Quay lại",
-        command=lambda: render_view_activity(container, user),  # 🟢 Gọi lại trang hoạt động
-        **BACK_BUTTON_STYLE
+        command=lambda: render_view_activity(container, user),
+        **BACK_BUTTON_ROLL_CALL_STYLE
     )
     back_btn.pack(side="left", anchor="w")
-
 
     roll_call_btn = tk.Button(
         bottom_frame,
         text="Bắt đầu điểm danh",
         font=("Arial", 12, "bold"),
         activebackground="#FF5722",
+        bd = "2",
+        relief = "raised",
         command=lambda: start_roll_call(user, video_label),
         bg="#FFA726", fg="white", padx=10, pady=5
     )
     roll_call_btn.pack()
-
     bottom_frame.update_idletasks()
-    roll_call_btn.place(relx=0.5, rely=0.5, anchor="center")
-
+    roll_call_btn.place(relx=0.5, rely=0.4, anchor="center")
 
 def start_roll_call(user, video_label):
     mssv = user["mssv"]
@@ -74,47 +64,10 @@ def start_roll_call(user, video_label):
 
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     detector = cv2.QRCodeDetector()
-
     face_verified = False
     qr_data = None
     timeout = 20
     start_time = datetime.datetime.now()
-
-    def update():
-        nonlocal face_verified, qr_data
-
-        if cap.isOpened():
-            ret, frame = cap.read()
-            if ret:
-                frame = cv2.flip(frame, 1)
-                rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-                # ===== Nhận diện khuôn mặt =====
-                face_encodings = face_recognition.face_encodings(rgb)
-                for face_encoding in face_encodings:
-                    matches = face_recognition.compare_faces(known_encodings, face_encoding, tolerance=0.45)
-                    if matches.count(True) > 0:
-                        face_verified = True
-                        break
-
-                if face_verified:
-                    data, bbox, _ = detector.detectAndDecode(frame)
-                    if bbox is not None and data and data.startswith("HOATDONG:"):
-                        qr_data = data.replace("HOATDONG:", "")
-                        finish()
-                        return
-
-                # ===== Hiển thị lên video_label =====
-                img = Image.fromarray(rgb)
-                imgtk = ImageTk.PhotoImage(image=img)
-                video_label.imgtk = imgtk
-                video_label.configure(image=imgtk)
-
-        if (datetime.datetime.now() - start_time).total_seconds() > timeout:
-            finish()
-            return
-
-        video_label.after(10, update)
 
     def finish():
         cap.release()
@@ -177,4 +130,39 @@ def start_roll_call(user, video_label):
         finally:
             conn.close()
 
-    update()
+    def camera_loop():
+        nonlocal face_verified, qr_data
+        while (datetime.datetime.now() - start_time).total_seconds() <= timeout:
+            ret, frame = cap.read()
+            if not ret:
+                continue
+
+            frame = cv2.flip(frame, 1)
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            if not face_verified:
+                encodings = face_recognition.face_encodings(rgb)
+                for enc in encodings:
+                    matches = face_recognition.compare_faces(known_encodings, enc, tolerance=0.45)
+                    if any(matches):
+                        face_verified = True
+                        break
+
+            if face_verified:
+                data, bbox, _ = detector.detectAndDecode(frame)
+                if bbox is not None and data and data.startswith("HOATDONG:"):
+                    qr_data = data.replace("HOATDONG:", "")
+                    break
+
+            img = Image.fromarray(rgb)
+            imgtk = ImageTk.PhotoImage(image=img)
+
+            def update_ui():
+                video_label.imgtk = imgtk
+                video_label.configure(image=imgtk)
+
+            video_label.after(0, update_ui)
+
+        video_label.after(0, finish)
+
+    threading.Thread(target=camera_loop, daemon=True).start()

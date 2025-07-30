@@ -100,7 +100,7 @@ def render_view_activity(container, user):
                 ON CONFLICT(ID_SV, ID_HK) DO UPDATE SET TONG_DIEM = excluded.TONG_DIEM
             ''', (mssv, id_hk, tong_diem))
 
-        table.insert("", "end", values=("", "", "", "", "Tổng điểm học kỳ này:", tong_diem), tags=("summary",))
+        table.insert("", "end", values=("", "", "", "", "Tổng điểm:", tong_diem), tags=("summary",))
         style_rows()
 
     style = ttk.Style()
