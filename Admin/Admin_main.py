@@ -74,7 +74,7 @@ def render_admin_main(container):
             widget.destroy()
         tk.Label(
             main_content,
-            text="📊 Tổng quan hệ thống",
+            text="THÊM TẤM HÌNH Ở ĐÂY !!",
             font=TITLE_FONT,
             fg="#2E4053",
             bg="white"

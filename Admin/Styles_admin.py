@@ -60,6 +60,18 @@ BUTTON_EDIT_STYLE = {
     "height": 1
 }
 
+#Tìm kiếm
+BUTTON_SHEARCH_STYLE = {
+    "font": ("Arial", 9, "bold"),
+    "bg": "#4CAF50",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 2,
+    "relief": "raised",
+    "width": 9,
+    "height": 1
+}
+
 #Xem danh sách tham hoạt động
 BUTTON_VIEW_STYLE = {
     "font": ("Arial", 14, "bold"),

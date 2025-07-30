@@ -1,6 +1,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk
 import os
+from datetime import datetime  # 👈 Thêm để định dạng ngày
 
 def render_view_infor(container, user):
     for widget in container.winfo_children():
@@ -22,7 +23,7 @@ def render_view_infor(container, user):
     else:
         img = Image.new("RGB", (150, 200), color="#cccccc")  # fallback
 
-    img = img.resize((150, 200))
+    img = img.resize((170, 210))
     photo = ImageTk.PhotoImage(img)
 
     img_label = tk.Label(left_frame, image=photo, bg="white")
@@ -40,20 +41,27 @@ def render_view_infor(container, user):
     title.grid(row=0, column=0, columnspan=4, pady=(0, 15), sticky="w")
 
     def add_pair(label1, value1, label2, value2, row):
-        left_frame = tk.Frame(right_frame, bg="white")
-        left_frame.grid(row=row, column=0, columnspan=2, sticky="w", pady=2, padx=(0, 40))
+        left_pair = tk.Frame(right_frame, bg="white")
+        left_pair.grid(row=row, column=0, columnspan=2, sticky="w", pady=2, padx=(0, 40))
 
-        tk.Label(left_frame, text=label1, font=("Arial", 11), bg="white").pack(side="left")
-        tk.Label(left_frame, text=value1, font=("Arial", 11, "bold"), bg="white", fg="#00897B").pack(side="left")
+        tk.Label(left_pair, text=label1, font=("Arial", 11), bg="white").pack(side="left")
+        tk.Label(left_pair, text=value1, font=("Arial", 11, "bold"), bg="white", fg="#00897B").pack(side="left")
 
-        right_inner = tk.Frame(right_frame, bg="white")
-        right_inner.grid(row=row, column=2, columnspan=2, sticky="w", pady=2)
+        right_pair = tk.Frame(right_frame, bg="white")
+        right_pair.grid(row=row, column=2, columnspan=2, sticky="w", pady=2)
 
-        tk.Label(right_inner, text=label2, font=("Arial", 11), bg="white").pack(side="left")
-        tk.Label(right_inner, text=value2, font=("Arial", 11, "bold"), bg="white", fg="#00897B").pack(side="left")
+        tk.Label(right_pair, text=label2, font=("Arial", 11), bg="white").pack(side="left")
+        tk.Label(right_pair, text=value2, font=("Arial", 11, "bold"), bg="white", fg="#00897B").pack(side="left")
+
+    # ===== Định dạng ngày sinh: yyyy-mm-dd -> dd-mm-yyyy =====
+    raw_date = user.get("date", "")
+    try:
+        formatted_date = datetime.strptime(raw_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+    except:
+        formatted_date = raw_date  # fallback nếu lỗi
 
     # ===== CÁC DÒNG HIỂN THỊ =====
     add_pair("MSSV:", user.get("mssv", ""), "Địa chỉ:", user.get("address", ""), 1)
     add_pair("Họ tên:", user.get("name", ""), "Lớp học:", user.get("class", ""), 2)
     add_pair("Giới tính:", "Nam" if user.get("sex") == 1 else "Nữ", "Email:", user.get("email", ""), 3)
-    add_pair("Ngày sinh:", user.get("date", ""), "Số điện thoại:", user.get("phone", ""), 4)
+    add_pair("Ngày sinh:", formatted_date, "Số điện thoại:", user.get("phone", ""), 4)

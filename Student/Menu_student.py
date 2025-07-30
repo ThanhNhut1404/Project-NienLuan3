@@ -5,13 +5,14 @@ from Student.Activity_roll_call import render_activity_roll_call
 from Student.View_activity import render_view_activity
 from Student.Update_sv import render_update_sv
 from Student.View_infor import render_view_infor
+from Student.Dashboard import render_dashboard
 
 def render_menu(container, content_frame, user, menu_btn, go_back_login):
     menu_frame = tk.Frame(container, bg="white", bd=2, relief="ridge")
 
     def show_home():
         menu_frame.place_forget()
-        render_view_infor(content_frame, user)
+        render_dashboard(content_frame, user)
 
     def show_view_activity():
         menu_frame.place_forget()

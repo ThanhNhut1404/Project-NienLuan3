@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 import sqlite3
-from Student.Styles_student import BACK_BUTTON_STYLE, PAGE_BG_COLOR, TREEVIEW_STYLE
+from Student.Styles_student import BACK_BUTTON_STYLE, PAGE_BG_COLOR, TREEVIEW_STYLE, BUTTON_SEARCH_STYLE
 from Database.Create_db import DB_NAME
 
 def render_view_activity(container, user):
+    all_data_rows = []
     for widget in container.winfo_children():
         widget.destroy()
     container.config(bg=PAGE_BG_COLOR)
@@ -15,8 +16,11 @@ def render_view_activity(container, user):
         render_view_infor(container, user)
 
     def load_hoat_dong(event=None):
+        nonlocal all_data_rows
         for row in table.get_children():
             table.delete(row)
+
+        all_data_rows.clear()
 
         hk_str = combo_hk.get()
         if not hk_str:
@@ -47,7 +51,6 @@ def render_view_activity(container, user):
 
             max_loai = {"Tình nguyện": 1, "Hội nhập": 1}
             max_cap = {"Chi hội": 2, "Liên chi": 3, "Trường": 2}
-            max_gxn = 1
 
             count_loai = {"Tình nguyện": False, "Hội nhập": False}
             count_cap = {"Chi hội": 0, "Liên chi": 0, "Trường": 0}
@@ -82,14 +85,8 @@ def render_view_activity(container, user):
 
                 tong_diem += diem
 
-                table.insert("", "end", values=(
-                    idx,
-                    ten_hd,
-                    cap_hd,
-                    loai_hd,
-                    co_xn,
-                    diem
-                ))
+                table.insert("", "end", values=(idx, ten_hd, cap_hd, loai_hd, co_xn, diem))
+                all_data_rows.append((idx, ten_hd, cap_hd, loai_hd, co_xn, diem))
 
                 cursor.execute('''
                     UPDATE DIEM_DANH_HOAT_DONG
@@ -127,13 +124,43 @@ def render_view_activity(container, user):
     top_frame = tk.Frame(container, bg=PAGE_BG_COLOR)
     top_frame.pack(fill="x", pady=(10, 0))
 
+    title_search_frame = tk.Frame(top_frame, bg=PAGE_BG_COLOR)
+    title_search_frame.pack(fill="x", padx=20, pady=(0, 10))
+
     tk.Label(
-        top_frame,
+        title_search_frame,
         text="✅ Hoạt động đã tham gia",
         font=TREEVIEW_STYLE["header_font"],
         fg="#00897B",
         bg=PAGE_BG_COLOR
-    ).pack(anchor="w", padx=70, pady=(0, 10))
+    ).pack(side="left", padx=37)
+
+    search_frame = tk.Frame(title_search_frame, bg=PAGE_BG_COLOR)
+    search_frame.pack(side="right")
+
+    search_var = tk.StringVar()
+    search_entry = tk.Entry(search_frame, textvariable=search_var, font=("Arial", 11), width=30)
+    search_entry.pack(side="left", padx=(0, 5))
+
+    def search_table():
+        keyword = search_var.get().lower().strip()
+        for row in table.get_children():
+            table.delete(row)
+
+        filtered = []
+        for row in all_data_rows:
+            if keyword in " ".join(str(val).lower() for val in row):
+                filtered.append(row)
+
+        for i, row in enumerate(filtered, start=1):
+            table.insert("", "end", values=row)
+
+        tong_diem = sum(int(row[-1]) for row in filtered) if filtered else 0
+        table.insert("", "end", values=("", "", "", "", "Tổng điểm tìm được:", tong_diem), tags=("summary",))
+        style_rows()
+
+    search_button = tk.Button(search_frame, text="Tìm kiếm", command=search_table, **BUTTON_SEARCH_STYLE)
+    search_button.pack(side="left")
 
     with sqlite3.connect(DB_NAME) as conn:
         cursor = conn.cursor()

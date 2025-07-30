@@ -65,8 +65,25 @@ def render_update_sv(container, user, go_back):
 
     img_label = tk.Label(left_frame, bg="#F5F5F5")
     img_label.pack(pady=(0, 10))
+
+    # Dùng ảnh từ img_path nếu có, nếu không thì dùng avatar mặc định
     if img_path and os.path.exists(img_path):
-        show_image(img_path)
+        try:
+            img = Image.open(img_path)
+        except:
+            img = Image.new("RGB", (180, 210), color="#cccccc")
+    else:
+        # Dùng ảnh mờ mặc định
+        try:
+            img = Image.open("avatar.png")
+        except:
+            img = Image.new("RGB", (180, 210), color="#cccccc")  # fallback nếu thiếu avatar.png
+
+    # Resize ảnh
+    img = img.resize((180, 210))
+    img_tk = ImageTk.PhotoImage(img)
+    img_label.config(image=img_tk)
+    img_label.image = img_tk
 
     choose_img_label = tk.Label(
         left_frame,
@@ -89,14 +106,21 @@ def render_update_sv(container, user, go_back):
         entry.grid(row=row, column=1, padx=10, pady=6, sticky='w')
         return entry
 
+    # Ngày sinh
     tk.Label(form_frame, text="Ngày sinh:", bg="#F5F5F5", fg="#00897B", font=LABEL_FONT) \
         .grid(row=0, column=0, sticky='e', padx=10, pady=6)
 
     entry_birth = DateEntry(form_frame, date_pattern="dd-mm-yyyy", width=23, font=ENTRY_FONT)
-    try:
-        entry_birth.set_date(datetime.strptime(birth, "%Y-%m-%d"))
-    except:
-        pass
+
+    # Gán ngày sinh nếu có
+    # Gán ngày sinh nếu có
+    if birth:
+        try:
+            parsed_birth = datetime.strptime(birth, "%Y-%m-%d")  # ← đây là dòng cần sửa
+            entry_birth.set_date(parsed_birth)
+        except Exception as e:
+            print(f"[⚠️] Không thể đặt ngày sinh từ DB: {birth} → {e}")
+
     entry_birth.grid(row=0, column=1, padx=10, pady=6, sticky="w")
 
     address_var = tk.StringVar(value=address or "")
@@ -139,7 +163,7 @@ def render_update_sv(container, user, go_back):
     def save_changes():
         new_address = address_var.get().strip()
         new_phone = phone_var.get().strip()
-        new_birth = entry_birth.get_date().strftime("%d-%m-%Y")
+        new_birth = entry_birth.get_date().strftime("%Y-%m-%d")
         old_pw = old_pw_var.get().strip()
         new_pw = new_pw_var.get().strip()
 
@@ -165,6 +189,13 @@ def render_update_sv(container, user, go_back):
             conn.commit()
             conn.close()
             messagebox.showinfo("Thành công", "Cập nhật thông tin thành công!")
+
+            # ✅ Cập nhật dữ liệu user để View_infor hiển thị đúng
+            user["address"] = new_address
+            user["phone"] = new_phone
+            user["date"] = entry_birth.get_date().strftime("%d-%m-%Y")
+            user["img"] = img_file_path  # Quan trọng nhất: cập nhật ảnh
+
             on_back()
         except Exception as e:
             messagebox.showerror("Lỗi", f"Cập nhật thất bại: {str(e)}")

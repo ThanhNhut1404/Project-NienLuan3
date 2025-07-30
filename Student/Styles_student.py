@@ -45,8 +45,8 @@ BACK_BUTTON_UPDATE_STYLE = {
     "activebackground": "#D32F2F",
     "bd": 2,
     "relief": "raised",
-    "padx": 5,
-    "pady": 3
+    "padx": 9,
+    "pady": 4
 }
 
 
@@ -59,6 +59,17 @@ BUTTON_FACE_STYLE = {
     "bd": 2,
     "relief": "raised",
     "width": 9,
+    "height": 1
+}
+
+BUTTON_SEARCH_STYLE= {
+    "font": ("Arial", 10, "bold"),
+    "bg": "#FFA726",
+    "fg": "white",
+    "activebackground": "#388E3C",
+    "bd": 2,
+    "relief": "raised",
+    "width": 8,
     "height": 1
 }
 

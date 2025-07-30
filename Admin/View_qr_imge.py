@@ -54,8 +54,8 @@ def show_qr_image(container, qr_path):
                 messagebox.showerror("Lỗi", str(e))
 
     def back_to_main():
-        from Admin.Admin_main import render_admin_main
-        render_admin_main(container.master)
+        from Admin.Create_activity import render_Create_activity
+        render_Create_activity(container)
 
     # ====== Nút Quay lại nằm sát góc trái dưới cùng ======
     btn_back = tk.Button(

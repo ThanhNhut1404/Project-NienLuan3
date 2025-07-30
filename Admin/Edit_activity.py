@@ -37,7 +37,11 @@ def render_edit_activity(container, id_hd, go_back):
         messagebox.showerror("Lỗi", "Không tìm thấy hoạt động.")
         return
 
-    ten_hd, loai_hd, cap_hd, co_xac_nhan, ngay_tc, gio_bd, gio_kt, diem_cong, id_hk = data[1:10]
+    ten_hd, loai_hd, cap_hd, gio_bd, gio_kt, diem_cong, co_xac_nhan, ngay_tc, id_hk = data[1:10]
+
+    print("Xác nhận")
+    print("Giờ bắt đầu:", gio_bd)
+    print("Giờ kết thúc:", gio_kt)
 
     cursor.execute("SELECT ID_HK, NAME_HK, SCHOOL_YEAR FROM HK_NK")
     ds_hk = cursor.fetchall()
@@ -150,7 +154,7 @@ def render_edit_activity(container, id_hd, go_back):
     calendar_ngay = DateEntry(form_inner, **DATE_ENTRY_STYLE)
     calendar_ngay.grid(row=4, column=1, pady=6)
     try:
-        calendar_ngay.set_date(datetime.strptime(ngay_tc, "%d/%m/%Y"))
+        calendar_ngay.set_date(datetime.strptime(ngay_tc, "%d/%m/%Y").date())
     except:
         pass
 
