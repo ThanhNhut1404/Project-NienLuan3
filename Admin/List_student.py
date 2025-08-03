@@ -1,188 +1,129 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
-from Admin.Styles_admin import LIST_TITLE_FONT, TREEVIEW_STYLE
-from Admin.Edit_student import render_student_edit
+from tkinter import ttk, messagebox
 from Admin.Styles_admin import *
-from Database.Create_db import get_all_sinh_vien, delete_sinh_vien_by_mssv  # Đảm bảo hàm này trả về list[dict]
+from Admin.Edit_student import render_student_edit
+from Database.Create_db import get_all_sinh_vien, delete_sinh_vien_by_mssv
 
-def on_tree_click(event, tree, container):
-    region = tree.identify("region", event.x, event.y)
-    if region != "cell":
-        return
 
-    row_id = tree.identify_row(event.y)
-    column = tree.identify_column(event.x)
 
-    if not row_id or column != "#5":
-        return
-
-    item = tree.item(row_id)
-    values = item["values"]
-    if not values:
-        return
-
-    mssv = str(values[3]).strip()  # MSSV ở cột thứ 4
-    name = values[1]
-
-    bbox = tree.bbox(row_id, column)
-    if not bbox:
-        return
-
-    click_offset = event.x - bbox[0]
-
-    sửa_text = "🛠 Sửa"
-    xóa_text = "❌ Xóa"
-
-    font = ("Arial", 11)
-    temp = tk.Label(tree, text=sửa_text, font=font)
-    temp.update_idletasks()
-    sửa_width = temp.winfo_reqwidth()
-
-    temp.config(text=" | ")
-    temp.update_idletasks()
-    separator_width = temp.winfo_reqwidth()
-
-    temp.config(text=xóa_text)
-    temp.update_idletasks()
-    xóa_width = temp.winfo_reqwidth()
-
-    del temp
-
-    if click_offset <= sửa_width:
-        students = get_all_sinh_vien()
-        selected_sv = next((sv for sv in students if sv["mssv"] == mssv), None)
-        if selected_sv:
-            render_student_edit(container, selected_sv)
-        else:
-            messagebox.showerror("Lỗi", "Không tìm thấy dữ liệu sinh viên.")
-    elif click_offset >= sửa_width + separator_width:
-        confirm = messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa sinh viên: {name} ({mssv})?")
-        if confirm:
-            delete_sinh_vien_by_mssv(mssv)
-            tree.delete(row_id)
-            for idx, item_id in enumerate(tree.get_children(), start=1):
-                item_vals = list(tree.item(item_id)["values"])
-                item_vals[0] = idx
-                tree.item(item_id, values=item_vals)
-            messagebox.showinfo("Thành công", f"Đã xóa sinh viên '{name}' khỏi hệ thống.")
-
-def render_student_list(container):
+def render_student_list(container, go_back):
+    # Clear container
     for widget in container.winfo_children():
         widget.destroy()
+    container.config(bg=PAGE_BG_COLOR)
 
-    selected_row = {"item_id": None}
+    # MAIN WRAPPER
+    wrapper = tk.Frame(container, bg=PAGE_BG_COLOR)
+    wrapper.pack(fill=tk.BOTH, expand=True)
+
+    # TITLE + SEARCH
+    title_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)
+    title_frame.pack(fill="x", padx=28, pady=(20, 5))
+
+    tk.Label(title_frame, text="📋 Danh sách sinh viên", font=TITLE_FONT, bg="white", fg="#003366").pack(side="left")
+
+    search_wrapper = tk.Frame(title_frame, bg=PAGE_BG_COLOR)
+    search_wrapper.pack(side="right")
+
+    search_var = tk.StringVar()
+    tk.Entry(search_wrapper, textvariable=search_var, font=("Arial", 11), width=30).pack(side="left", padx=(0,10))
+    tk.Button(search_wrapper, text="Tìm kiếm", command=lambda: perform_search(), **BUTTON_SHEARCH_STYLE).pack(side="left")
+
+    # TREEVIEW
+    tree_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)
+    tree_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(10,5))
 
     style = ttk.Style()
     style.theme_use("default")
+    style.layout("Treeview", [('Treeview.treearea', {'sticky': 'nswe'})])
+    style.configure("Treeview", font=TREEVIEW_STYLE["font"], rowheight=TREEVIEW_STYLE["rowheight"],
+                    background="white", foreground="black", fieldbackground="white")
+    style.configure("Treeview.Heading", font=TREEVIEW_STYLE["header_font"],
+                    background=TREEVIEW_STYLE["header_bg"], foreground=TREEVIEW_STYLE["header_fg"])
+    style.map("Treeview.Heading", background=[("active", TREEVIEW_STYLE["header_bg"])])
 
-    style.configure("Treeview",
-                    font=TREEVIEW_STYLE["font"],
-                    background="white",
-                    foreground="black",
-                    rowheight=TREEVIEW_STYLE["rowheight"],
-                    fieldbackground="white",
-                    bordercolor=TREEVIEW_STYLE["border_color"],
-                    borderwidth=1)
-
-    style.map("Treeview",
-              background=[("selected", "white")],
-              foreground=[("selected", "black")])
-
-    style.configure("Treeview.Heading",
-                    font=TREEVIEW_STYLE["header_font"],
-                    background=TREEVIEW_STYLE["header_bg"],
-                    foreground=TREEVIEW_STYLE["header_fg"])
-
-    style.map("Treeview.Heading",
-              background=[("active", TREEVIEW_STYLE["header_bg"])],
-              foreground=[("active", TREEVIEW_STYLE["header_fg"])])
-
-    style.layout("Treeview", [
-        ('Treeview.treearea', {'sticky': 'nswe'})
-    ])
-
-    header_frame = tk.Frame(container, bg="white")
-    header_frame.pack(fill="x", padx=40, pady=(20, 5))
-
-    tk.Label(header_frame, text="📋 Danh sách sinh viên", font=LIST_TITLE_FONT, bg="white", fg="#003366") \
-        .pack(side="left")
-
-    search_frame = tk.Frame(header_frame, bg="white")
-    search_frame.pack(side="right")
-
-    search_var = tk.StringVar()
-    search_entry = tk.Entry(search_frame, textvariable=search_var, font=("Arial", 11), width=30)
-    search_entry.pack(side="left", padx=(0, 10))
-
-    def perform_search():
-        keyword = search_var.get().lower().strip()
-        filtered_students = []
-        for sv in get_all_sinh_vien():
-            if (keyword in sv["name"].lower()
-                    or keyword in sv["class"].lower()
-                    or keyword in sv["mssv"].lower()):
-                filtered_students.append(sv)
-
-        tree.delete(*tree.get_children())
-        for idx, sv in enumerate(filtered_students, start=1):
-            tag = "even" if idx % 2 == 0 else "odd"
-            tree.insert("", "end", values=(idx, sv["name"], sv["class"], sv["mssv"], "🛠 Sửa | ❌ Xóa"), tags=(tag,))
-
-    search_btn = tk.Button(search_frame, text="Tìm kiếm", command=perform_search, **BUTTON_SHEARCH_STYLE)
-    search_btn.pack(side="left")
-
-    center_frame = tk.Frame(container, bg="white")
-    center_frame.pack(pady=(0, 20))
-
-    table_frame = tk.Frame(center_frame, bg="white")
-    table_frame.pack()
-
-    columns = ("stt", "name", "class", "mssv", "actions")
-
-    tree = ttk.Treeview(table_frame, columns=columns, show="headings", selectmode="none")
+    columns = ("stt", "name", "class", "mssv", "date")
+    tree = ttk.Treeview(tree_frame, columns=columns, show="headings", style="Treeview")
     tree.pack(fill=tk.BOTH, expand=True)
+
+    # Headings
+    tree.heading("stt", text="STT")
+    tree.column("stt", anchor="center", width=50)
+    tree.heading("name", text="Họ và Tên")
+    tree.column("name", anchor="w", width=260)
+    tree.heading("class", text="Lớp")
+    tree.column("class", anchor="center", width=300)
+    tree.heading("mssv", text="MSSV")
+    tree.column("mssv", anchor="center", width=130)
+    tree.heading("date", text="Ngày sinh")
+    tree.column("date", anchor="center", width=160)
 
     tree.tag_configure("even", background=TREEVIEW_STYLE["even_row_bg"])
     tree.tag_configure("odd", background=TREEVIEW_STYLE["odd_row_bg"])
-    tree.tag_configure("selected_highlight", background="#DDEEFF")
 
-    def handle_click_with_highlight(event, container):
-        region = tree.identify_region(event.x, event.y)
-        if region == "separator":
+    tree.bind("<Button-1>", lambda e: block_resize_column(e, tree))
+
+    def back_to_main():
+        if go_back:
+            go_back("main")
+
+    # BUTTONS FRAME
+    btn_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)
+    btn_frame.pack(fill="x", pady=(0,15), padx=10)
+
+    left_frame = tk.Frame(btn_frame, bg=PAGE_BG_COLOR)
+    left_frame.pack(side="left", anchor="w")
+
+    btn_back = tk.Button(left_frame, text="← Quay lại", command=back_to_main, **BACK_BUTTON_STYLE)
+    btn_back.pack(side="left")
+
+    right_frame = tk.Frame(btn_frame, bg=PAGE_BG_COLOR)
+    right_frame.pack(side="right", anchor="e")
+
+    tk.Button(right_frame, text="Xóa sinh viên", command=lambda: handle_delete(tree, container), **BUTTON_DELETE_STYLE).pack(side="left", padx=5)
+    tk.Button(right_frame, text="Sửa thông tin", command=lambda: handle_edit(tree, container), **BUTTON_EDIT_STYLE).pack(side="left", padx=5)
+
+    # Local functions
+    def perform_search():
+        keyword = search_var.get().lower().strip()
+        filtered = [sv for sv in get_all_sinh_vien() if keyword in sv["name"].lower() or keyword in sv["class"].lower() or keyword in sv["mssv"].lower()]
+        tree.delete(*tree.get_children())
+        for idx, sv in enumerate(filtered, start=1):
+            tag = "even" if idx%2==0 else "odd"
+            tree.insert("", "end", values=(idx, sv["name"], sv["class"], sv["mssv"], sv["date"]), tags=(tag,))
+
+    def load_students():
+        tree.delete(*tree.get_children())
+        students = get_all_sinh_vien()
+        for idx, sv in enumerate(students, start=1):
+            tag = "even" if idx%2==0 else "odd"
+            tree.insert("", "end", values=(idx, sv["name"], sv["class"], sv["mssv"], sv["date"]), tags=(tag,))
+
+    def get_selected():
+        sel = tree.focus()
+        if not sel:
+            messagebox.showwarning("Chưa chọn", "Vui lòng chọn một sinh viên.")
+            return None
+        return tree.item(sel, "values")
+
+    def handle_edit(treeview, container_frame):
+        vals = get_selected()
+        if not vals: return
+        mssv = vals[3]
+        sv = next((s for s in get_all_sinh_vien() if s["mssv"]==mssv), None)
+        if sv: render_student_edit(container_frame, sv)
+
+    def handle_delete(treeview, container_frame):
+        vals = get_selected()
+        if not vals: return
+        mssv, name = vals[3], vals[1]
+        if messagebox.askyesno("Xác nhận", f"Bạn có chắc muốn xóa sinh viên {name}?"):
+            delete_sinh_vien_by_mssv(mssv)
+            load_students()
+
+    def block_resize_column(event, treeview):
+        if treeview.identify_region(event.x, event.y)=="separator":
             return "break"
 
-        row_id = tree.identify_row(event.y)
-        if not row_id:
-            return
-
-        if selected_row["item_id"] and tree.exists(selected_row["item_id"]):
-            idx = tree.index(selected_row["item_id"])
-            tag = "even" if (idx + 1) % 2 == 0 else "odd"
-            tree.item(selected_row["item_id"], tags=(tag,))
-
-        current_tags = tree.item(row_id)["tags"]
-        new_tags = tuple(t for t in current_tags if t != "selected_highlight") + ("selected_highlight",)
-        tree.item(row_id, tags=new_tags)
-        selected_row["item_id"] = row_id
-
-        on_tree_click(event, tree, container)
-
-    tree.bind("<Button-1>", lambda e: handle_click_with_highlight(e, container))
-
-    tree.heading("stt", text="STT")
-    tree.heading("name", text="Họ và Tên")
-    tree.heading("class", text="Lớp")
-    tree.heading("mssv", text="MSSV")
-    tree.heading("actions", text="Chức năng")
-
-    tree.column("stt", width=50, anchor="center", stretch=False)
-    tree.column("name", width=250, anchor="w", stretch=False)
-    tree.column("class", width=270, anchor="center", stretch=False)
-    tree.column("mssv", width=130, anchor="center", stretch=False)
-    tree.column("actions", width=200, anchor="center", stretch=False)
-
-    students = get_all_sinh_vien()
-    for idx, sv in enumerate(students, start=1):
-        tag = "even" if idx % 2 == 0 else "odd"
-        tree.insert("", "end", values=(idx, sv["name"], sv["class"], sv["mssv"], "🛠 Sửa | ❌ Xóa"), tags=(tag,))
+    # Load initial data
+    load_students()

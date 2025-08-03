@@ -30,13 +30,16 @@ def render_admin_main(container):
             current_cleanup["func"] = render_student_create(main_content, switch_to_view)
         elif view_name == "view_students":
             from Admin.List_student import render_student_list
-            render_student_list(main_content)
+            render_student_list(main_content, go_back=switch_to_view)
         elif view_name == "create_activity":
             from Admin.Create_activity import render_Create_activity
             render_Create_activity(main_content)
         elif view_name == "create_hk":
             from Admin.Create_HK import render_create_hoc_ky
             render_create_hoc_ky(main_content)
+        elif view_name == "list_view_hk":
+            from Admin.List_view_HK import render_list_view_hk
+            render_list_view_hk(main_content, go_back=switch_to_view)
         elif view_name == "view_activities":
             from Admin.List_view_activity import render_list_view_activity
             render_list_view_activity(main_content, switch_to_view)

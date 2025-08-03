@@ -37,7 +37,16 @@ def render_edit_activity(container, id_hd, go_back):
         messagebox.showerror("Lỗi", "Không tìm thấy hoạt động.")
         return
 
-    ten_hd, loai_hd, cap_hd, gio_bd, gio_kt, diem_cong, co_xac_nhan, ngay_tc, id_hk = data[1:10]
+    ten_hd = data[1]
+    loai_hd = data[2]
+    cap_hd = data[3]
+    gio_bd = data[4]
+    gio_kt = data[5]
+    diem_cong = data[6]
+    co_xac_nhan = data[7]
+    ngay_tc = data[8]
+    dia_chi_hd = data[9]
+    id_hk = data[10]
 
     print("Xác nhận")
     print("Giờ bắt đầu:", gio_bd)
@@ -55,6 +64,7 @@ def render_edit_activity(container, id_hd, go_back):
             cap = combo_cap.get()
             xn = xn_var.get()
             ngay = calendar_ngay.get_date().strftime("%d/%m/%Y")
+            dia_chi = entry_dia_chi.get().strip()
             gio_bd = f"{int(spin_start_hour.get()):02}:{int(spin_start_min.get()):02}:00"
             gio_kt = f"{int(spin_end_hour.get()):02}:{int(spin_end_min.get()):02}:00"
             hk_text = combo_hk.get()
@@ -67,11 +77,12 @@ def render_edit_activity(container, id_hd, go_back):
             diem_cong = tinh_diem()
 
             cursor.execute("""
-                UPDATE HOAT_DONG
+            UPDATE HOAT_DONG
                 SET TEN_HD = ?, CATEGORY_HD = ?, CAP_HD = ?, START_TIME = ?, TIME_OUT = ?, 
-                    DIEM_CONG = ?, CO_XAC_NHAN = ?, NGAY_TO_CHUC = ?, ID_HK = ?
+                DIEM_CONG = ?, CO_XAC_NHAN = ?, NGAY_TO_CHUC = ?, DIA_CHI_HD = ?, ID_HK = ?
                 WHERE ID_HD = ?
-            """, (ten, loai, cap, gio_bd, gio_kt, diem_cong, xn, ngay, id_hk_value, id_hd))
+
+            """, (ten, loai, cap, gio_bd, gio_kt, diem_cong, xn, ngay, dia_chi, id_hk_value, id_hd))
 
             conn.commit()
             messagebox.showinfo("Thành công", "Cập nhật hoạt động thành công!")
@@ -158,10 +169,17 @@ def render_edit_activity(container, id_hd, go_back):
     except:
         pass
 
+    tk.Label(form_inner, text="Địa chỉ:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=5, column=0, pady=6)
+    entry_dia_chi = tk.Entry(form_inner, **ENTRY_STYLE_ACTIVITY)
+    entry_dia_chi.grid(row=5, column=1, pady=6)
+    entry_dia_chi.insert(0, dia_chi_hd if dia_chi_hd else "")
+
+
     tk.Label(form_inner, text="Giờ bắt đầu:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(
-        row=5, column=0, pady=6)
+        row=6, column=0, pady=6)
     start_time_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
-    start_time_frame.grid(row=5, column=1, pady=6, sticky="w")
+    start_time_frame.grid(row=6, column=1, pady=6, sticky="w")
     start_hour_style = deepcopy(SPINBOX_STYLE)
     start_hour_style["to"] = 23
     spin_start_hour = tk.Spinbox(start_time_frame, **start_hour_style)
@@ -182,9 +200,9 @@ def render_edit_activity(container, id_hd, go_back):
         pass
 
     tk.Label(form_inner, text="Giờ kết thúc:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
-             fg="white").grid(row=6, column=0, pady=6)
+             fg="white").grid(row=7, column=0, pady=6)
     end_time_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
-    end_time_frame.grid(row=6, column=1, pady=6, sticky="w")
+    end_time_frame.grid(row=7, column=1, pady=6, sticky="w")
     end_hour_style = deepcopy(SPINBOX_STYLE)
     end_hour_style["to"] = 23
     spin_end_hour = tk.Spinbox(end_time_frame, **end_hour_style)
@@ -203,9 +221,9 @@ def render_edit_activity(container, id_hd, go_back):
         pass
 
     tk.Label(form_inner, text="Học kỳ - Năm học:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
-             fg="white").grid(row=7, column=0, pady=6)
+             fg="white").grid(row=8, column=0, pady=6)
     combo_hk = ttk.Combobox(form_inner, font=("Arial", 10), width=29, state="readonly", values=hk_list)
-    combo_hk.grid(row=7, column=1, pady=6)
+    combo_hk.grid(row=8, column=1, pady=6)
     for hk_str in hk_list:
         if hk_str.startswith(f"{id_hk} -"):
             combo_hk.set(hk_str)
@@ -213,7 +231,7 @@ def render_edit_activity(container, id_hd, go_back):
 
     # === Nút chức năng trong ô vuông ===
     button_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
-    button_frame.grid(row=8, column=0, columnspan=2, pady=(10, 0), sticky="ew")
+    button_frame.grid(row=9, column=0, columnspan=2, pady=(10, 0), sticky="ew")
     button_frame.columnconfigure(0, weight=1)
     button_frame.columnconfigure(1, weight=1)
 

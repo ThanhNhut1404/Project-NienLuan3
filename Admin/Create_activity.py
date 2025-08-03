@@ -29,7 +29,8 @@ def render_Create_activity(container):
     cursor = conn.cursor()
     cursor.execute("SELECT ID_HK, NAME_HK, SCHOOL_YEAR FROM HK_NK")
     hk_data = cursor.fetchall()
-    hk_list = [f"{row[0]} - {row[1]} ({row[2]})" for row in hk_data]
+    hk_map = {f"{row[1]} ({row[2]})": row[0] for row in hk_data}  # key hiển thị, value là ID_HK
+    hk_list = list(hk_map.keys())
 
     def tinh_diem():
         cap = combo_cap.get()
@@ -45,6 +46,7 @@ def render_Create_activity(container):
         return tong
 
     def clear_form():
+        entry_dia_chi.delete(0, tk.END)
         entry_ten.delete(0, tk.END)
         combo_loai.set("")
         combo_cap.set("")
@@ -61,6 +63,7 @@ def render_Create_activity(container):
         gio_kt = f"{spin_end_hour.get()}:{spin_end_min.get()}:00"
         co_xn = xn_var.get()
         hk_str = combo_hk.get().strip()
+        dia_chi = entry_dia_chi.get().strip()
 
         if not ten_hd:
             messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập tên hoạt động.")
@@ -69,14 +72,23 @@ def render_Create_activity(container):
             messagebox.showwarning("Thiếu học kỳ", "Vui lòng chọn học kỳ – năm học.")
             return
 
+        id_hk = hk_map.get(hk_str)
+        if id_hk is None:
+            messagebox.showerror("Lỗi", "Không xác định được học kỳ.")
+            return
+
         diem_cong = tinh_diem()
-        id_hk = int(hk_str.split(" - ")[0])
+
+        if id_hk is None:
+            messagebox.showerror("Lỗi", "Không xác định được học kỳ.")
+            return
 
         try:
             cursor.execute('''
-                INSERT INTO HOAT_DONG (TEN_HD, CATEGORY_HD, CAP_HD, START_TIME, TIME_OUT, NGAY_TO_CHUC, DIEM_CONG, CO_XAC_NHAN, ID_HK)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (ten_hd, loai_hd, cap_hd, gio_bd, gio_kt, ngay_to_chuc, diem_cong, co_xn, id_hk))
+                INSERT INTO HOAT_DONG (TEN_HD, CATEGORY_HD, CAP_HD, START_TIME, TIME_OUT, NGAY_TO_CHUC, DIA_CHI_HD, DIEM_CONG, CO_XAC_NHAN, ID_HK)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (ten_hd, loai_hd, cap_hd, gio_bd, gio_kt, ngay_to_chuc, dia_chi, diem_cong, co_xn, id_hk))
+
             conn.commit()
 
             id_hd = cursor.lastrowid
@@ -157,9 +169,14 @@ def render_Create_activity(container):
     calendar_ngay = DateEntry(form_inner, **DATE_ENTRY_STYLE)
     calendar_ngay.grid(row=4, column=1, pady=6)
 
-    tk.Label(form_inner, text="Bắt đầu:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=5, column=0, pady=6)
+    tk.Label(form_inner, text="Địa chỉ:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR,
+             fg="white").grid(row=5, column=0, pady=6)
+    entry_dia_chi = tk.Entry(form_inner, **ENTRY_STYLE_ACTIVITY)
+    entry_dia_chi.grid(row=5, column=1, pady=6)
+
+    tk.Label(form_inner, text="Bắt đầu:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=6, column=0, pady=6)
     start_time_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
-    start_time_frame.grid(row=5, column=1, pady=6, sticky="w")
+    start_time_frame.grid(row=6, column=1, pady=6, sticky="w")
 
     start_hour_style = deepcopy(SPINBOX_STYLE)
     start_hour_style["to"] = 23
@@ -170,9 +187,9 @@ def render_Create_activity(container):
     spin_start_min.pack(side="left")
     tk.Label(start_time_frame, text="phút", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left", padx=(5, 0))
 
-    tk.Label(form_inner, text="Kết thúc:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=6, column=0, pady=6)
+    tk.Label(form_inner, text="Kết thúc:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=7, column=0, pady=6)
     end_time_frame = tk.Frame(form_inner, bg=FORM_BG_COLOR)
-    end_time_frame.grid(row=6, column=1, pady=6, sticky="w")
+    end_time_frame.grid(row=7, column=1, pady=6, sticky="w")
 
     end_hour_style = deepcopy(SPINBOX_STYLE)
     end_hour_style["to"] = 23
@@ -183,9 +200,9 @@ def render_Create_activity(container):
     spin_end_min.pack(side="left")
     tk.Label(end_time_frame, text="phút", bg=FORM_BG_COLOR, fg="white", font=ENTRY_FONT).pack(side="left", padx=(5, 0))
 
-    tk.Label(form_inner, text="Học kỳ - Năm học:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=7, column=0, pady=6)
+    tk.Label(form_inner, text="Học kỳ - Năm học:", font=LABEL_FONT, width=18, anchor="e", bg=FORM_BG_COLOR, fg="white").grid(row=9, column=0, pady=6)
     combo_hk = ttk.Combobox(form_inner, font=("Arial", 10), width=29, state="readonly", values=hk_list)
-    combo_hk.grid(row=7, column=1, pady=6)
+    combo_hk.grid(row=9, column=1, pady=6)
 
     diem_label = tk.Label(
         form_inner,
@@ -195,7 +212,7 @@ def render_Create_activity(container):
         bg=FORM_BG_COLOR,
         anchor="center"
     )
-    diem_label.grid(row=8, column=0, columnspan=2, sticky="ew", pady=(10, 5))
+    diem_label.grid(row=11, column=0, columnspan=2, sticky="ew", pady=(10, 5))
 
     btn_create = tk.Button(
         form_inner,
@@ -203,7 +220,7 @@ def render_Create_activity(container):
         command=tao_hoat_dong,
         **CREATE_BUTTON_STYLE
     )
-    btn_create.grid(row=9, column=1, pady=(20, 10), sticky="e")
+    btn_create.grid(row=12, column=1, pady=(20, 10), sticky="e")
 
     btn_back = tk.Button(
         form_inner,
@@ -211,4 +228,4 @@ def render_Create_activity(container):
         command=back_to_main,
         **BACK_BUTTON_STYLE
     )
-    btn_back.grid(row=9, column=0, pady=(20, 10), sticky="w")
+    btn_back.grid(row=12, column=0, pady=(20, 10), sticky="w")

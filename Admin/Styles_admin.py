@@ -95,6 +95,17 @@ BUTTON_DELETE_STYLE = {
     "height": 1
 }
 
+BUTTON_DELETE_HK_STYLE= {
+    "font": ("Arial", 14, "bold"),
+    "bg": "#FFA726",
+    "fg": "white",
+    "activebackground": "#FF5722",
+    "bd": 2,
+    "relief": "raised",
+    "width": 9,
+    "height": 1
+}
+
 # ==== Style cho checkbox hiện mật khẩu ====
 CHECKBOX_STYLE = {
     "bg": FORM_BG_COLOR,

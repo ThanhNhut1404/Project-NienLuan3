@@ -186,11 +186,11 @@ def render_list_view_activity(container, go_back):
     btn_view_students = tk.Button(right_frame, text="Xem danh sách tham gia", command=handle_view_students, **BUTTON_VIEW_STYLE)
     btn_view_students.pack(side="left", padx=5)
 
-    btn_edit = tk.Button(right_frame, text="Sửa hoạt động", command=handle_edit, **BUTTON_EDIT_STYLE)
-    btn_edit.pack(side="left", padx=5)
-
     btn_delete = tk.Button(right_frame, text="Xóa hoạt động", command=handle_delete, **BUTTON_DELETE_STYLE)
     btn_delete.pack(side="left", padx=5)
+
+    btn_edit = tk.Button(right_frame, text="Sửa hoạt động", command=handle_edit, **BUTTON_EDIT_STYLE)
+    btn_edit.pack(side="left", padx=5)
 
     def load_activities():
         for item in tree.get_children():

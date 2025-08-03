@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS HINH_ANH_KHUON_MAT (
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS HK_NK (
     ID_HK INTEGER PRIMARY KEY,
-    NAME_HK TEXT NOT NULL,           -- Tên học kỳ
+    NAME_HK TEXT NOT NULL,          
     SCHOOL_YEAR TEXT
 );
 ''')
@@ -69,14 +69,15 @@ CREATE TABLE IF NOT EXISTS HK_NK (
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS HOAT_DONG (
     ID_HD INTEGER PRIMARY KEY AUTOINCREMENT,
-    TEN_HD TEXT NOT NULL,           -- Tên hoạt động
-    CATEGORY_HD TEXT,               -- Loại hoạt động: Tình nguyện, Hội nhập...
-    CAP_HD TEXT,                    -- Cấp: Chi hội, Liên chi, Trường
-    START_TIME TEXT,                -- Thời gian bắt đầu
-    TIME_OUT TEXT,                  -- Thời gian kết thúc
-    DIEM_CONG INTEGER DEFAULT 0,     -- Số điểm cộng khi tham gia
+    TEN_HD TEXT NOT NULL,           
+    CATEGORY_HD TEXT,               
+    CAP_HD TEXT,                   
+    START_TIME TEXT,                
+    TIME_OUT TEXT,                  
+    DIEM_CONG INTEGER DEFAULT 0,     
     CO_XAC_NHAN TEXT,
-    NGAY_TO_CHUC TEXT,  -- Ngày tổ chức
+    NGAY_TO_CHUC TEXT,  
+    DIA_CHI_HD TEXT,               
     ID_HK INTEGER,
     FOREIGN KEY (ID_HK) REFERENCES HK_NK(ID_HK)
 );
