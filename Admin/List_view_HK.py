@@ -15,7 +15,7 @@ def render_list_view_hk(container, go_back):
     wrapper.pack(fill=tk.BOTH, expand=True)
 
     title_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)
-    title_frame.pack(fill="x", padx=28, pady=(20, 5))
+    title_frame.pack(fill="x", padx=20, pady=(20, 5))
 
     tk.Label(title_frame, text="📅 Danh sách học kỳ", font=TITLE_FONT, bg="white", fg="#003366") \
         .pack(side="left")
@@ -38,8 +38,8 @@ def render_list_view_hk(container, go_back):
     search_wrapper.pack(side="right")
 
     search_var = tk.StringVar()
-    search_entry = tk.Entry(search_wrapper, textvariable=search_var, font=("Arial", 11), width=30)
-    search_entry.pack(side="left", padx=(0, 10))
+    search_entry = tk.Entry(search_wrapper, textvariable=search_var, font=("Arial", 11), width=30, bg="#f8f8f8")
+    search_entry.pack(side="left", padx=(0, 6))
 
     search_btn = tk.Button(search_wrapper, text="Tìm kiếm", command=perform_search, **BUTTON_SHEARCH_STYLE)
     search_btn.pack(side="left")

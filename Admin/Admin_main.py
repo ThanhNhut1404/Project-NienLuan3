@@ -1,6 +1,9 @@
 import tkinter as tk
 from Admin.Styles_admin import TITLE_FONT
 from Admin.Header_admin import render_header
+from PIL import Image, ImageTk
+import os
+
 
 def render_admin_main(container):
     from Admin.Login_admin import render_admin_login  # tránh import vòng lặp
@@ -34,29 +37,31 @@ def render_admin_main(container):
         elif view_name == "create_activity":
             from Admin.Create_activity import render_Create_activity
             render_Create_activity(main_content)
+        elif view_name == "view_activities":
+            from Admin.List_view_activity import render_list_view_activity
+            render_list_view_activity(main_content, switch_to_view)
         elif view_name == "create_hk":
             from Admin.Create_HK import render_create_hoc_ky
             render_create_hoc_ky(main_content)
         elif view_name == "list_view_hk":
             from Admin.List_view_HK import render_list_view_hk
             render_list_view_hk(main_content, go_back=switch_to_view)
-        elif view_name == "view_activities":
-            from Admin.List_view_activity import render_list_view_activity
-            render_list_view_activity(main_content, switch_to_view)
 
         else:
             render_dashboard()
 
-    # === Tiêu đề hệ thống luôn nằm trên cùng ===
-    title_label = tk.Label(
-        container,
-        text="🎓 HỆ THỐNG ĐIỂM DANH SINH VIÊN - ADMIN",
-        font=TITLE_FONT,
-        fg="#2E4053",
-        bg="white",
-        pady=10
-    )
-    title_label.pack(side=tk.TOP, fill=tk.X)
+    # Đường dẫn đến ảnh tiêu đề
+    title_image_path = os.path.join("Image", "banner_top.jpg")  # đổi tên nếu cần
+
+    # Mở và resize ảnh: ví dụ chiều cao 100px (banner ngang)
+    title_img = Image.open(title_image_path)
+    title_img = title_img.resize((982, 45), Image.Resampling.LANCZOS)  # hoặc tuỳ theo kích thước frame
+    title_photo = ImageTk.PhotoImage(title_img)
+
+    # Gắn ảnh vào label
+    title_img_label = tk.Label(container, image=title_photo, bg="white")
+    title_img_label.image = title_photo  # giữ tham chiếu ảnh
+    title_img_label.pack(side=tk.TOP, fill=tk.X)
 
     # === Gọi header ngay dưới tiêu đề ===
     header = render_header(
@@ -75,13 +80,19 @@ def render_admin_main(container):
     def render_dashboard():
         for widget in main_content.winfo_children():
             widget.destroy()
-        tk.Label(
-            main_content,
-            text="THÊM TẤM HÌNH Ở ĐÂY !!",
-            font=TITLE_FONT,
-            fg="#2E4053",
-            bg="white"
-        ).pack(pady=40)
+
+        # Đường dẫn đến ảnh
+        image_path = os.path.join("Image", "banner_admin.jpg")
+
+        # Mở và resize ảnh cho vừa vùng nội dung
+        img = Image.open(image_path)
+        img = img.resize((979, 550), Image.Resampling.LANCZOS)
+        photo = ImageTk.PhotoImage(img)
+
+        # Tạo label chứa ảnh
+        img_label = tk.Label(main_content, image=photo, bg="white")
+        img_label.image = photo  # Lưu tham chiếu ảnh tránh bị xóa
+        img_label.pack(pady=30)
 
     # Gọi dashboard mặc định
     render_dashboard()

@@ -18,17 +18,20 @@ def render_student_list(container, go_back):
 
     # TITLE + SEARCH
     title_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)
-    title_frame.pack(fill="x", padx=28, pady=(20, 5))
+    title_frame.pack(fill="x", padx=20, pady=(20, 5))  # KHỚP VỚI tree_frame (padx=20)
 
-    tk.Label(title_frame, text="📋 Danh sách sinh viên", font=TITLE_FONT, bg="white", fg="#003366").pack(side="left")
+    # Tiêu đề bên trái
+    tk.Label(title_frame, text="📋 Danh sách sinh viên", font=TITLE_FONT, bg="white", fg="#003366").pack(side="left",
+                                                                                                        anchor="w")
 
+    # Tìm kiếm bên phải
     search_wrapper = tk.Frame(title_frame, bg=PAGE_BG_COLOR)
-    search_wrapper.pack(side="right")
+    search_wrapper.pack(side="right", anchor="e")  # Gắn sát phải, trong cùng mép treeview
 
     search_var = tk.StringVar()
-    tk.Entry(search_wrapper, textvariable=search_var, font=("Arial", 11), width=30).pack(side="left", padx=(0,10))
-    tk.Button(search_wrapper, text="Tìm kiếm", command=lambda: perform_search(), **BUTTON_SHEARCH_STYLE).pack(side="left")
-
+    tk.Entry(search_wrapper, textvariable=search_var, font=("Arial", 11), width=30, bg="#f8f8f8").pack(side="left", padx=(0, 6))
+    tk.Button(search_wrapper, text="Tìm kiếm", command=lambda: perform_search(), **BUTTON_SHEARCH_STYLE).pack(
+        side="left")
     # TREEVIEW
     tree_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)
     tree_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=(10,5))
