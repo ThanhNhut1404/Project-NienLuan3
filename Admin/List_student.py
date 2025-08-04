@@ -68,7 +68,7 @@ def render_student_list(container, go_back):
 
     def back_to_main():
         if go_back:
-            go_back("main")
+            go_back("dashboard")
 
     # BUTTONS FRAME
     btn_frame = tk.Frame(wrapper, bg=PAGE_BG_COLOR)

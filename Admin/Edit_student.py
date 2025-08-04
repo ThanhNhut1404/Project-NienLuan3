@@ -84,9 +84,8 @@ def render_student_edit(container, student_data):
     # Nút "Quay lại" và "Lưu thay đổi" nằm cùng 1 hàng
     def back_to_list():
         from Admin.List_student import render_student_list
-        render_student_list(container)
+        render_student_list(container, back_to_list)
 
-    # Nút "Quay lại" ở cột 0, canh trái
     btn_back = tk.Button(
         form_frame,
         text="← Quay lại",
