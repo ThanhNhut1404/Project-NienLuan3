@@ -1,0 +1,18 @@
+
+# Màu sắc
+PRIMARY_COLOR = "#2C387E"
+BUTTON_COLOR = "#3F51B5"
+TEXT_COLOR = "#000000"
+HINT_TEXT_COLOR = "Hint"
+BUTTON_COLOR_RGBA = "#303F9F"
+
+# Font và kiểu
+FONT_TITLE = "H5"
+FONT_NORMAL = "Subtitle1"
+
+# Kích thước
+WINDOW_WIDTH = 360
+WINDOW_HEIGHT = 640
+BUTTON_HEIGHT = 56  # Tăng lên 56dp (tiêu chuẩn cho nút)
+PADDING = 20
+SPACING = 20
