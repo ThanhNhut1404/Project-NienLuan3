@@ -7,11 +7,13 @@ from Styles.Styles_student import (
 
 Window.size = (WINDOW_WIDTH, WINDOW_HEIGHT)
 from kivymd.uix.button import MDIconButton
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.behaviors import ButtonBehavior
 from kivymd.uix.relativelayout import MDRelativeLayout
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Rectangle
 from kivymd.app import MDApp
-from kivymd.uix.card import MDCard
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -64,11 +66,20 @@ class CameraFeed(Image):
                 rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 buf = rgb.tobytes()
                 h, w = rgb.shape[:2]
-                if not self.texture_obj:
+
+                # Nếu chưa tạo texture thì tạo
+                if not self.texture_obj or self.texture_obj.size != (w, h):
                     self.texture_obj = Texture.create(size=(w, h), colorfmt='rgb')
                     self.texture_obj.flip_vertical()
+
+                # Cập nhật buffer vào texture
                 self.texture_obj.blit_buffer(buf, colorfmt='rgb', bufferfmt='ubyte')
+
+                # Gán texture và ép widget vẽ lại
                 self.texture = self.texture_obj
+                self.canvas.ask_update()
+
+                # Lưu hình ảnh hiện tại
                 self.current_image = rgb
 
     def get_encoding(self):
@@ -253,21 +264,126 @@ class LoginScreen(MDScreen):
         face_screen.next_screen = 'student_main'
         app.sm.current = 'face_scan'
 
-
+class ButtonImage(ButtonBehavior, Image):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if 'source' in kwargs:
+            from kivy.core.image import Image as CoreImage
+            try:
+                CoreImage(kwargs['source'])
+            except Exception as e:
+                print(f"Lỗi tải hình ảnh {kwargs['source']}: {e}")
+                toast(f"Lỗi tải hình ảnh: {kwargs['source']}")
 
 class FaceScanScreen(MDScreen):
     def __init__(self, next_screen='student_main', **kwargs):
         super().__init__(**kwargs)
         self.next_screen = next_screen
-        layout = MDBoxLayout(orientation='vertical', padding=10, spacing=10)
-        layout.add_widget(MDLabel(text='📷 Quét khuôn mặt để đăng nhập', halign='center', font_style=FONT_TITLE))
-        self.camera = CameraFeed()
+
+        layout = FloatLayout()
+
+        # Camera
+        self.camera = CameraFeed(
+            size_hint=(None, None),
+            size=(Window.width - dp(10), dp(270)),
+            pos_hint={"center_x": 0.5, "top": 0.78}
+        )
         layout.add_widget(self.camera)
-        layout.add_widget(MDRaisedButton(text='🔍 Kiểm tra khuôn mặt', on_release=self.verify_face))
-        layout.add_widget(MDRaisedButton(text='⬅️ Quay về', on_release=self.go_back))
-        scroll = ScrollView()
-        scroll.add_widget(layout)
-        self.add_widget(scroll)
+
+        # Header
+        header_layout = MDBoxLayout(
+            orientation='vertical',
+            size_hint=(1, None),
+            height=dp(150),
+            pos_hint={"top": 0.97},
+            padding=[0, dp(10), 0, 0],
+            spacing=dp(6),
+        )
+
+        logo = Image(
+            source="Image/Logo_login.png",
+            size_hint=(None, None),
+            size=(dp(180), dp(119)),
+            pos_hint={"center_x": 0.5},
+            fit_mode="contain"
+        )
+        header_layout.add_widget(logo)
+
+        title = MDLabel(
+            text='ĐĂNG NHẬP VỚI KHUÔN MẶT',
+            halign='center',
+            font_style='H5',
+            bold=True,
+            theme_text_color='Custom',
+            text_color=[0, 0, 0, 1],
+            size_hint_y=None,
+            height=dp(30),
+        )
+        header_layout.add_widget(title)
+
+        layout.add_widget(header_layout)
+
+        # Dòng chữ hướng dẫn
+        instruction_label = MDLabel(
+            text="Vui lòng nhìn thẳng vào camera để hệ thống nhận diện khuôn mặt",
+            theme_text_color="Custom",
+            text_color=(1, 0, 0, 1),
+            halign="center",
+            font_style="Caption",
+            size_hint=(1, None),
+            height=dp(30),
+            pos_hint={"center_x": 0.5, "top": 0.40}
+        )
+        layout.add_widget(instruction_label)
+
+        # Nút kiểm tra khuôn mặt
+        btn_wrapper = MDBoxLayout(
+            size_hint=(1, None),
+            height=BUTTON_HEIGHT,
+            padding=[dp(10), 0, dp(10), 0],
+            pos_hint={"top": 0.36}
+        )
+
+        check_btn = MDRaisedButton(
+            text='KIỂM TRA KHUÔN MẶT',
+            on_release=self.verify_face,
+            size_hint=(1, None),
+            height=BUTTON_HEIGHT,
+            font_style="H6",
+            md_bg_color=[0.0, 0.6, 0.3, 1],
+            text_color=[1, 1, 1, 1],
+        )
+        check_btn.font_size = sp(13)
+
+        btn_wrapper.add_widget(check_btn)
+        layout.add_widget(btn_wrapper)
+
+        # Nút quay về
+        back_btn = ButtonImage(
+            source='Image/go_back.png',
+            size_hint=(None, None),
+            size=(dp(40), dp(40)),
+            pos_hint={"x": 0.01, "top": 1},
+            on_release=self.go_back,
+            opacity=1
+        )
+        layout.add_widget(back_btn)
+
+        # Label cho thông báo thành công
+        self.success_label = MDLabel(
+            text='',
+            halign='center',
+            theme_text_color='Custom',
+            text_color=(0, 0.7, 0.2, 1),  # Xanh lá cây
+            font_size=sp(30),  # 👈 to lên ở đây
+            bold=True,
+            size_hint=(1, None),
+            height=dp(40),  # nên tăng luôn height nếu font to
+            pos_hint={"center_x": 0.5, "top": 0.28}
+        )
+        layout.add_widget(self.success_label)
+
+        self.add_widget(layout)
 
     def on_enter(self):
         self.camera.start_camera()
@@ -278,24 +394,36 @@ class FaceScanScreen(MDScreen):
     def verify_face(self, *args):
         encoding = self.camera.get_encoding()
         if encoding is None:
-            toast('❌ Không thấy khuôn mặt hoặc quá nhiều khuôn mặt')
+            toast('Không thấy khuôn mặt hoặc quá nhiều khuôn mặt', background=[1, 0, 0, 1])
             return
+
         for user in get_all_sinh_vien():
+            print(f"Checking user: {user}")  # Debug
             for enc in user.get('encodings', []):
                 arr = np.array(eval(enc)) if isinstance(enc, str) else enc
                 match = face_recognition.compare_faces([arr], encoding, tolerance=0.4)[0]
                 if match:
-                    toast(f'✅ Xin chào {user["mssv"]}')
-                    self.camera.stop_camera()
-                    app = MDApp.get_running_app()
-                    screen = app.sm.get_screen(self.next_screen)
-                    if hasattr(screen, 'load_user'):
-                        screen.load_user(user)
-                    if hasattr(screen, 'set_user'):
-                        screen.set_user(user)
-                    app.sm.current = self.next_screen
+                    print(f"Match found for user: {user.get('name', 'Người dùng')}")  # Debug
+                    self.success_label.text = 'Đăng nhập thành công'
+                    # Chuyển màn hình sau 1 giây
+                    def switch_screen(dt):
+                        self.success_label.text = ''
+                        self.camera.stop_camera()
+                        app = MDApp.get_running_app()
+                        screen = app.sm.get_screen(self.next_screen)
+                        print(f"Calling load_user for screen: {self.next_screen}")  # Debug
+                        if hasattr(screen, 'load_user'):
+                            screen.load_user(user)
+                        else:
+                            print(f"Screen {self.next_screen} does not have load_user method")  # Debug
+                        if hasattr(screen, 'set_user'):
+                            screen.set_user(user)
+                        app.sm.current = self.next_screen
+                    Clock.schedule_once(switch_screen, 1)
                     return
-        toast('❌ Không tìm thấy khuôn mặt phù hợp')
+
+        toast('Không tìm thấy khuôn mặt phù hợp', background=[1, 0, 0, 1])
 
     def go_back(self, *args):
+        self.camera.stop_camera()
         MDApp.get_running_app().sm.current = 'login'
