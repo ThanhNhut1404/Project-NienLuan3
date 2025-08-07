@@ -8,6 +8,7 @@ from Student.Menu_student import render_menu
 
 class StudentMainScreen(Screen):
     def load_user(self, user):
+        self.user = user
         self.clear_widgets()
 
         layout = MDBoxLayout(orientation='vertical', spacing=0)
