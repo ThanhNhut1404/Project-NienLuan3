@@ -4,9 +4,11 @@ from kivymd.uix.label import MDLabel
 def render_header(container, user):
     header = MDBoxLayout(
         orientation='horizontal',
-        size_hint_y=None, height="50dp",
-        md_bg_color="#00897B",
-        padding=(20, 5), spacing=10
+        size_hint_y=None,
+        height="50dp",
+        md_bg_color="#2C387E",  # Đồng bộ với PRIMARY_COLOR
+        padding=(20, 5),
+        spacing=10
     )
 
     title_label = MDLabel(

@@ -4,6 +4,7 @@ from kivymd.uix.label import MDLabel
 from kivy.uix.behaviors import ButtonBehavior
 from kivymd.app import MDApp
 
+
 class MenuButton(ButtonBehavior, MDBoxLayout):
     def __init__(self, icon, text, on_press_action, **kwargs):
         super().__init__(orientation='vertical', spacing=4, **kwargs)
@@ -50,18 +51,14 @@ def render_menu(menu_layout, user, screen_manager):
             screen.set_user(user)
         screen_manager.current = "view_activity"
 
-    def goto_update_student(*args):
-        if user:
-            app = MDApp.get_running_app()
-            update_screen = app.update_student_screen
-            update_screen.load_user(user)  # Sử dụng user được truyền vào thay vì app.main_screen.user
-        app.sm.current = "update_student"
+    def goto_setting(*args):
+        screen_manager.current = "setting"
 
     menu_layout.clear_widgets()
     menu_layout.add_widget(MenuButton("account", "Thông tin", goto_infor))
     menu_layout.add_widget(MenuButton("calendar", "Điểm danh", goto_roll_call))
     menu_layout.add_widget(MenuButton("clipboard-list", "Hoạt động", goto_activity))
-    menu_layout.add_widget(MenuButton("account-edit", "Cập nhật", goto_update_student))
+    menu_layout.add_widget(MenuButton("cog", "Cài đặt", goto_setting))
 
     if not user:
         print("Debug - user không hợp lệ hoặc rỗng khi render menu")
