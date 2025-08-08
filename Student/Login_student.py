@@ -341,7 +341,7 @@ class FaceScanScreen(MDScreen):
             size_hint=(1, None),
             height=BUTTON_HEIGHT,
             padding=[dp(10), 0, dp(10), 0],
-            pos_hint={"top": 0.36}
+            pos_hint={"top": 0.25}
         )
 
         check_btn = MDRaisedButton(
@@ -375,11 +375,11 @@ class FaceScanScreen(MDScreen):
             halign='center',
             theme_text_color='Custom',
             text_color=(0, 0.7, 0.2, 1),  # Xanh lá cây
-            font_size=sp(30),  # 👈 to lên ở đây
+            font_size=sp(39),
             bold=True,
             size_hint=(1, None),
             height=dp(40),  # nên tăng luôn height nếu font to
-            pos_hint={"center_x": 0.5, "top": 0.28}
+            pos_hint={"center_x": 0.5, "top": 0.33}
         )
         layout.add_widget(self.success_label)
 

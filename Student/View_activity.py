@@ -1,4 +1,3 @@
-# View_activity.py
 from kivy.uix.screenmanager import Screen
 from kivy.metrics import dp
 from kivymd.uix.boxlayout import MDBoxLayout
@@ -7,6 +6,8 @@ from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.datatables import MDDataTable
 from kivymd.uix.menu import MDDropdownMenu
 import sqlite3
+from kivy.graphics import Color, Line
+from kivy.clock import Clock
 
 from Database.Create_db import DB_NAME
 
@@ -32,48 +33,77 @@ class ViewActivityScreen(Screen):
         self.clear_widgets()
         root = MDBoxLayout(
             orientation="vertical",
-            spacing=dp(4),
-            padding=[dp(4), dp(4), dp(4), dp(4)]
+            spacing=0,
+            padding=[0, 0, 0, 0],
+            size_hint=(1, 1)  # Đảm bảo layout cha full width
         )
 
         # — Toolbar —
         toolbar = MDTopAppBar(
             title="Hoạt động đã tham gia",
-            elevation=2,
+            elevation=0,
+            md_bg_color=(0.17, 0.22, 0.49, 1),
             size_hint_y=None,
-            height=dp(44)
+            height=dp(44),
+            size_hint_x=1  # Make toolbar full width
         )
         toolbar.left_action_items = [["arrow-left", lambda x: self.back_to_main()]]
         root.add_widget(toolbar)
 
-        # — Button chọn học kỳ —
-        self.hk_button = MDRaisedButton(
-            text="Chọn HK",
-            size_hint=(None, None),
-            size=(dp(140), dp(32)),
-            pos_hint={"center_x": 0.5},
-            on_release=self.open_hk_menu
-        )
-        root.add_widget(self.hk_button)
-
         # — Container và DataTable —
         self.container = root
+
+        # Tạo một layout ngang cho nút chọn học kỳ kiểu label + icon
+        from kivymd.uix.label import MDLabel
+        from kivymd.uix.button import MDIconButton
+        from kivy.uix.boxlayout import BoxLayout
+        frame_layout = BoxLayout(orientation="horizontal", size_hint=(None, None), height=dp(40), width=dp(300), padding=[0,0,0,0], spacing=0)
+        self.hk_label = MDLabel(
+            text="Chọn học kỳ",
+            font_style="Subtitle1",
+            size_hint=(None, None),
+            halign="left",
+            valign="middle",
+            theme_text_color="Primary",
+            height=dp(32),
+            width=dp(250),
+            shorten=False,
+            max_lines=1
+        )
+        self.hk_icon = MDIconButton(
+            icon="chevron-down",
+            size_hint=(None, None),
+            height=dp(32),
+            width=dp(32),
+            on_release=self.open_hk_menu
+        )
+        # Khi bấm vào label cũng mở menu
+        self.hk_label.bind(on_touch_down=lambda instance, touch: self.open_hk_menu() if self.hk_label.collide_point(*touch.pos) else None)
+        frame_layout.add_widget(self.hk_label)
+        frame_layout.add_widget(self.hk_icon)
+        # Thêm lại frame_layout và bảng vào layout cha
+        self.box = BoxLayout(orientation="vertical", size_hint_x=1, spacing=0, padding=[0,0,0,0])
+        self.box.add_widget(frame_layout)
         self.data_table = MDDataTable(
             size_hint=(1, 0.78),
             use_pagination=False,
+            elevation=0,
             column_data=[
-                ("STT", dp(18)),
-                ("Tên hoạt động", dp(80)),
-                ("Cấp", dp(30)),
-                ("Loại", dp(30)),
-                ("GXN", dp(25)),
-                ("Điểm", dp(20)),
+                ("STT", dp(15), "center"),
+                ("Tên hoạt động", dp(90), "left"),
+                ("Cấp hoạt động", dp(35), "center"),
+                ("Loại hoạt động", dp(35), "center"),
+                ("GXN", dp(35), "center"),
+                ("Điểm", dp(35), "center"),
             ],
             row_data=[]
         )
-        root.add_widget(self.data_table)
+        self.box.add_widget(self.data_table)
+        root.add_widget(self.box)
 
         self.add_widget(root)
+
+        # Tải học kỳ để hiển thị lên menu
         self.load_hk_items()
 
     def back_to_main(self):
@@ -95,21 +125,23 @@ class ViewActivityScreen(Screen):
                 "height": dp(32),
                 "on_release": lambda x=label: self.select_hk(x)
             })
-
-        self.menu = MDDropdownMenu(
-            caller=self.hk_button,
-            items=items,
-            width_mult=2.5
-        )
+            self.menu = MDDropdownMenu(
+                caller=self.hk_icon,  # Đổi caller thành icon để menu hiện đúng
+                items=items,
+                width_mult=2.5
+            )
 
     def open_hk_menu(self, *args):
         if self.menu:
             self.menu.open()
 
     def select_hk(self, text):
-        self.hk_button.text = text
+        self.hk_label.text = text
+        self.hk_label.shorten = False  # Hiển thị đủ chữ, không cắt
+        self.hk_label.max_lines = 1
         self.menu.dismiss()
         self.load_activities(text)
+
 
     def load_activities(self, hk_str):
         """Đọc DIEM_DANH_HOAT_DONG, tính điểm và hiển thị lại DataTable."""
@@ -122,18 +154,18 @@ class ViewActivityScreen(Screen):
             cur = conn.cursor()
             # đảm bảo bảng tổng điểm tồn tại
             cur.execute('''
-                CREATE TABLE IF NOT EXISTS TONG_DIEM_HK (
-                    ID_SV TEXT, ID_HK INTEGER, TONG_DIEM INTEGER,
-                    PRIMARY KEY(ID_SV, ID_HK)
-                )
-            ''')
+                    CREATE TABLE IF NOT EXISTS TONG_DIEM_HK (
+                        ID_SV TEXT, ID_HK INTEGER, TONG_DIEM INTEGER,
+                        PRIMARY KEY(ID_SV, ID_HK)
+                    )
+                ''')
 
             cur.execute('''
-                SELECT hd.ID_HD, hd.TEN_HD, hd.CAP_HD, hd.CATEGORY_HD, hd.CO_XAC_NHAN
-                FROM DIEM_DANH_HOAT_DONG dd
-                JOIN HOAT_DONG hd ON dd.ID_HOAT_DONG = hd.ID_HD
-                WHERE dd.MSSV=? AND dd.ID_HK=?
-            ''', (mssv, id_hk))
+                    SELECT hd.ID_HD, hd.TEN_HD, hd.CAP_HD, hd.CATEGORY_HD, hd.CO_XAC_NHAN
+                    FROM DIEM_DANH_HOAT_DONG dd
+                    JOIN HOAT_DONG hd ON dd.ID_HOAT_DONG = hd.ID_HD
+                    WHERE dd.MSSV=? AND dd.ID_HK=?
+                ''', (mssv, id_hk))
             activities = cur.fetchall()
 
             # logic tính điểm
@@ -165,33 +197,33 @@ class ViewActivityScreen(Screen):
                 rows.append([str(i), display_ten, cap, loai, str(gxn), str(diem)])
 
                 cur.execute('''
-                    UPDATE DIEM_DANH_HOAT_DONG
-                    SET diem_cong=?
-                    WHERE MSSV=? AND ID_HOAT_DONG=? AND ID_HK=?
-                ''', (diem, mssv, id_hd, id_hk))
+                        UPDATE DIEM_DANH_HOAT_DONG
+                        SET diem_cong=?
+                        WHERE MSSV=? AND ID_HOAT_DONG=? AND ID_HK=?
+                    ''', (diem, mssv, id_hd, id_hk))
 
             # lưu tổng điểm HK
             cur.execute('''
-                INSERT OR REPLACE INTO TONG_DIEM_HK(ID_SV,ID_HK,TONG_DIEM)
-                VALUES(?,?,?)
-            ''', (mssv, id_hk, total))
+                    INSERT OR REPLACE INTO TONG_DIEM_HK(ID_SV,ID_HK,TONG_DIEM)
+                    VALUES(?,?,?)
+                ''', (mssv, id_hk, total))
+            # thêm dòng tổng điểm
+            rows.append(["", "", "", "", "Tổng điểm:", str(total)])
 
-        # thêm dòng tổng điểm
-        rows.append(["", "", "", "", "Tổng điểm:", str(total)])
-
-        # xoá DataTable cũ, tạo và add lại
-        self.container.remove_widget(self.data_table)
-        self.data_table = MDDataTable(
-            size_hint=(1, 0.78),
-            use_pagination=False,
-            column_data=[
-                ("STT", dp(18)),
-                ("Tên hoạt động", dp(80)),
-                ("Cấp", dp(30)),
-                ("Loại", dp(30)),
-                ("GXN", dp(25)),
-                ("Điểm", dp(20)),
-            ],
-            row_data=rows
-        )
-        self.container.add_widget(self.data_table)
+            # xoá DataTable cũ, tạo và add lại
+            self.box.remove_widget(self.data_table)
+            self.data_table = MDDataTable(
+                size_hint=(1, 0.78),
+                use_pagination=False,
+                elevation=0,
+                column_data=[
+                    ("STT", dp(15), "center", "left"),
+                    ("Tên hoạt động", dp(90), "center", "left"),  # Tiêu đề và nội dung cột tên hoạt động đều canh giữa
+                    ("Cấp hoạt động", dp(35), "center", "center"),
+                    ("Loại hoạt động", dp(35), "center", "center"),
+                    ("GXN", dp(35), "center", "center"),
+                    ("Điểm", dp(35), "center", "center"),
+                ],
+                row_data=rows
+            )
+            self.box.add_widget(self.data_table)

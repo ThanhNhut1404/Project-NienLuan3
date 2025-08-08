@@ -2,14 +2,18 @@ from kivy.uix.screenmanager import Screen
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDRaisedButton, MDFlatButton
 from kivymd.uix.label import MDLabel
-from kivymd.uix.card import MDCard
+from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.toolbar import MDTopAppBar
+from kivy.uix.widget import Widget
 from kivy.clock import Clock
+from kivy.metrics import dp
 from kivy.graphics.texture import Texture
 from kivymd.toast import toast
 from kivy.uix.image import Image
 
 import numpy as np
 import cv2
+import threading
 import datetime
 import sqlite3
 import face_recognition
@@ -18,6 +22,30 @@ from Database.Create_db import DB_NAME
 
 
 class RollCallScreen(Screen):
+    def show_error(self, message):
+        Snackbar(
+            text=message,
+            text_color=(1, 0, 0, 1),  # đỏ
+            bg_color=(0, 0, 0, 0),  # nền trong suốt
+            duration=2
+        ).open()
+
+    def show_warning(self, message):
+        Snackbar(
+            text=message,
+            text_color=(1, 0.5, 0, 1),  # cam
+            bg_color=(0, 0, 0, 0),
+            duration=2
+        ).open()
+
+    def show_success(self, message):
+        Snackbar(
+            text=message,
+            text_color=(0, 1, 0, 1),  # xanh lá
+            bg_color=(0, 0, 0, 0),
+            duration=2
+        ).open()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.user = None
@@ -31,78 +59,120 @@ class RollCallScreen(Screen):
         self.start_time = None
         self.detector = cv2.QRCodeDetector()
 
+        # ===== Layout gốc =====
+        self.main_layout = MDBoxLayout(orientation="vertical", spacing=0)
+
+        # ===== HEADER =====
+        self.header = MDTopAppBar(
+            title="Điểm danh hoạt động",
+            anchor_title="center",
+            size_hint_y=None,
+            height="48dp",
+            md_bg_color=(0.17, 0.22, 0.49, 1),
+            specific_text_color=(1, 1, 1, 1),
+            elevation=1,
+            left_action_items=[["arrow-left", lambda x: self.go_back_to_main()]],
+        )
+        self.main_layout.add_widget(self.header)
+        Clock.schedule_once(lambda dt: setattr(self.header.ids.left_actions, "padding", (0, 0, 0, 0)))
+
+        # ===== SUB-HEADER cố định =====
+        self.sub_header = MDLabel(
+            text="VUI LÒNG NHÌN VÀO CAMERA\nVÀ ĐƯA MÃ QR RA ĐỂ ĐIỂM DANH",
+            halign="center",
+            valign="top",
+            bold=True,
+            theme_text_color="Custom",
+            text_color=(0, 0.6, 0, 1),
+            size_hint_y=None,
+            height="60dp",
+            padding_y=5  # khoảng cách nhỏ với header
+        )
+        self.main_layout.add_widget(self.sub_header)
+
+        # ===== Content container =====
+        self.content_container = MDBoxLayout(
+            orientation="vertical",
+            padding=(20, 0, 27, 20),
+            spacing=10)
+        self.main_layout.add_widget(self.content_container)
+
+        self.add_widget(self.main_layout)
+
+
     def on_enter(self):
         self.build_idle_layout()
 
     def build_idle_layout(self):
-        self.clear_widgets()
-        layout = MDBoxLayout(orientation="vertical", padding=20, spacing=20)
+        self.content_container.clear_widgets()
 
-        layout.add_widget(MDLabel(
-            text="📌 Điểm danh hoạt động",
-            halign="center",
-            font_style="H5"
-        ))
-
-        layout.add_widget(MDLabel(
-            text="👤 Hệ thống sẽ nhận diện khuôn mặt và quét mã QR.",
-            halign="center",
-            theme_text_color="Secondary"
-        ))
+        # Container để nút full width nhưng có khoảng cách 2 bên
+        btn_container = MDBoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height="40dp",
+            padding=(3, 0, 3, 0),  # cách trái 10dp, phải 10dp
+            spacing=0
+        )
 
         start_btn = MDRaisedButton(
-            text="▶ BẮT ĐẦU ĐIỂM DANH",
-            pos_hint={"center_x": 0.5},
+            text="BẮT ĐẦU ĐIỂM DANH",
+            size_hint=(1, 1),  # chiếm toàn bộ ngang của container
             md_bg_color=(0, 0.6, 0.1, 1),
             text_color="white",
             on_release=self.build_camera_layout
         )
-        layout.add_widget(start_btn)
 
-        back_btn = MDFlatButton(
-            text="← Quay lại",
-            pos_hint={"center_x": 0.5},
-            text_color="red",
-            on_release=self.go_back_to_main
-        )
-        layout.add_widget(back_btn)
-
-        self.add_widget(layout)
+        btn_container.add_widget(start_btn)
+        self.content_container.add_widget(btn_container)
 
     def build_camera_layout(self, *args):
-        self.clear_widgets()
+        self.content_container.clear_widgets()
         self.face_verified = False
         self.qr_data = None
         self.start_time = datetime.datetime.now()
 
-        layout = MDBoxLayout(orientation="vertical", spacing=10, padding=10)
-
+        # Camera
         self.image_widget = Image(allow_stretch=True, keep_ratio=True)
-        layout.add_widget(self.image_widget)
+        self.content_container.add_widget(self.image_widget)
 
-        stop_btn = MDRaisedButton(
-            text="❌ Thoát điểm danh",
-            pos_hint={"center_x": 0.5},
-            md_bg_color=(1, 0, 0, 1),
-            on_release=self.stop_roll_call
-        )
-        layout.add_widget(stop_btn)
-
-        self.add_widget(layout)
 
         self.set_user(self.user)
         if not self.known_encodings:
-            toast("❌ Sinh viên chưa có dữ liệu khuôn mặt.")
+            toast("Sinh viên chưa có dữ liệu khuôn mặt.")
             self.build_idle_layout()
             return
 
         self.camera = cv2.VideoCapture(0)
         if not self.camera.isOpened():
-            toast("❌ Không mở được camera.")
+            toast("Không mở được camera.")
             self.build_idle_layout()
             return
 
         self.capture_event = Clock.schedule_interval(self.update, 1.0 / 30)
+
+        # Thêm nút thoát sau 0.5 giây
+        Clock.schedule_once(self.add_stop_button, 0.9)
+
+    def add_stop_button(self, *args):
+        btn_container = MDBoxLayout(
+            orientation="horizontal",
+            size_hint_y=None,
+            height="40dp",
+            padding=(3, 0, 3, 0),
+            spacing=0
+        )
+
+        stop_btn = MDRaisedButton(
+            text="THOÁT ĐIỂM DANH",
+            size_hint=(1, 1),
+            md_bg_color=(1, 0, 0, 1),
+            text_color="white",
+            on_release=self.stop_roll_call
+        )
+
+        btn_container.add_widget(stop_btn)
+        self.content_container.add_widget(btn_container)
 
     def stop_roll_call(self, *args):
         if self.capture_event:
@@ -111,7 +181,8 @@ class RollCallScreen(Screen):
             self.camera.release()
             self.camera = None
 
-        self.image_widget.texture = None
+        if self.image_widget:
+            self.image_widget.texture = None
         self.build_idle_layout()
 
     def go_back_to_main(self, *args):
@@ -161,14 +232,15 @@ class RollCallScreen(Screen):
         if self.camera:
             self.camera.release()
             self.camera = None
-        self.image_widget.texture = None
+        if self.image_widget:
+            self.image_widget.texture = None
 
         if not self.face_verified:
-            toast("❌ Không xác minh được khuôn mặt.")
+            toast("Không xác minh được khuôn mặt.")
             self.build_idle_layout()
             return
         if not self.qr_data:
-            toast("❌ Không quét được mã QR hợp lệ.")
+            toast("Không quét được mã QR hợp lệ.")
             self.build_idle_layout()
             return
 
@@ -186,7 +258,7 @@ class RollCallScreen(Screen):
             ''', (self.qr_data,))
             row = cursor.fetchone()
             if not row:
-                toast("❌ Không tìm thấy hoạt động.")
+                toast("Không tìm thấy hoạt động.")
                 return
 
             ten_hd, start_str, end_str, ngay_str, diem_cong, id_hk = row
@@ -195,7 +267,7 @@ class RollCallScreen(Screen):
             now = datetime.datetime.now()
 
             if not (start_dt <= now <= end_dt):
-                toast(f"⚠️ Hoạt động '{ten_hd}' chưa bắt đầu hoặc đã kết thúc.")
+                toast(f"Hoạt động '{ten_hd}' chưa bắt đầu hoặc đã kết thúc.")
                 return
 
             cursor.execute('''
@@ -203,7 +275,7 @@ class RollCallScreen(Screen):
                 WHERE id_hoat_dong = ? AND MSSV = ?
             ''', (self.qr_data, self.user["mssv"]))
             if cursor.fetchone():
-                toast(f"ℹ️ Bạn đã điểm danh hoạt động '{ten_hd}'.")
+                toast(f"Bạn đã điểm danh hoạt động '{ten_hd}'.")
                 return
 
             cursor.execute('''
@@ -217,9 +289,9 @@ class RollCallScreen(Screen):
             ''', (diem_cong, self.user["mssv"]))
 
             conn.commit()
-            toast(f"✅ Điểm danh thành công hoạt động '{ten_hd}'.")
+            toast(f"Điểm danh thành công hoạt động '{ten_hd}'.")
 
         except Exception as e:
-            toast(f"❌ Lỗi: {str(e)}")
+            toast(f"Lỗi: {str(e)}")
         finally:
             conn.close()

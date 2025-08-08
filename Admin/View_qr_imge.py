@@ -31,7 +31,7 @@ def show_qr_image(container, qr_path):
 
         btn_save = tk.Button(
             qr_frame,
-            text="📥 Lưu về máy",
+            text="Lưu về máy",
             command=lambda: save_qr(),
             **CREATE_BUTTON_STYLE
         )
