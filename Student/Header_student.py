@@ -10,7 +10,7 @@ def render_header(container, user):
     )
 
     title_label = MDLabel(
-        text="🎓 HỆ THỐNG QUẢN LÝ SINH VIÊN",
+        text="🎓 HỆ THỐNG ĐIỂM RÈN LUYỆN",
         font_style="H6",
         theme_text_color="Custom",
         text_color="white",

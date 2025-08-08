@@ -29,9 +29,6 @@ class StudentMainScreen(Screen):
         render_menu(menu_layout, user, self.manager)
         layout.add_widget(menu_layout)
 
-        # Info section phía dưới menu
-        info_layout = MDBoxLayout(size_hint_y=1, padding=(10, 5))
-        render_view_infor(info_layout, user)
-        layout.add_widget(info_layout)
+
 
         self.add_widget(layout)

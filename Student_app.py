@@ -6,7 +6,7 @@ from Student.Activity_roll_call import RollCallScreen
 from Student.View_activity import ViewActivityScreen
 from Database.Create_db import get_all_sinh_vien
 from Student.Update_student import UpdateStudentScreen
-
+from Student.Infor_student import ViewInforScreen
 class StudentApp(MDApp):
     def build(self):
         self.theme_cls.primary_palette = "Teal"
@@ -31,6 +31,10 @@ class StudentApp(MDApp):
         # Màn hình cập nhật thông tin (chưa tải user, sẽ tải khi đăng nhập)
         self.update_student_screen = UpdateStudentScreen(name="update_student")
         self.sm.add_widget(self.update_student_screen)
+
+        # Màn hình xem thông tin sinh viên
+        self.view_infor_screen = ViewInforScreen(name="view_infor")
+        self.sm.add_widget(self.view_infor_screen)
 
         return self.sm
 

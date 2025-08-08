@@ -31,7 +31,12 @@ def render_menu(menu_layout, user, screen_manager):
         screen_manager.current = 'student_main'
 
     def goto_infor(*args):
-        screen_manager.current = 'view_infor'
+        if user:
+            app = MDApp.get_running_app()
+            view_screen = app.sm.get_screen("view_infor")
+            view_screen.load_user(user)
+            app.sm.current = "view_infor"
+        screen_manager.current = "view_infor"
 
     def goto_roll_call(*args):
         if user:
@@ -53,7 +58,6 @@ def render_menu(menu_layout, user, screen_manager):
         app.sm.current = "update_student"
 
     menu_layout.clear_widgets()
-    menu_layout.add_widget(MenuButton("home", "Trang chủ", goto_home))
     menu_layout.add_widget(MenuButton("account", "Thông tin", goto_infor))
     menu_layout.add_widget(MenuButton("calendar", "Điểm danh", goto_roll_call))
     menu_layout.add_widget(MenuButton("clipboard-list", "Hoạt động", goto_activity))
