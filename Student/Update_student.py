@@ -133,7 +133,7 @@ class UpdateStudentScreen(MDScreen):
         info_card = MDCard(
             orientation='vertical',
             padding=dp(8),
-            spacing=dp(12),  # Tăng spacing để các ô cách xa hơn
+            spacing=dp(12),
             size_hint=(1, None),
             pos_hint={"center_x": 0.5}
         )
@@ -261,10 +261,10 @@ class UpdateStudentScreen(MDScreen):
             font_size=dp(12)
         )
         select_date_btn = MDRectangleFlatButton(
-            icon="calendar",  # Thay bằng icon calendar
+            icon="calendar",
             md_bg_color=BUTTON_COLOR,
             theme_text_color="Custom",
-            text_color=[1, 1, 1, 1],  # Màu chữ trắng
+            text_color=[1, 1, 1, 1],
             size_hint=(None, None),
             size=(dp(35), dp(35)),
             on_release=self.show_date_picker
@@ -310,8 +310,8 @@ class UpdateStudentScreen(MDScreen):
             text="Lưu",
             md_bg_color=BUTTON_COLOR,
             theme_text_color="Custom",
-            text_color=[1, 1, 1, 1],  # Màu chữ trắng
-            pos_hint={"center_x": 0.5},  # Căn giữa
+            text_color=[1, 1, 1, 1],
+            pos_hint={"center_x": 0.5},
             size_hint=(None, None),
             size=(dp(100), dp(35)),
             on_release=self.update_info
@@ -396,7 +396,7 @@ class UpdateStudentScreen(MDScreen):
                 text="Xác nhận",
                 md_bg_color=BUTTON_COLOR,
                 theme_text_color="Custom",
-                text_color=[1, 1, 1, 1],  # Màu chữ trắng
+                text_color=[1, 1, 1, 1],
                 pos_hint={"center_x": 0.5},
                 size_hint=(None, None),
                 size=(dp(100), dp(35)),
@@ -434,7 +434,7 @@ class UpdateStudentScreen(MDScreen):
             text="Chọn",
             md_bg_color=BUTTON_COLOR,
             theme_text_color="Custom",
-            text_color=[1, 1, 1, 1],  # Màu chữ trắng
+            text_color=[1, 1, 1, 1],
             pos_hint={"center_x": 0.5},
             size_hint=(None, None),
             size=(dp(100), dp(35)),
@@ -453,6 +453,7 @@ class UpdateStudentScreen(MDScreen):
     def show_popup(self, title, text):
         if self.dialog:
             self.dialog.dismiss()
+
         self.dialog = MDDialog(
             title=title,
             text=text,
@@ -462,7 +463,7 @@ class UpdateStudentScreen(MDScreen):
                     text="OK",
                     md_bg_color=BUTTON_COLOR,
                     theme_text_color="Custom",
-                    text_color=[1, 1, 1, 1],  # Màu chữ trắng
+                    text_color=[1, 1, 1, 1],
                     size_hint=(None, None),
                     size=(dp(100), dp(35)),
                     on_release=lambda x: self.dialog.dismiss()
@@ -524,6 +525,7 @@ class UpdateStudentScreen(MDScreen):
             conn.commit()
             conn.close()
 
+            # Cập nhật dữ liệu trong user
             self.user["name"] = name or self.user.get("name", "")
             self.user["email"] = email or self.user.get("email", "")
             self.user["address"] = address or self.user.get("address", "")
@@ -532,11 +534,19 @@ class UpdateStudentScreen(MDScreen):
             self.user["phone"] = phone or self.user.get("phone", "")
             self.user["avatar"] = avatar_filename
 
+            # Làm mới dữ liệu trên ViewInforScreen
+            try:
+                view_infor_screen = self.manager.get_screen("view_infor")
+                view_infor_screen.load_user(self.user)
+            except Exception as e:
+                print(f"Debug - Lỗi khi làm mới ViewInforScreen: {e}")
+
             self.show_popup("✅ Thành công", "Cập nhật thông tin thành công!")
+            self.manager.current = "view_infor"  # Chuyển về ViewInforScreen
 
         except Exception as e:
             self.show_popup("❌ Lỗi", f"Lỗi khi cập nhật: {e}")
             print(f"Debug - Lỗi: {e}")
 
     def go_back(self, instance):
-        self.manager.current = "student_main"
+        self.manager.current = "view_infor"  # Chuyển về ViewInforScreen
