@@ -68,28 +68,71 @@ class ActivityNotification(MDBoxLayout):
 
         self.current_index = 0
         self.activities = []
+        self.last_activity_count = 0  # Lưu số lượng hoạt động để kiểm tra thay đổi
         self.load_activities()
         if self.activities:
             self.update_notification()
             Clock.schedule_interval(self.switch_notification, 5)  # Chuyển thông báo mỗi 5 giây
+        Clock.schedule_interval(self.check_for_activity_updates, 30)  # Cập nhật mỗi 30 giây
 
     def load_activities(self):
-        """Tải danh sách hoạt động chưa diễn ra từ cơ sở dữ liệu"""
+        """Tải danh sách hoạt động chưa diễn ra trong học kỳ mới nhất từ cơ sở dữ liệu"""
         try:
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
             current_date = datetime.now().strftime("%d/%m/%Y")
+
+            # Kiểm tra bảng HK_NK tồn tại
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='HK_NK'")
+            if not cursor.fetchone():
+                print("Lỗi: Bảng HK_NK không tồn tại.")
+                self.activities = []
+                self.notification_text = "Lỗi: Bảng HK_NK không tồn tại."
+                self.notification_label.text = f"[color=000000]{self.notification_text}[/color]"
+                conn.close()
+                return
+
+            # Lấy ID_HK và NAME_HK mới nhất từ HK_NK
             cursor.execute('''
-                SELECT TEN_HD, NGAY_TO_CHUC, DIA_CHI_HD, START_TIME 
-                FROM HOAT_DONG 
-                WHERE NGAY_TO_CHUC >= ?
-                ORDER BY NGAY_TO_CHUC
-            ''', (current_date,))
-            self.activities = cursor.fetchall()
+                SELECT ID_HK, NAME_HK
+                FROM HK_NK
+                ORDER BY ID_HK DESC
+                LIMIT 1
+            ''')
+            result = cursor.fetchone()
+            if result:
+                id_hk, name_hk = result
+                # Lấy hoạt động thuộc học kỳ mới nhất
+                cursor.execute('''
+                    SELECT TEN_HD, NGAY_TO_CHUC, DIA_CHI_HD, START_TIME 
+                    FROM HOAT_DONG 
+                    WHERE ID_HK = ? AND NGAY_TO_CHUC >= ?
+                    ORDER BY NGAY_TO_CHUC
+                ''', (id_hk, current_date))
+                self.activities = cursor.fetchall()
+                if len(self.activities) != self.last_activity_count:
+                    print(f"Debug: Học kỳ mới nhất - ID_HK: {id_hk}, NAME_HK: {name_hk}, Tìm thấy {len(self.activities)} hoạt động")
+                    self.last_activity_count = len(self.activities)
+                if self.activities:
+                    self.update_notification()
+                else:
+                    self.notification_text = f"Không có hoạt động sắp tới trong học kỳ {name_hk}."
+                    self.notification_label.text = f"[color=000000]{self.notification_text}[/color]"
+            else:
+                print("Debug: Không tìm thấy học kỳ nào trong bảng HK_NK.")
+                self.activities = []
+                self.notification_text = "Không có học kỳ nào trong cơ sở dữ liệu."
+                self.notification_label.text = f"[color=000000]{self.notification_text}[/color]"
             conn.close()
-        except Exception as e:
+        except sqlite3.Error as e:
             print(f"Lỗi khi tải hoạt động: {e}")
             self.activities = []
+            self.notification_text = f"Lỗi khi tải hoạt động: {e}"
+            self.notification_label.text = f"[color=000000]{self.notification_text}[/color]"
+
+    def check_for_activity_updates(self, dt):
+        """Kiểm tra cập nhật danh sách hoạt động."""
+        self.load_activities()
 
     def update_notification(self):
         """Cập nhật nội dung thông báo"""
@@ -104,7 +147,7 @@ class ActivityNotification(MDBoxLayout):
             )
             self.notification_label.text = f"[color=000000]{self.notification_text}[/color]"
         else:
-            self.notification_text = "Không có hoạt động sắp tới."
+            self.notification_text = "Không có hoạt động sắp tới trong học kỳ này."
             self.notification_label.text = f"[color=000000]{self.notification_text}[/color]"
 
     def switch_notification(self, dt):

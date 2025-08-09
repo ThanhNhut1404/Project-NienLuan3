@@ -15,9 +15,12 @@ from Admin.face_util import compare_face, extract_face_encodings_from_frame
 from tkcalendar import DateEntry
 from Admin.List_student import render_student_list
 
-
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
+def capitalize_name(name):
+    # Split the name into words, capitalize each word, and join back
+    return ' '.join(word.capitalize() for word in name.split())
 
 def render_student_create(container, switch_to_view):
     for widget in container.winfo_children():
@@ -132,10 +135,7 @@ def render_student_create(container, switch_to_view):
         **CHECKBOX_STYLE
     ).grid(row=9, column=1, sticky="w", padx=FORM_ENTRY_PADX, pady=(0, 10))
 
-    # === Logic camera, đăng ký, xử lý dữ liệu ở đây ===
-    # (giữ nguyên phần code từ dòng cap = None trở đi)
-
-
+    # === Logic camera, đăng ký, xử lý dữ liệu ===
     cap = None
     running = False
     capture_count = 0
@@ -177,7 +177,6 @@ def render_student_create(container, switch_to_view):
         if running:
             video_label.after(10, update_camera)
 
-
     def show_popup(msg):
         popup = tk.Toplevel()
         popup.title("Thông báo")
@@ -189,7 +188,7 @@ def render_student_create(container, switch_to_view):
 
     def register_sinh_vien():
         nonlocal capture_count
-        #Họ và tên
+        # Họ và tên
         name = name_entry.get().strip()
         if not name:
             messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập họ và tên.")
@@ -204,6 +203,9 @@ def render_student_create(container, switch_to_view):
         if len(name.split()) < 2:
             messagebox.showwarning("Lỗi họ tên", "Vui lòng nhập đầy đủ họ và tên.")
             return
+
+        # Viết hoa chữ cái đầu mỗi từ
+        name = capitalize_name(name)
 
         mssv = mssv_entry.get().strip()
         email = email_entry.get().strip()
@@ -223,24 +225,24 @@ def render_student_create(container, switch_to_view):
                 return
 
         birthdate = birth_entry.get().strip()
-        #Giới tính
+        # Giới tính
         gender = gender_var.get()  # Lấy giá trị 0 hoặc 1
-        #Số điện thoại
+        # Số điện thoại
         phone = phone_entry.get().strip()
         if not re.match(r'^0\d{9}$', phone):
             messagebox.showwarning("Lỗi Số điện thoại", "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0.")
             return
-        #Địa chỉ
+        # Địa chỉ
         address = address_entry.get().strip()
         if len(address) < 5:
             messagebox.showwarning("Lỗi địa chỉ", "Địa chỉ quá ngắn, vui lòng nhập đầy đủ.")
             return
-        #Lớp
+        # Lớp
         class_sv = class_entry.get().strip()
         if not class_sv:
             messagebox.showwarning("Thiếu thông tin", "Vui lòng nhập lớp.")
             return
-        #Password
+        # Password
         raw_password = password_entry.get().strip()
         if len(raw_password) < 6:
             messagebox.showwarning("Lỗi mật khẩu", "Mật khẩu phải có ít nhất 6 ký tự.")
@@ -273,7 +275,7 @@ def render_student_create(container, switch_to_view):
 
         def capture_loop():
             nonlocal capture_count, last_capture
-            existing = get_all_sinh_vien()  # ✅ GỌI TRƯỚC khi vào while
+            existing = get_all_sinh_vien()  # Gọi trước khi vào while
             print(f"[DEBUG] Có {len(existing)} sinh viên trong DB để so sánh.")
 
             while capture_count < 5 and cap and cap.isOpened():
@@ -288,7 +290,7 @@ def render_student_create(container, switch_to_view):
                         print("[Lỗi] Encoding mới không hợp lệ, bỏ qua ảnh này.")
                         continue
 
-                    # ✅ Duyệt qua danh sách sinh viên lấy được lúc đầu
+                    # Duyệt qua danh sách sinh viên
                     for sv in existing:
                         print(f"[DEBUG] So sánh với {sv['name']} - số encoding: {len(sv['encodings'])}")
                         for known in sv.get("encodings", []):
@@ -319,7 +321,7 @@ def render_student_create(container, switch_to_view):
             try:
                 insert_sinh_vien(
                     name, mssv, email, address, birthdate, gender, class_sv, password,
-                    json.dumps(encodings), phone, img =""
+                    json.dumps(encodings), phone, img=""
                 )
                 stop_camera()
                 messagebox.showinfo("Thành công", f"Tài khoản '{name}' đã được tạo thành công!")
@@ -339,7 +341,7 @@ def render_student_create(container, switch_to_view):
         **CREATE_BUTTON_STYLE
     ).grid(row=10, column=0, columnspan=2, pady=20)
 
-    #Nút quay lại — đặt NGAY SAU counter_label, bên dưới camera
+    # Nút quay lại
     back_button = tk.Button(
         camera_wrapper,
         text="← Quay lại",
@@ -348,6 +350,6 @@ def render_student_create(container, switch_to_view):
     )
     back_button.pack(anchor="w", padx=5, pady=(15, 0))
 
-    #Khởi động camera sau khi layout xong
+    # Khởi động camera sau khi layout xong
     container.after(500, reset_camera)
     return stop_camera  # Trả về hàm stop_camera để gọi từ bên ngoài nếu cần
