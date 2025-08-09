@@ -32,7 +32,7 @@ PRIMARY_COLOR = "#2C387E"
 BUTTON_COLOR = [0.298, 0.686, 0.314, 1]
 TEXT_COLOR = "#000000"
 PRIMARY_COLOR_RGBA = [0.17, 0.22, 0.49, 1]
-BUTTON_COLOR_RGBA = "#303F9F"
+BUTTON_COLOR_RGBA = [0.188, 0.247, 0.624, 1]  # sửa thành rgba để dùng an toàn
 BUTTON_COLOR_DATE = "#3F51B5"
 FONT_TITLE = "H5"
 GRAY_COLOR_HEX = "#7a7a7a"
@@ -42,7 +42,6 @@ WINDOW_HEIGHT = 640
 BUTTON_HEIGHT = 56
 PADDING = 20
 SPACING = 12
-
 
 
 class UpdateStudentScreen(MDScreen):
@@ -164,7 +163,7 @@ class UpdateStudentScreen(MDScreen):
         )
         info_card.add_widget(title)
 
-        # AVATAR
+        # AVATAR (sửa: hiển thị avatar + nút chọn ảnh rõ ràng)
         avatar_filename = self.user.get("avatar", "default_avatar.jpg")
         image_path = os.path.join("assets", avatar_filename)
         if not os.path.exists(image_path):
@@ -189,19 +188,26 @@ class UpdateStudentScreen(MDScreen):
             pos_hint={"center_x": 0.5, "center_y": 0.5}
         )
         avatar_card.add_widget(self.avatar)
-        info_card.add_widget(avatar_card)
+
+        # container để đặt avatar và nút "Chọn ảnh" phía dưới (không thay đổi logic chọn)
+        avatar_container = MDBoxLayout(orientation='vertical', spacing=dp(4), size_hint=(1, None), height=dp(110), pos_hint={"center_x": 0.5})
+        avatar_container.add_widget(avatar_card)
 
         choose_image_label = MDLabel(
-            text="Chọn ảnh",
+            text="[u]Chọn ảnh[/u]",
+            markup=True,
             font_style="Caption",
             theme_text_color="Custom",
             text_color=BUTTON_COLOR_RGBA,
             halign="center",
             size_hint_y=None,
-            height=dp(20),
-            on_touch_down=self.on_choose_image_label_touch
+            height=dp(20)
         )
-        info_card.add_widget(choose_image_label)
+        # bind click
+        choose_image_label.bind(on_touch_down=self.on_choose_image_label_touch)
+        avatar_container.add_widget(choose_image_label)
+
+        info_card.add_widget(avatar_container)
 
         def add_field(label, value, hint):
             row = MDBoxLayout(
@@ -397,7 +403,7 @@ class UpdateStudentScreen(MDScreen):
 
     def on_choose_image_label_touch(self, instance, touch):
         if instance.collide_point(*touch.pos):
-            self.choose_image(instance)
+            self.choose_image()
 
     def show_date_picker(self, instance):
         if self.date_dialog:
@@ -488,7 +494,7 @@ class UpdateStudentScreen(MDScreen):
 
         self.date_dialog.open()
 
-    def choose_image(self, instance):
+    def choose_image(self, *args):
         chooser_layout = MDBoxLayout(
             orientation="vertical",
             spacing=dp(8),
@@ -503,10 +509,13 @@ class UpdateStudentScreen(MDScreen):
             if selection:
                 self.image_path = selection[0]
                 self.avatar.source = self.image_path
-                self.avatar.reload()
+                try:
+                    self.avatar.reload()
+                except Exception:
+                    pass
                 self.popup.dismiss()
 
-        choose_btn = MDRectangleFlatButton(
+        popup_choose_btn = MDRectangleFlatButton(
             text="Chọn",
             md_bg_color=BUTTON_COLOR,
             theme_text_color="Custom",
@@ -516,7 +525,7 @@ class UpdateStudentScreen(MDScreen):
             size=(dp(100), dp(35)),
             on_release=on_select
         )
-        chooser_layout.add_widget(choose_btn)
+        chooser_layout.add_widget(popup_choose_btn)
 
         self.popup = Popup(
             title="Chọn ảnh",
@@ -553,7 +562,7 @@ class UpdateStudentScreen(MDScreen):
         email = self.email_field.text.strip()
         address = self.address_field.text.strip()
         dob = self.dob_field.text.strip() or self.user.get("dob", "01-01-2000")
-        sex = 1 if self.sex_field.text == "Nam" else 0
+        sex = 1 if self.sex_text.text == "Nam" else 0
         phone = self.phone_field.text.strip()
         avatar_filename = self.user.get("avatar", "default_avatar.jpg")
 

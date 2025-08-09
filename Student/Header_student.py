@@ -1,6 +1,6 @@
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.label import MDLabel
-
+from kivy.metrics import dp
 def render_header(container, user):
     header = MDBoxLayout(
         orientation='horizontal',
@@ -12,8 +12,9 @@ def render_header(container, user):
     )
 
     title_label = MDLabel(
-        text="🎓 HỆ THỐNG ĐIỂM RÈN LUYỆN",
+        text="HỆ THỐNG ĐIỂM RÈN LUYỆN",
         font_style="H6",
+        font_size=dp(10),
         theme_text_color="Custom",
         text_color="white",
         halign="left"
