@@ -7,6 +7,7 @@ from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.toolbar import MDTopAppBar
 from kivymd.app import MDApp
 from kivy.uix.image import Image
+from kivy.uix.floatlayout import FloatLayout
 from kivy.metrics import dp
 import os
 from PIL import Image as PILImage
@@ -38,10 +39,11 @@ def render_view_infor(container, user):
 
     # THÔNG TIN
     title = MDLabel(
-        text="📄 Thông tin sinh viên",
+        text="Thông tin sinh viên",
         font_style=FONT_TITLE,
         theme_text_color="Custom",
         text_color=TEXT_COLOR,
+        bold=True,
         halign="center",
         size_hint_y=None,
         height=dp(40)
@@ -81,8 +83,8 @@ def render_view_infor(container, user):
     # THÔNG TIN KHÁC
     info_card = MDCard(
         orientation='vertical',
-        padding=dp(15),
-        spacing=dp(15),
+        padding=(dp(3), dp(9)),
+        spacing=dp(5),
         size_hint=(1, None)
     )
     info_card.bind(minimum_height=info_card.setter('height'))
@@ -91,10 +93,10 @@ def render_view_infor(container, user):
     def add_pair(label, value):
         row = MDBoxLayout(
             orientation='horizontal',
-            padding=dp(10),
-            spacing=dp(10),
+            padding=(dp(2), 0),
+            spacing=dp(4),
             size_hint_y=None,
-            height=dp(30)
+            height=dp(25)
         )
         row.add_widget(
             MDLabel(
@@ -102,7 +104,7 @@ def render_view_infor(container, user):
                 font_style=FONT_NORMAL,
                 halign="left",
                 size_hint_x=None,
-                width=dp(100),
+                width=dp(90),
                 theme_text_color="Custom",
                 text_color=TEXT_COLOR
             )
@@ -112,21 +114,22 @@ def render_view_infor(container, user):
                 text=value,
                 font_style=FONT_NORMAL,
                 theme_text_color="Custom",
-                text_color=TEXT_COLOR,
+                text_color=(0.2, 0.5, 0.9, 1),
+                bold=True,
                 halign="left",
                 size_hint_x=1
             )
         )
         info_card.add_widget(row)
 
-    add_pair("👨‍🎓 MSSV:", user.get("mssv", ""))
-    add_pair("🏠 Địa chỉ:", user.get("address", ""))
-    add_pair("🧑 Họ tên:", user.get("name", ""))
-    add_pair("🎓 Lớp:", user.get("class", ""))
-    add_pair("👤 Giới tính:", "Nam" if user.get("sex") == 1 else "Nữ")
-    add_pair("📧 Email:", user.get("email", ""))
-    add_pair("🎂 Ngày sinh:", user.get("date", ""))
-    add_pair("📞 SĐT:", user.get("phone", ""))
+    add_pair("MSSV:", user.get("mssv", ""))
+    add_pair("Họ tên:", user.get("name", ""))
+    add_pair("Lớp:", user.get("class", ""))
+    add_pair("Giới tính:", "Nam" if user.get("sex") == 1 else "Nữ")
+    add_pair("Ngày sinh:", user.get("date", ""))
+    add_pair("Địa chỉ:", user.get("address", ""))
+    add_pair("Email:", user.get("email", ""))
+    add_pair("SĐT:", user.get("phone", ""))
 
     container.add_widget(scroll)
 
@@ -143,11 +146,16 @@ class ViewInforScreen(MDScreen):
     def build_ui(self):
         self.clear_widgets()
 
+        root = FloatLayout()  # root để chứa main content + FAB nổi
+
+        # Nội dung chính (toolbar + scroll content)
         main_layout = MDBoxLayout(
             orientation="vertical",
-            spacing=dp(5),
-            padding=dp(5),
-            md_bg_color=[1, 1, 1, 1]
+            spacing=0,
+            padding=0,
+            md_bg_color=[1, 1, 1, 1],
+            size_hint=(1, 1),
+            pos_hint={"x": 0, "y": 0}
         )
 
         # Thanh tiêu đề
@@ -156,31 +164,35 @@ class ViewInforScreen(MDScreen):
             left_action_items=[["arrow-left", lambda x: self.go_back(x)]],
             md_bg_color=PRIMARY_COLOR,
             size_hint_y=None,
-            height=dp(BUTTON_HEIGHT)
+            height=dp(BUTTON_HEIGHT),
+            elevation=0
         )
         main_layout.add_widget(toolbar)
 
+        # vùng chứa nội dung
         self.info_container = MDBoxLayout(
             orientation="vertical",
             spacing=dp(5),
             size_hint=(1, 1)
         )
         render_view_infor(self.info_container, self.user)
+        main_layout.add_widget(self.info_container)
 
-        # Nút cập nhật
+        # thêm main_layout vào root (nằm phía dưới)
+        root.add_widget(main_layout)
+
+        # Nút cập nhật — nằm nổi lên trên nội dung nhờ FloatLayout
         update_btn = MDFloatingActionButton(
             icon="pencil",
             md_bg_color=BUTTON_COLOR,
-            pos_hint={"center_x": 0.5},
             size_hint=(None, None),
-            size=(dp(48), dp(48))
+            size=(dp(55), dp(55)),  # to hơn nếu cần
+            pos_hint={"center_x": 0.5, "y": 0.02}  # tăng y để "cao lên" (0.08 ~ hơi trên đáy)
         )
         update_btn.bind(on_release=self.go_to_update)
+        root.add_widget(update_btn)
 
-        main_layout.add_widget(self.info_container)
-        main_layout.add_widget(update_btn)
-
-        self.add_widget(main_layout)
+        self.add_widget(root)
 
     def go_back(self, instance):
         self.manager.current = "student_main"
